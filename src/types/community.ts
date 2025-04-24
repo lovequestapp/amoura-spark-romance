@@ -16,6 +16,7 @@ export interface Post {
   comments: number;
   timestamp: string;
   isUserPost?: boolean;
+  isLiked?: boolean;
 }
 
 export interface Comment {

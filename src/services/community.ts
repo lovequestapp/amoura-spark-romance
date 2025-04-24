@@ -67,7 +67,7 @@ export const formatPost = async (
     comments: dbPost.comments || 0,
     timestamp: formatRelativeTime(dbPost.created_at || new Date()),
     isUserPost: dbPost.user_id === userId,
-    isLiked: isLiked
+    isLiked
   };
 };
 
@@ -252,7 +252,11 @@ export const likePost = async (postId: string): Promise<number> => {
     throw new Error("Failed to like post");
   }
   
-  return data?.likes || 0;
+  // Fix: Check if data is an object and has a likes property
+  if (data && typeof data === 'object' && 'likes' in data) {
+    return data.likes as number;
+  }
+  return 0;
 };
 
 // Function to unlike a post
@@ -264,7 +268,11 @@ export const unlikePost = async (postId: string): Promise<number> => {
     throw new Error("Failed to unlike post");
   }
   
-  return data?.likes || 0;
+  // Fix: Check if data is an object and has a likes property
+  if (data && typeof data === 'object' && 'likes' in data) {
+    return data.likes as number;
+  }
+  return 0;
 };
 
 // Function to add a comment
@@ -297,14 +305,14 @@ export const addComment = async (
   }
 
   // Update comment count on post
-  const { data: commentCount } = await supabase
+  const { count } = await supabase
     .from('post_comments')
-    .select('id', { count: 'exact' })
+    .select('id', { count: 'exact', head: true })
     .eq('post_id', postId);
 
   await supabase
     .from('community_posts')
-    .update({ comments: commentCount || 0 })
+    .update({ comments: count || 0 })
     .eq('id', postId);
 
   // Get author info
@@ -328,15 +336,10 @@ export const addComment = async (
 
 // Function to fetch comments for a post
 export const fetchComments = async (postId: string): Promise<Comment[]> => {
+  // First, get all comments for the post
   const { data: comments, error } = await supabase
     .from('post_comments')
-    .select(`
-      id,
-      content,
-      created_at,
-      user_id,
-      profiles:user_id (full_name, avatar_url)
-    `)
+    .select('*')
     .eq('post_id', postId)
     .order('created_at', { ascending: false });
 
@@ -345,14 +348,25 @@ export const fetchComments = async (postId: string): Promise<Comment[]> => {
     return [];
   }
 
-  return comments.map(comment => ({
-    id: comment.id,
-    author: {
-      id: comment.user_id || '',
-      name: comment.profiles?.full_name || 'Anonymous User',
-      avatar: comment.profiles?.avatar_url || '/photo-1581091226825-a6a2a5aee158'
-    },
-    content: comment.content,
-    timestamp: formatRelativeTime(comment.created_at)
+  // Then, get profiles for each user_id in the comments
+  const commentResults = await Promise.all(comments.map(async (comment) => {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, avatar_url')
+      .eq('id', comment.user_id)
+      .single();
+
+    return {
+      id: comment.id,
+      author: {
+        id: comment.user_id || '',
+        name: profile?.full_name || 'Anonymous User',
+        avatar: profile?.avatar_url || '/photo-1581091226825-a6a2a5aee158'
+      },
+      content: comment.content,
+      timestamp: formatRelativeTime(comment.created_at)
+    };
   }));
+
+  return commentResults;
 };
