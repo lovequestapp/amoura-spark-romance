@@ -57,7 +57,9 @@ const enhancedProfiles = [
         question: "A perfect date would be...",
         answer: "A morning hike followed by brunch at a local spot, then exploring a neighborhood we haven't been to before."
       }
-    ]
+    ],
+    relationshipIntention: "Relationship",
+    personalityBadges: ["Analytical", "Outdoor-lover", "Thoughtful"]
   },
   {
     id: 3,
