@@ -1,13 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Heart, MessageCircle, X, Star } from "lucide-react";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { useToast } from '@/components/ui/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
-import ProfileCard from '@/components/profile/ProfileCard';
 import DateIdea from '@/components/profile/DateIdea';
+import EnhancedProfileCard from '@/components/home/EnhancedProfileCard';
+import { Badge } from '@/components/ui/badge';
 
-const profiles = [
+const enhancedProfiles = [
   {
     id: 1,
     name: "Emma",
@@ -16,6 +18,12 @@ const profiles = [
     occupation: "Graphic Designer",
     photos: ["/assets/profile-1a.jpg", "/assets/profile-1b.jpg", "/assets/profile-1c.jpg"],
     bio: "Coffee addict, design enthusiast, and weekend hiker. Looking for someone to share laughs and adventures with.",
+    personalityMatch: 85,
+    traits: [
+      { name: "Creative", score: 90 },
+      { name: "Adventurous", score: 75 },
+      { name: "Intellectual", score: 82 },
+    ],
     prompts: [
       {
         question: "Two truths and a lie...",
@@ -35,6 +43,13 @@ const profiles = [
     occupation: "Software Engineer",
     photos: ["/assets/profile-2a.jpg", "/assets/profile-2b.jpg"],
     bio: "Tech geek with a passion for hiking and craft beer. Looking for someone to explore new trails and breweries with.",
+    premium: true,
+    personalityMatch: 72,
+    traits: [
+      { name: "Analytical", score: 95 },
+      { name: "Introverted", score: 65 },
+      { name: "Adventurous", score: 80 },
+    ],
     prompts: [
       {
         question: "A perfect date would be...",
@@ -50,6 +65,12 @@ const profiles = [
     occupation: "Event Planner",
     photos: ["/assets/profile-3a.jpg", "/assets/profile-3b.jpg", "/assets/profile-3c.jpg"],
     bio: "Foodie, music lover, and avid traveler. Let's plan our next adventure together!",
+    personalityMatch: 91,
+    traits: [
+      { name: "Extroverted", score: 88 },
+      { name: "Creative", score: 75 },
+      { name: "Spontaneous", score: 92 },
+    ],
     prompts: [
       {
         question: "We'll get along if...",
@@ -62,13 +83,15 @@ const profiles = [
 const Home = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const { toast } = useToast();
   
-  const currentProfile = profiles[currentIndex];
+  const currentProfile = enhancedProfiles[currentIndex];
   
   const handleSwipe = (dir: string) => {
     setDirection(dir);
     setTimeout(() => {
-      if (currentIndex < profiles.length - 1) {
+      if (currentIndex < enhancedProfiles.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
         // When we've gone through all profiles, reset to show a message
@@ -77,6 +100,19 @@ const Home = () => {
       setDirection(null);
     }, 300);
   };
+
+  const dragConstraints = useRef(null);
+
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setDragging(false);
+    if (Math.abs(info.offset.x) > 100) {
+      if (info.offset.x > 0) {
+        handleSwipe('right');
+      } else {
+        handleSwipe('left');
+      }
+    }
+  };
   
   return (
     <AppLayout>
@@ -84,42 +120,70 @@ const Home = () => {
         <DateIdea />
         
         <div className="flex-1 flex items-center justify-center relative">
-          <AnimatePresence mode="wait">
-            {currentIndex >= 0 ? (
-              <motion.div
-                key={currentProfile.id}
-                initial={{ opacity: 1 }}
-                animate={{ 
-                  opacity: 1,
-                  x: direction === 'right' ? 100 : direction === 'left' ? -100 : 0,
-                  rotate: direction === 'right' ? 10 : direction === 'left' ? -10 : 0
-                }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="w-full max-w-sm"
-              >
-                <ProfileCard profile={currentProfile} />
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center p-6"
-              >
-                <div className="mb-4">
-                  <span className="text-6xl">✨</span>
-                </div>
-                <h3 className="text-2xl font-bold mb-2">You've seen all profiles for now</h3>
-                <p className="text-gray-500 mb-6">Check back soon or adjust your preferences to see more people</p>
-                <Button
-                  onClick={() => setCurrentIndex(0)}
-                  className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white"
+          <motion.div 
+            ref={dragConstraints}
+            className="w-full max-w-sm"
+          >
+            <AnimatePresence mode="wait">
+              {currentIndex >= 0 ? (
+                <motion.div
+                  key={currentProfile.id}
+                  drag="x"
+                  dragConstraints={dragConstraints}
+                  onDragStart={() => setDragging(true)}
+                  onDragEnd={handleDragEnd}
+                  animate={{ 
+                    x: direction === 'right' ? 300 : direction === 'left' ? -300 : 0,
+                    rotate: direction === 'right' ? 20 : direction === 'left' ? -20 : 0,
+                    scale: dragging ? 1.03 : 1
+                  }}
+                  transition={{ duration: 0.5 }}
+                  className="touch-none"
                 >
-                  Refresh Profiles
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <EnhancedProfileCard 
+                    profile={currentProfile} 
+                    onSwipe={handleSwipe}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center p-6"
+                >
+                  <div className="mb-4">
+                    <span className="text-6xl">✨</span>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">You've seen all profiles for now</h3>
+                  <p className="text-gray-500 mb-6">Check back soon or adjust your preferences to see more people</p>
+                  
+                  <div className="space-y-4">
+                    <Button
+                      onClick={() => setCurrentIndex(0)}
+                      className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white w-full"
+                    >
+                      Refresh Profiles
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      className="w-full flex items-center justify-center gap-2"
+                      onClick={() => {
+                        toast({
+                          title: "Premium Feature",
+                          description: "Upgrade to see more profiles!",
+                        });
+                      }}
+                    >
+                      <Star size={16} className="text-amoura-gold" />
+                      <span>Upgrade to See More</span>
+                      <Badge variant="premium" className="ml-1">Premium</Badge>
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
         
         {currentIndex >= 0 && (
@@ -127,7 +191,7 @@ const Home = () => {
             <Button
               onClick={() => handleSwipe("left")}
               size="lg"
-              className="h-16 w-16 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+              className="h-16 w-16 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 shadow-sm"
             >
               <X size={24} className="text-gray-500" />
             </Button>
@@ -135,7 +199,7 @@ const Home = () => {
             <Button
               onClick={() => handleSwipe("right")}
               size="lg"
-              className="h-16 w-16 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
+              className="h-16 w-16 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-md"
             >
               <Heart size={24} className="text-white" />
             </Button>

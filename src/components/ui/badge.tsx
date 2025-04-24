@@ -15,8 +15,10 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
-        premium: "border-transparent bg-amoura-gold text-black hover:bg-amoura-gold/90",
+        premium: "border-transparent bg-gradient-to-r from-amoura-gold to-amber-500 text-black hover:from-amber-500 hover:to-amoura-gold",
         rose: "border-transparent bg-amoura-deep-pink text-white hover:bg-amoura-deep-pink/90",
+        success: "border-transparent bg-green-500 text-white hover:bg-green-600",
+        boost: "border-transparent bg-purple-500 text-white hover:bg-purple-600",
       },
     },
     defaultVariants: {
