@@ -13,7 +13,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
 import Home from "./pages/Home";
-import Standouts from "./pages/Standouts";
+import Community from "./pages/Community";
 import Matches from "./pages/Matches";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
@@ -38,7 +38,7 @@ const App = () => (
               <Route path="/signup" element={<Signup />} />
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/home" element={<Home />} />
-              <Route path="/standouts" element={<Standouts />} />
+              <Route path="/community" element={<Community />} />
               <Route path="/matches" element={<Matches />} />
               <Route path="/messages/:id" element={<Messages />} />
               <Route path="/messages" element={<Messages />} />

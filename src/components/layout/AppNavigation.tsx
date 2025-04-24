@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Heart, Search, MessageCircle, User } from 'lucide-react';
+import { MessageCircle, Search, User, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AppNavigation = () => {
@@ -26,15 +26,15 @@ const AppNavigation = () => {
           </span>
         </Link>
         
-        <Link to="/standouts" className="flex flex-col items-center">
+        <Link to="/community" className="flex flex-col items-center">
           <motion.div
             whileTap={{ scale: 0.9 }}
-            className={`p-2 rounded-full ${isActive('/standouts') ? 'bg-amoura-soft-pink' : ''}`}
+            className={`p-2 rounded-full ${isActive('/community') ? 'bg-amoura-soft-pink' : ''}`}
           >
-            <Heart size={26} className={`${isActive('/standouts') ? 'text-amoura-deep-pink' : 'text-gray-500'}`} />
+            <Users size={26} className={`${isActive('/community') ? 'text-amoura-deep-pink' : 'text-gray-500'}`} />
           </motion.div>
-          <span className={`text-xs mt-1 ${isActive('/standouts') ? 'text-amoura-deep-pink font-medium' : 'text-gray-500'}`}>
-            Standouts
+          <span className={`text-xs mt-1 ${isActive('/community') ? 'text-amoura-deep-pink font-medium' : 'text-gray-500'}`}>
+            Community
           </span>
         </Link>
         
