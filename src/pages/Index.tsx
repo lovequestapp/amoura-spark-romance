@@ -153,19 +153,19 @@ const Index = () => {
               >
                 <div className="flex -space-x-2">
                   <motion.img 
-                    src="/photo-1649972904349-6e44c42644a7"
+                    src="/lovable-uploads/photo-1581091226825-a6a2a5aee158.jpg"
                     alt="Community member"
                     whileHover={{ scale: 1.1 }}
                     className="w-8 h-8 rounded-full object-cover border-2 border-white"
                   />
                   <motion.img 
-                    src="/photo-1581091226825-a6a2a5aee158"
+                    src="/lovable-uploads/photo-1486312338219-ce68d2c6f44d.jpg"
                     alt="Community member"
                     whileHover={{ scale: 1.1 }}
                     className="w-8 h-8 rounded-full object-cover border-2 border-white"
                   />
                   <motion.img 
-                    src="/photo-1581090464777-f3220bbe1a8b"
+                    src="/lovable-uploads/photo-1531297484001-80022131f5a1.jpg"
                     alt="Community member"
                     whileHover={{ scale: 1.1 }}
                     className="w-8 h-8 rounded-full object-cover border-2 border-white"
