@@ -1,15 +1,35 @@
-
 import React from 'react';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 import EnhancedProfileCard from './EnhancedProfileCard';
-import { useIsMobile } from '@/hooks/use-mobile';
+
+interface Profile {
+  id: number;
+  name: string;
+  age: number;
+  distance: string;
+  occupation: string;
+  photos: string[];
+  bio: string;
+  premium?: boolean;
+  personalityMatch?: number;
+  prompts: {
+    question: string;
+    answer: string;
+  }[];
+  traits?: Array<{
+    name: string;
+    score: number;
+  }>;
+  relationshipIntention?: string;
+  personalityBadges?: string[];
+}
 
 interface SwipeableCardProps {
-  profile: any;
-  controls: any;
-  dragConstraints: any;
+  profile: Profile;
+  controls: ReturnType<typeof useAnimation>;
+  dragConstraints: React.RefObject<HTMLDivElement>;
   onDragStart: () => void;
-  onDragEnd: (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void;
+  onDragEnd: (info: any) => void;
 }
 
 const SwipeableCard: React.FC<SwipeableCardProps> = ({
@@ -19,26 +39,41 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
   onDragStart,
   onDragEnd
 }) => {
-  const isMobile = useIsMobile();
-
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 20
+      }
+    },
+    exit: {
+      x: window.innerWidth,
+      opacity: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+  
   return (
     <motion.div
-      key={profile.id}
-      drag={isMobile ? "x" : false}
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      drag
       dragConstraints={dragConstraints}
-      dragElastic={0.7}
+      dragElastic={0.8}
       onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      animate={controls}
-      initial={{ x: 0, rotate: 0, scale: 0.95, opacity: 0 }}
-      whileInView={{ scale: 1, opacity: 1 }}
-      className="touch-none"
-      style={{ touchAction: "pan-y" }}
+      onDragEnd={(event, info) => {
+        onDragEnd(info);
+      }}
+      style={{ originX: 0.5 }}
+      className="relative"
     >
-      <EnhancedProfileCard 
-        profile={profile}
-        onSwipe={() => {}}
-      />
+      <EnhancedProfileCard profile={profile} onSwipe={() => {}} />
     </motion.div>
   );
 };

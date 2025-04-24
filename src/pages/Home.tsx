@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import DateIdea from '@/components/profile/DateIdea';
@@ -8,6 +8,7 @@ import { Heart, X } from "lucide-react";
 import { useCardSwiper } from '@/hooks/use-card-swiper';
 import SwipeableCard from '@/components/home/SwipeableCard';
 import NoMoreProfiles from '@/components/home/NoMoreProfiles';
+import MatchFilters, { FilterOptions } from '@/components/home/MatchFilters';
 
 const enhancedProfiles = [
   {
@@ -92,10 +93,27 @@ const Home = () => {
     setCurrentIndex
   } = useCardSwiper(enhancedProfiles);
   
+  const [filters, setFilters] = useState<FilterOptions>({
+    ageRange: [18, 65],
+    distance: 25,
+    showVerifiedOnly: false,
+    interests: [],
+    relationshipIntention: null,
+  });
+  
+  const handleApplyFilters = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+    // In a real app, this would trigger a refetch of profiles based on filters
+    console.log("Filters applied:", newFilters);
+  };
+  
   return (
     <AppLayout>
       <div className="flex-1 flex flex-col p-4">
         <DateIdea />
+        
+        {/* Add Match Filters component */}
+        <MatchFilters onApplyFilters={handleApplyFilters} />
         
         <div className="flex-1 flex items-center justify-center relative">
           <div 
