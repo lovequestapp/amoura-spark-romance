@@ -58,10 +58,11 @@ const Profile = () => {
       const typedPrompts: ProfilePrompt[] = (data.prompts as Json[] || [])
         .map(prompt => {
           if (typeof prompt === 'object' && prompt !== null) {
+            const promptObj = prompt as Record<string, unknown>;
             return {
-              question: String(prompt.question || ''),
-              answer: String(prompt.answer || ''),
-              category: prompt.category ? String(prompt.category) : undefined
+              question: promptObj.question ? String(promptObj.question) : '',
+              answer: promptObj.answer ? String(promptObj.answer) : '',
+              category: promptObj.category ? String(promptObj.category) : undefined
             };
           }
           return { question: '', answer: '' };
