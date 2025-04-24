@@ -1,20 +1,10 @@
-
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, Plus, X } from "lucide-react";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/hooks/use-toast";
+import PhotoUploader from '@/components/profile/PhotoUploader';
 import OnboardingProgress from '@/components/onboarding/OnboardingProgress';
-import { updateProfile, uploadPhotos, saveInterests, fetchInterests, ProfilePrompt } from '@/services/onboarding';
+import { updateProfile, uploadPhotos, ProfilePrompt } from '@/services/onboarding';
+import { toast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 
 const Onboarding = () => {
@@ -23,8 +13,7 @@ const Onboarding = () => {
   const [step, setStep] = useState(1);
   const totalSteps = 5;
   const [isLoading, setIsLoading] = useState(false);
-  const [availableInterests, setAvailableInterests] = useState<any[]>([]);
-
+  
   // Form states
   const [photos, setPhotos] = useState<{ file: File; url: string; }[]>([]);
   const [formData, setFormData] = useState({
@@ -69,7 +58,6 @@ const Onboarding = () => {
   const handleNextStep = async () => {
     setIsLoading(true);
     try {
-      // Save data based on current step
       switch (step) {
         case 1: // Photos
           if (photos.length < 3) {
@@ -78,6 +66,7 @@ const Onboarding = () => {
               description: "Please upload at least 3 photos",
               variant: "destructive",
             });
+            setIsLoading(false);
             return;
           }
           const uploadedUrls = await uploadPhotos(photos);
@@ -85,6 +74,7 @@ const Onboarding = () => {
             photos: uploadedUrls,
             onboarding_step: step + 1 
           });
+          setStep(prev => prev + 1);
           break;
 
         case 2: // Basic Info
@@ -128,8 +118,6 @@ const Onboarding = () => {
           navigate('/home');
           return;
       }
-
-      setStep(prev => prev + 1);
     } catch (error) {
       console.error('Error saving data:', error);
       toast({
@@ -147,32 +135,16 @@ const Onboarding = () => {
       case 1:
         return (
           <div className="animate-fade-in">
-            <h2 className="text-2xl font-bold text-amoura-black mb-6">Add your photos</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Add your photos</h2>
             <p className="text-gray-500 mb-8">Upload at least 3 photos to help others get to know you better</p>
             
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div 
-                  key={index}
-                  className={`aspect-square rounded-xl flex items-center justify-center ${
-                    index === 0 
-                      ? "bg-amoura-soft-pink border border-amoura-deep-pink border-dashed" 
-                      : "bg-gray-100 border border-gray-200 border-dashed"
-                  }`}
-                >
-                  {index === 0 ? (
-                    <div className="flex flex-col items-center">
-                      <Camera size={24} className="text-amoura-deep-pink mb-1" />
-                      <span className="text-xs text-amoura-deep-pink">Add photo</span>
-                    </div>
-                  ) : (
-                    <Plus size={24} className="text-gray-400" />
-                  )}
-                </div>
-              ))}
-            </div>
+            <PhotoUploader 
+              photos={photos}
+              onPhotosChange={setPhotos}
+              maxPhotos={6}
+            />
             
-            <p className="text-xs text-gray-500 mb-8">
+            <p className="text-xs text-gray-500 mt-4">
               Photos should clearly show your face and reflect your personality. Group photos are fine, but make sure we can identify you.
             </p>
           </div>
@@ -181,7 +153,7 @@ const Onboarding = () => {
       case 2:
         return (
           <div className="animate-fade-in">
-            <h2 className="text-2xl font-bold text-amoura-black mb-6">Tell us about yourself</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Tell us about yourself</h2>
             
             <div className="space-y-6 mb-6">
               <div className="space-y-2">
@@ -249,7 +221,7 @@ const Onboarding = () => {
       case 3:
         return (
           <div className="animate-fade-in">
-            <h2 className="text-2xl font-bold text-amoura-black mb-6">Your interests</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Your interests</h2>
             <p className="text-gray-500 mb-8">Select at least 5 interests to help us find your best matches</p>
             
             <div className="flex flex-wrap gap-3 mb-8">
@@ -278,7 +250,7 @@ const Onboarding = () => {
       case 4:
         return (
           <div className="animate-fade-in">
-            <h2 className="text-2xl font-bold text-amoura-black mb-6">Lifestyle questions</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Lifestyle questions</h2>
             <p className="text-gray-500 mb-8">Help potential matches get to know you better</p>
             
             <div className="space-y-6 mb-6">
@@ -363,7 +335,7 @@ const Onboarding = () => {
       case 5:
         return (
           <div className="animate-fade-in">
-            <h2 className="text-2xl font-bold text-amoura-black mb-6">Add some prompts</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Add some prompts</h2>
             <p className="text-gray-500 mb-8">Answer prompts to showcase your personality</p>
             
             <div className="space-y-6 mb-6">
