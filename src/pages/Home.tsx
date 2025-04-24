@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -140,6 +139,7 @@ const Home = () => {
       <div className="flex-1 flex flex-col p-4">
         <DateIdea />
         
+        {/* Only render FeaturedMatch if featuredProfile exists and has all required properties */}
         {featuredProfile && (
           <FeaturedMatch 
             profile={featuredProfile} 
