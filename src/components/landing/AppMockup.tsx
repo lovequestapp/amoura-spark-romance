@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -15,19 +16,19 @@ const AppMockup = () => {
   
   const screens = [
     {
-      image: "/lovable-uploads/d087d2b0-450b-402c-91f9-cc0841a89716.png",
+      image: "/lovable-uploads/woman-laptop-1.jpg",
       title: "Discover",
       description: "Find people who share your interests",
       path: "/home"
     },
     {
-      image: "/lovable-uploads/f572c971-a715-43c4-84b3-ce8d82790d45.png",
+      image: "/lovable-uploads/woman-laptop-2.jpg",
       title: "Connect",
       description: "Start meaningful conversations",
       path: "/matches"
     },
     {
-      image: "/lovable-uploads/4388b48e-0a4b-4870-9e6b-55b46b986162.png",
+      image: "/lovable-uploads/man-laptop.jpg",
       title: "Community",
       description: "Join our vibrant dating community",
       path: "/community"
