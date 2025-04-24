@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -153,19 +154,19 @@ const Index = () => {
               >
                 <div className="flex -space-x-2">
                   <motion.img 
-                    src="/lovable-uploads/photo-1581091226825-a6a2a5aee158.jpg"
+                    src="/lovable-uploads/955e854b-03c9-4efe-91de-ea62233f88eb.png"
                     alt="Community member"
                     whileHover={{ scale: 1.1 }}
                     className="w-8 h-8 rounded-full object-cover border-2 border-white"
                   />
                   <motion.img 
-                    src="/lovable-uploads/photo-1486312338219-ce68d2c6f44d.jpg"
+                    src="/lovable-uploads/d96b24ef-01b0-41a0-afdf-564574149a3c.png"
                     alt="Community member"
                     whileHover={{ scale: 1.1 }}
                     className="w-8 h-8 rounded-full object-cover border-2 border-white"
                   />
                   <motion.img 
-                    src="/lovable-uploads/photo-1531297484001-80022131f5a1.jpg"
+                    src="/lovable-uploads/c3b91871-0b81-4711-a02d-6771b41f44ed.png"
                     alt="Community member"
                     whileHover={{ scale: 1.1 }}
                     className="w-8 h-8 rounded-full object-cover border-2 border-white"
