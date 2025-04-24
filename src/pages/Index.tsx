@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -307,28 +306,30 @@ const Index = () => {
             Join thousands of singles who found meaningful connections based on true compatibility
           </p>
           
-          <Button 
-            className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-7 px-12 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-            asChild
-          >
-            <Link to="/signup">
-              Begin Your Love Story Today
-              <motion.span
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 5, -5, 0]
-                }}
-                transition={{ 
-                  duration: 1.5,
-                  repeat: Infinity,
-                  repeatDelay: 3
-                }}
-                className="ml-2 inline-block"
-              >
-                ❤️
-              </motion.span>
-            </Link>
-          </Button>
+          <div className="flex justify-center">
+            <Button 
+              className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-7 px-12 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              asChild
+            >
+              <Link to="/signup">
+                Begin Your Love Story Today
+                <motion.span
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 5, -5, 0]
+                  }}
+                  transition={{ 
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatDelay: 3
+                  }}
+                  className="ml-2 inline-block"
+                >
+                  ❤️
+                </motion.span>
+              </Link>
+            </Button>
+          </div>
           
           <motion.p
             initial={{ opacity: 0 }}
