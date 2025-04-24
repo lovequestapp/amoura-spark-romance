@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import DateIdea from '@/components/profile/DateIdea';
 import { Button } from "@/components/ui/button";
@@ -88,6 +89,7 @@ const Home = () => {
     handleSwipe,
     handleDragEnd,
     setDragging,
+    setCurrentIndex
   } = useCardSwiper(enhancedProfiles);
   
   return (
@@ -96,7 +98,7 @@ const Home = () => {
         <DateIdea />
         
         <div className="flex-1 flex items-center justify-center relative">
-          <motion.div 
+          <div 
             ref={dragConstraints}
             className="w-full max-w-sm"
           >
@@ -113,7 +115,7 @@ const Home = () => {
                 <NoMoreProfiles onRefresh={() => currentIndex === -1 && setCurrentIndex(0)} />
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
         </div>
         
         {currentIndex >= 0 && (

@@ -77,5 +77,6 @@ export function useCardSwiper(profiles: Profile[], onFinish?: () => void) {
     handleSwipe,
     handleDragEnd,
     setDragging,
+    setCurrentIndex,
   };
 }
