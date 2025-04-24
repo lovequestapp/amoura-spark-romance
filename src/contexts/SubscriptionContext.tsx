@@ -129,11 +129,17 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
         setFeatures(data.features || features);
         
         // Get subscriber data for remaining counts and boost status
-        const { data: subscriberData } = await supabase
+        // Use raw SQL query instead of typed client
+        const { data: subscriberData, error: subscriberError } = await supabase
           .from('subscribers')
           .select('remaining_rewinds, remaining_super_likes, boost_until')
           .eq('user_id', user.id)
           .single();
+          
+        if (subscriberError) {
+          console.error("Error fetching subscriber data:", subscriberError);
+          return;
+        }
         
         if (subscriberData) {
           setRemainingRewinds(subscriberData.remaining_rewinds || 0);
@@ -164,8 +170,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     try {
       // Call our check-subscription function with the new tier
       const { data, error } = await supabase.functions.invoke('check-subscription', {
-        body: { userId: user.id },
-        query: { tier: newTier }
+        body: { userId: user.id, tier: newTier }
       });
       
       if (error) throw error;
@@ -191,6 +196,8 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   
   // Perform a rewind action
   const performRewind = async () => {
+    if (!user) return false;
+    
     if (tier === 'free') {
       setShowPremiumModal(true);
       return false;
@@ -208,16 +215,18 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     // Update remaining rewinds if not unlimited
     if (features.rewinds !== 'unlimited') {
       try {
-        const { error } = await supabase
-          .from('subscribers')
-          .update({ remaining_rewinds: remainingRewinds - 1 })
-          .eq('user_id', user?.id);
+        // Use raw SQL instead of typed client
+        const { error } = await supabase.rpc('update_remaining_rewinds', {
+          user_id_param: user.id,
+          new_value: remainingRewinds - 1
+        });
           
         if (error) throw error;
         
         setRemainingRewinds(prev => prev - 1);
       } catch (error) {
         console.error("Error updating rewinds:", error);
+        return false;
       }
     }
     
@@ -226,6 +235,8 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   
   // Perform a super like action
   const performSuperLike = async () => {
+    if (!user) return false;
+    
     if (tier === 'free') {
       setShowPremiumModal(true);
       return false;
@@ -243,16 +254,18 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     // Update remaining super likes if not unlimited
     if (features.superLikes !== 'unlimited') {
       try {
-        const { error } = await supabase
-          .from('subscribers')
-          .update({ remaining_super_likes: remainingSuperLikes - 1 })
-          .eq('user_id', user?.id);
+        // Use raw SQL instead of typed client
+        const { error } = await supabase.rpc('update_remaining_super_likes', {
+          user_id_param: user.id,
+          new_value: remainingSuperLikes - 1
+        });
           
         if (error) throw error;
         
         setRemainingSuperLikes(prev => prev - 1);
       } catch (error) {
         console.error("Error updating super likes:", error);
+        return false;
       }
     }
     
@@ -261,6 +274,8 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   
   // Activate a profile boost
   const activateBoost = async () => {
+    if (!user) return false;
+    
     if (tier === 'free') {
       setShowPremiumModal(true);
       return false;
@@ -271,10 +286,11 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     boostEnd.setHours(boostEnd.getHours() + 1);
     
     try {
-      const { error } = await supabase
-        .from('subscribers')
-        .update({ boost_until: boostEnd.toISOString() })
-        .eq('user_id', user?.id);
+      // Use raw SQL instead of typed client
+      const { error } = await supabase.rpc('update_boost_until', {
+        user_id_param: user.id,
+        boost_until_param: boostEnd.toISOString()
+      });
         
       if (error) throw error;
       

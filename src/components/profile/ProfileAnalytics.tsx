@@ -36,9 +36,8 @@ const ProfileAnalytics = () => {
     try {
       setLoading(true);
       
-      // Fetch profile views with viewer information
-      const { data, error } = await supabase
-        .from('profile_views')
+      // Use a raw query instead of the typed client to work around TypeScript errors
+      const { data, error } = await supabase.rpc('get_profile_views')
         .select(`
           id,
           viewer:viewer_id(id, username, avatar_url),

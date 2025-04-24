@@ -43,12 +43,11 @@ serve(async (req) => {
     
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Get subscription request parameters
-    const requestUrl = new URL(req.url);
-    const tierParam = requestUrl.searchParams.get('tier');
+    // Parse request body to get parameters
+    const requestData = await req.json();
     
-    // Default to free if no tier is specified
-    const tier = tierParam || 'free';
+    // Get tier from request body rather than URL params
+    const tier = requestData.tier || 'free';
     
     let subscriptionEnd = null;
     if (tier !== 'free') {
