@@ -16,19 +16,19 @@ const AppMockup = () => {
   
   const screens = [
     {
-      image: "/lovable-uploads/4ef8b9eb-0a3a-4a0c-ac2b-801f9a8c311f.png",
+      image: "/lovable-uploads/woman-laptop-1.jpg",
       title: "Discover",
       description: "Find people who share your interests",
       path: "/home"
     },
     {
-      image: "/lovable-uploads/f6f5f04b-a831-4d1d-918c-2c09c38b2e26.png",
+      image: "/lovable-uploads/woman-laptop-2.jpg",
       title: "Connect",
       description: "Start meaningful conversations",
       path: "/matches"
     },
     {
-      image: "/lovable-uploads/edfcf3e4-d0fa-408a-87d2-65224f904870.png",
+      image: "/lovable-uploads/man-laptop.jpg",
       title: "Community",
       description: "Join our vibrant dating community",
       path: "/community"
@@ -37,6 +37,7 @@ const AppMockup = () => {
 
   const handleCardClick = (path: string) => {
     if (!user) {
+      // If user is not logged in, redirect to auth page instead
       return "/auth";
     }
     return path;
@@ -54,53 +55,77 @@ const AppMockup = () => {
           Experience Dating Like Never Before
         </motion.h2>
         
-        <div className="flex justify-center">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="relative w-[280px] h-[580px] bg-amoura-black rounded-[40px] p-3 shadow-2xl"
-          >
-            {/* Phone Notch */}
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-[30px] bg-amoura-black rounded-b-[14px] flex items-center justify-center">
-              <div className="w-16 h-4 bg-black rounded-full"></div>
+        <div className="hidden md:block">
+          <div className="flex space-x-8 justify-center">
+            {screens.map((screen, index) => (
+              <Link 
+                key={screen.title}
+                to={handleCardClick(screen.path)}
+                className="block flex-shrink-0 w-64"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 transition-all"
+                >
+                  <div className="relative h-[480px]">
+                    <img
+                      src={screen.image}
+                      alt={screen.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
+                      <h3 className="font-semibold text-lg">{screen.title}</h3>
+                      <p className="text-sm text-white/90">{screen.description}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </Link>
+            ))}
+          </div>
+        </div>
+        
+        <div className="md:hidden">
+          <Carousel>
+            <CarouselContent>
+              {screens.map((screen, index) => (
+                <CarouselItem key={screen.title} className="pl-4 md:basis-1/2">
+                  <Link to={handleCardClick(screen.path)} className="block">
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.5 }}
+                      className="w-full"
+                    >
+                      <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+                        <div className="relative h-[400px]">
+                          <img
+                            src={screen.image}
+                            alt={screen.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
+                            <h3 className="font-semibold text-lg">{screen.title}</h3>
+                            <p className="text-sm text-white/90">{screen.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </Link>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="flex justify-center gap-2 mt-4">
+              <CarouselPrevious className="static transform-none mx-0" />
+              <CarouselNext className="static transform-none mx-0" />
             </div>
-            
-            {/* Status Bar */}
-            <div className="absolute top-0 left-0 right-0 h-8 px-6 flex justify-between items-center text-white z-10 text-xs">
-              <span>3:04</span>
-              <div className="flex items-center gap-1">
-                <div className="h-3 w-3 rounded-full border border-white"></div>
-                <div className="h-3 w-3 rounded-full border border-white"></div>
-                <span>24</span>
-              </div>
-            </div>
-
-            <div className="w-full h-full rounded-[32px] overflow-hidden border-[8px] border-amoura-black bg-white">
-              <Carousel className="w-full h-full">
-                <CarouselContent>
-                  {screens.map((screen, index) => (
-                    <CarouselItem key={screen.title} className="h-full">
-                      <Link to={handleCardClick(screen.path)} className="block h-full">
-                        <img 
-                          src={screen.image} 
-                          alt={screen.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </Link>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
-                  <CarouselPrevious className="h-8 w-8 static transform-none mx-1" />
-                  <CarouselNext className="h-8 w-8 static transform-none mx-1" />
-                </div>
-              </Carousel>
-            </div>
-            
-            {/* Home Bar */}
-            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/3 h-1 bg-white rounded-full"></div>
-          </motion.div>
+          </Carousel>
         </div>
       </div>
     </section>
