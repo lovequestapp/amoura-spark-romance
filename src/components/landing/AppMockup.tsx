@@ -1,14 +1,12 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import PhoneMockup from '@/components/ui/phone-mockup';
 import { 
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 
 const AppMockup = () => {
@@ -39,7 +37,7 @@ const AppMockup = () => {
           Experience Dating Like Never Before
         </motion.h2>
         
-        {/* Phone Mockup Carousel */}
+        {/* Phone Mockup with Carousel */}
         <div className="flex justify-center">
           <div className="relative w-[280px] h-[580px] mx-auto">
             <div className="absolute inset-0 bg-amoura-black rounded-[40px] p-3 shadow-2xl">
@@ -62,12 +60,11 @@ const AppMockup = () => {
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
                     {phoneScreens.map((_, index) => (
                       <motion.div
                         key={index}
-                        className="w-2 h-2 rounded-full bg-white/50"
-                        animate={{ opacity: index === activeSlide ? 1 : 0.5 }}
+                        className={`w-2 h-2 rounded-full ${activeSlide === index ? 'bg-white' : 'bg-white/50'}`}
                       />
                     ))}
                   </div>
