@@ -70,10 +70,15 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile }) => {
 
   // Function to determine the correct image source
   const getImageSrc = (path: string) => {
+    if (!path) return '';
+    
     if (path.startsWith('/lovable-uploads/')) {
       return path;
+    } else if (path.startsWith('https://')) {
+      return path;
+    } else {
+      return `https://source.unsplash.com${path}`;
     }
-    return `https://source.unsplash.com${path}`;
   };
 
   return (

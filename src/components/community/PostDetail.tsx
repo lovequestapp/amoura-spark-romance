@@ -106,15 +106,20 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose }) => {
   
   // Function to determine the correct image source
   const getImageSrc = (path: string) => {
+    if (!path) return '';
+    
     if (path.startsWith('/lovable-uploads/')) {
       return path;
+    } else if (path.startsWith('https://')) {
+      return path;
+    } else {
+      return `https://source.unsplash.com${path}`;
     }
-    return `https://source.unsplash.com${path}`;
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl h-[90vh] overflow-y-auto p-0 gap-0 rounded-xl">
+      <DialogContent className="max-w-2xl h-[90vh] overflow-y-auto p-0 gap-0 rounded-xl" aria-describedby="post-content">
         <VisuallyHidden>
           <DialogTitle>Post by {post.author.name}</DialogTitle>
         </VisuallyHidden>
@@ -141,7 +146,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose }) => {
           </div>
         </DialogHeader>
         
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4" id="post-content">
           {/* Post content */}
           <p className="text-lg whitespace-pre-line">{post.content}</p>
           
