@@ -3,7 +3,7 @@ import React from 'react';
 import { motion, useAnimation, PanInfo } from 'framer-motion';
 import EnhancedProfileCard from './EnhancedProfileCard';
 
-interface Profile {
+export interface Profile {
   id: number;
   name: string;
   age: number;
@@ -12,6 +12,8 @@ interface Profile {
   photos: string[];
   bio: string;
   premium?: boolean;
+  verified?: boolean;
+  featured?: boolean;
   personalityMatch?: number;
   prompts: {
     question: string;

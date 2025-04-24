@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -5,11 +6,13 @@ import DateIdea from '@/components/profile/DateIdea';
 import { Button } from "@/components/ui/button";
 import { Heart, X } from "lucide-react";
 import { useCardSwiper } from '@/hooks/use-card-swiper';
-import SwipeableCard from '@/components/home/SwipeableCard';
+import SwipeableCard, { Profile } from '@/components/home/SwipeableCard';
 import NoMoreProfiles from '@/components/home/NoMoreProfiles';
 import MatchFilters, { FilterOptions } from '@/components/home/MatchFilters';
+import FeaturedMatch from '@/components/home/FeaturedMatch';
+import { useToast } from '@/components/ui/use-toast';
 
-const enhancedProfiles = [
+const enhancedProfiles: Profile[] = [
   {
     id: 1,
     name: "Emma",
@@ -19,6 +22,8 @@ const enhancedProfiles = [
     photos: ["/assets/profile-1a.jpg", "/assets/profile-1b.jpg", "/assets/profile-1c.jpg"],
     bio: "Coffee addict, design enthusiast, and weekend hiker. Looking for someone to share laughs and adventures with.",
     personalityMatch: 85,
+    verified: true,
+    featured: true,
     traits: [
       { name: "Creative", score: 90 },
       { name: "Adventurous", score: 75 },
@@ -47,6 +52,7 @@ const enhancedProfiles = [
     bio: "Tech geek with a passion for hiking and craft beer. Looking for someone to explore new trails and breweries with.",
     premium: true,
     personalityMatch: 72,
+    verified: false,
     traits: [
       { name: "Analytical", score: 95 },
       { name: "Introverted", score: 65 },
@@ -70,6 +76,7 @@ const enhancedProfiles = [
     photos: ["/assets/profile-3a.jpg", "/assets/profile-3b.jpg", "/assets/profile-3c.jpg"],
     bio: "Foodie, music lover, and avid traveler. Let's plan our next adventure together!",
     personalityMatch: 91,
+    verified: true,
     traits: [
       { name: "Extroverted", score: 88 },
       { name: "Creative", score: 75 },
@@ -87,6 +94,7 @@ const enhancedProfiles = [
 ];
 
 const Home = () => {
+  const { toast } = useToast();
   const {
     currentIndex,
     currentProfile,
@@ -110,11 +118,29 @@ const Home = () => {
     setFilters(newFilters);
     console.log("Filters applied:", newFilters);
   };
+
+  const handleViewFeaturedProfile = () => {
+    toast({
+      title: "Featured Profile",
+      description: "View the full featured profile to learn more about this match.",
+    });
+    // In a real app, you would navigate to a detailed profile view
+  };
+  
+  // Find the featured profile
+  const featuredProfile = enhancedProfiles.find(profile => profile.featured);
   
   return (
     <AppLayout>
       <div className="flex-1 flex flex-col p-4">
         <DateIdea />
+        
+        {featuredProfile && (
+          <FeaturedMatch 
+            profile={featuredProfile} 
+            onViewProfile={handleViewFeaturedProfile} 
+          />
+        )}
         
         <MatchFilters onApplyFilters={handleApplyFilters} />
         

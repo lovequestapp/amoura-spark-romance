@@ -1,34 +1,15 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Heart, X, Info, Star } from 'lucide-react';
+import { MessageCircle, Heart, X, Info, Star, CheckCircle } from 'lucide-react';
 import ProfilePhotos from '@/components/profile/ProfilePhotos';
 import ProfilePrompt from '@/components/profile/ProfilePrompt';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PersonalityMatch from './PersonalityMatch';
+import PersonalityBadges from './PersonalityBadges';
 import { useToast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-
-interface Profile {
-  id: number;
-  name: string;
-  age: number;
-  distance: string;
-  occupation: string;
-  photos: string[];
-  bio: string;
-  premium?: boolean;
-  personalityMatch?: number;
-  prompts: {
-    question: string;
-    answer: string;
-  }[];
-  traits?: Array<{
-    name: string;
-    score: number;
-  }>;
-}
+import { Profile } from './SwipeableCard';
 
 interface EnhancedProfileCardProps {
   profile: Profile;
@@ -92,17 +73,34 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
       <div className="px-4 py-3">
         <div className="flex justify-between items-baseline mb-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold">
+            <h2 className="text-xl font-bold flex items-center">
               {profile.name}, {profile.age}
+              {profile.verified && (
+                <CheckCircle className="h-4 w-4 ml-1 text-blue-500 fill-white" />
+              )}
             </h2>
             {profile.premium && (
               <Badge variant="premium" className="h-5">Premium</Badge>
+            )}
+            {profile.featured && (
+              <Badge className="bg-gradient-to-r from-amoura-gold to-amber-400 text-black h-5 flex items-center">
+                <Star className="h-3 w-3 mr-1 fill-black" /> Featured
+              </Badge>
             )}
           </div>
           <span className="text-sm text-gray-500">{profile.distance}</span>
         </div>
         
         <p className="text-gray-700 mb-3">{profile.occupation}</p>
+        
+        {profile.relationshipIntention && profile.personalityBadges && (
+          <div className="mb-3">
+            <PersonalityBadges 
+              intention={profile.relationshipIntention} 
+              badges={profile.personalityBadges.slice(0, 2)} 
+            />
+          </div>
+        )}
         
         {!expanded ? (
           <>
