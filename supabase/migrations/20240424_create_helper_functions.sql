@@ -9,6 +9,25 @@ AS $$
   SELECT * FROM public.profile_views;
 $$;
 
+-- Function to get subscriber data
+CREATE OR REPLACE FUNCTION public.get_subscriber_data(user_id_param UUID)
+RETURNS TABLE (
+  remaining_rewinds INTEGER,
+  remaining_super_likes INTEGER,
+  boost_until TIMESTAMPTZ
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT 
+    remaining_rewinds,
+    remaining_super_likes,
+    boost_until
+  FROM public.subscribers
+  WHERE user_id = user_id_param;
+$$;
+
 -- Function to update remaining rewinds
 CREATE OR REPLACE FUNCTION public.update_remaining_rewinds(user_id_param UUID, new_value INTEGER)
 RETURNS void
@@ -44,3 +63,4 @@ AS $$
   SET boost_until = boost_until_param
   WHERE user_id = user_id_param;
 $$;
+

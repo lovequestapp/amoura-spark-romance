@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './AuthContext';
@@ -81,12 +80,10 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // Check subscription on component mount and when user changes
   useEffect(() => {
     if (user) {
       checkSubscription();
     } else {
-      // Reset to free tier when logged out
       setTier('free');
       setSubscriptionEnd(null);
       setFeatures({
@@ -105,7 +102,6 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   }, [user]);
   
-  // Check subscription status with our edge function
   const checkSubscription = async () => {
     if (!user) {
       setTier('free');
@@ -113,28 +109,19 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
     
     try {
-      // Call our check-subscription edge function
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         body: { userId: user.id }
       });
       
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
       if (data) {
-        // Update subscription state
         setTier(data.subscription_tier || 'free');
         setSubscriptionEnd(data.subscription_end ? new Date(data.subscription_end) : null);
         setFeatures(data.features || features);
         
-        // Get subscriber data for remaining counts and boost status
-        // Use raw SQL query instead of typed client
         const { data: subscriberData, error: subscriberError } = await supabase
-          .from('subscribers')
-          .select('remaining_rewinds, remaining_super_likes, boost_until')
-          .eq('user_id', user.id)
-          .single();
+          .rpc('get_subscriber_data', { user_id_param: user.id });
           
         if (subscriberError) {
           console.error("Error fetching subscriber data:", subscriberError);
@@ -163,19 +150,16 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   };
   
-  // Update subscription tier (for demo purposes)
   const updateSubscription = async (newTier: SubscriptionTier) => {
     if (!user) return;
     
     try {
-      // Call our check-subscription function with the new tier
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         body: { userId: user.id, tier: newTier }
       });
       
       if (error) throw error;
       
-      // Update state with new subscription data
       await checkSubscription();
       
       toast({
@@ -194,7 +178,6 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   };
   
-  // Perform a rewind action
   const performRewind = async () => {
     if (!user) return false;
     
@@ -212,10 +195,8 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
       return false;
     }
     
-    // Update remaining rewinds if not unlimited
     if (features.rewinds !== 'unlimited') {
       try {
-        // Use raw SQL instead of typed client
         const { error } = await supabase.rpc('update_remaining_rewinds', {
           user_id_param: user.id,
           new_value: remainingRewinds - 1
@@ -233,7 +214,6 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     return true;
   };
   
-  // Perform a super like action
   const performSuperLike = async () => {
     if (!user) return false;
     
@@ -251,10 +231,8 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
       return false;
     }
     
-    // Update remaining super likes if not unlimited
     if (features.superLikes !== 'unlimited') {
       try {
-        // Use raw SQL instead of typed client
         const { error } = await supabase.rpc('update_remaining_super_likes', {
           user_id_param: user.id,
           new_value: remainingSuperLikes - 1
@@ -272,7 +250,6 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     return true;
   };
   
-  // Activate a profile boost
   const activateBoost = async () => {
     if (!user) return false;
     
@@ -281,12 +258,10 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
       return false;
     }
     
-    // Set boost duration to 1 hour
     const boostEnd = new Date();
     boostEnd.setHours(boostEnd.getHours() + 1);
     
     try {
-      // Use raw SQL instead of typed client
       const { error } = await supabase.rpc('update_boost_until', {
         user_id_param: user.id,
         boost_until_param: boostEnd.toISOString()
@@ -314,7 +289,6 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   };
   
-  // Open upgrade modal
   const openUpgradeModal = () => {
     setShowPremiumModal(true);
   };

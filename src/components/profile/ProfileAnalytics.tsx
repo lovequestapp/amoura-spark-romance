@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,8 +12,8 @@ interface ProfileView {
   id: string;
   viewer: {
     id: string;
-    username: string;
-    avatar_url: string;
+    username: string | null;
+    avatar_url: string | null;
   };
   viewed_at: string;
 }
@@ -36,19 +35,32 @@ const ProfileAnalytics = () => {
     try {
       setLoading(true);
       
-      // Use a raw query instead of the typed client to work around TypeScript errors
-      const { data, error } = await supabase.rpc('get_profile_views')
-        .select(`
-          id,
-          viewer:viewer_id(id, username, avatar_url),
-          viewed_at
-        `)
-        .order('viewed_at', { ascending: false })
-        .limit(10);
+      const { data: viewsData, error: viewsError } = await supabase
+        .rpc('get_profile_views');
       
-      if (error) throw error;
+      if (viewsError) throw viewsError;
       
-      setProfileViews(data || []);
+      const viewsWithProfiles = await Promise.all(
+        (viewsData || []).map(async (view) => {
+          const { data: viewerProfile } = await supabase
+            .from('profiles')
+            .select('id, username, avatar_url')
+            .eq('id', view.viewer_id)
+            .single();
+            
+          return {
+            id: view.id,
+            viewer: viewerProfile || {
+              id: view.viewer_id,
+              username: 'Unknown User',
+              avatar_url: null
+            },
+            viewed_at: view.viewed_at
+          };
+        })
+      );
+      
+      setProfileViews(viewsWithProfiles);
     } catch (error) {
       console.error('Error fetching profile views:', error);
       toast({
@@ -60,7 +72,7 @@ const ProfileAnalytics = () => {
       setLoading(false);
     }
   };
-  
+
   const formatViewDate = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();
@@ -79,7 +91,6 @@ const ProfileAnalytics = () => {
     return date.toLocaleDateString();
   };
   
-  // If the user doesn't have analytics feature, show upgrade prompt
   if (!hasAnalytics) {
     return (
       <Card className="animate-in fade-in-50 my-4">

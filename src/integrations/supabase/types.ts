@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      profile_views: {
+        Row: {
+          id: string
+          viewed_at: string
+          viewed_id: string | null
+          viewer_id: string | null
+        }
+        Insert: {
+          id?: string
+          viewed_at?: string
+          viewed_id?: string | null
+          viewer_id?: string | null
+        }
+        Update: {
+          id?: string
+          viewed_at?: string
+          viewed_id?: string | null
+          viewer_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -36,6 +57,51 @@ export type Database = {
           id?: string
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      subscribers: {
+        Row: {
+          boost_until: string | null
+          created_at: string
+          email: string
+          id: string
+          remaining_rewinds: number | null
+          remaining_super_likes: number | null
+          stripe_customer_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          boost_until?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          remaining_rewinds?: number | null
+          remaining_super_likes?: number | null
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          boost_until?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          remaining_rewinds?: number | null
+          remaining_super_likes?: number | null
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
