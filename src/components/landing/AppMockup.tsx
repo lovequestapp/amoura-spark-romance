@@ -39,10 +39,10 @@ const AppMockup = () => {
   };
 
   return (
-    <section className="py-16 px-6 bg-gradient-to-b from-white via-amoura-gold/5 to-white relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-amoura-gold blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-amoura-deep-pink/20 blur-3xl"></div>
+    <section className="py-16 px-6 bg-white relative overflow-hidden">
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-gray-100 blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-gray-200 blur-3xl"></div>
       </div>
       
       <div className="max-w-6xl mx-auto relative">

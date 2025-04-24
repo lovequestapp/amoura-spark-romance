@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 
@@ -33,10 +34,10 @@ const AlgorithmSection = () => {
   };
 
   return (
-    <section className="py-24 px-6 bg-gradient-to-br from-amoura-soft-pink via-white to-amoura-soft-pink/30 relative overflow-hidden">
+    <section className="py-24 px-6 bg-white relative overflow-hidden">
       <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="absolute top-20 left-10 w-96 h-96 rounded-full bg-amoura-deep-pink blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-amoura-gold blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-96 h-96 rounded-full bg-gray-100 blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-gray-200 blur-3xl"></div>
       </div>
       
       <div className="max-w-6xl mx-auto relative">

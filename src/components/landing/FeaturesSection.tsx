@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Star, MessageCircle, Users, Award } from 'lucide-react';
@@ -33,10 +34,10 @@ const FeaturesSection = () => {
   ];
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-tr from-white via-amoura-gold/10 to-white relative overflow-hidden">
+    <section className="py-20 px-6 bg-white relative overflow-hidden">
       <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="absolute top-1/3 right-1/4 w-72 h-72 rounded-full bg-amoura-gold blur-3xl"></div>
-        <div className="absolute bottom-1/3 left-1/4 w-96 h-96 rounded-full bg-amoura-deep-pink/20 blur-3xl"></div>
+        <div className="absolute top-1/3 right-1/4 w-72 h-72 rounded-full bg-gray-100 blur-3xl"></div>
+        <div className="absolute bottom-1/3 left-1/4 w-96 h-96 rounded-full bg-gray-200 blur-3xl"></div>
       </div>
       
       <div className="max-w-6xl mx-auto relative">
