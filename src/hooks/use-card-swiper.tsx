@@ -1,82 +1,73 @@
 
 import { useState, useRef } from 'react';
-import { PanInfo, useAnimation } from 'framer-motion';
-import { useToast } from '@/components/ui/use-toast';
+import { useAnimation, PanInfo } from 'framer-motion';
+import { Profile } from '@/components/home/SwipeableCard';
 
-interface Profile {
-  id: number;
-  name: string;
-  [key: string]: any;
-}
-
-export function useCardSwiper(profiles: Profile[], onFinish?: () => void) {
+export const useCardSwiper = (
+  profiles: Profile[], 
+  onSwipe?: (profile: Profile, direction: string) => void
+) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const { toast } = useToast();
+  const dragConstraints = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
-  const dragConstraints = useRef(null);
 
   const currentProfile = profiles[currentIndex];
 
-  const handleSwipe = (dir: string) => {
-    setDirection(dir);
+  const handleSwipe = (direction: string) => {
+    if (!currentProfile) return;
     
-    controls.start({
-      x: dir === 'right' ? 400 : -400,
-      rotate: dir === 'right' ? 30 : -30,
+    const xDirection = direction === "left" ? -1000 : direction === "right" ? 1000 : 0;
+    const yDirection = direction === "superLike" ? -1000 : 0;
+    
+    controls.start({ 
+      x: xDirection, 
+      y: yDirection,
       opacity: 0,
-      transition: { type: "spring", stiffness: 400, damping: 40 }
+      transition: { duration: 0.5 }
     }).then(() => {
-      if (currentIndex < profiles.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        setCurrentIndex(-1);
-        onFinish?.();
+      // Call onSwipe callback with profile and direction
+      if (onSwipe) {
+        onSwipe(currentProfile, direction);
       }
-      setDirection(null);
+      
+      // Move to next profile
+      setCurrentIndex(prev => {
+        if (prev + 1 >= profiles.length) {
+          return -1; // No more profiles
+        }
+        return prev + 1;
+      });
+      
+      // Reset position
+      controls.set({ x: 0, y: 0, opacity: 1 });
     });
   };
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setDragging(false);
-    const threshold = 100;
+    const swipeThreshold = 150;
     
-    if (Math.abs(info.offset.x) > threshold) {
-      if (info.offset.x > 0) {
-        handleSwipe('right');
-        
-        // Create heart animation effect when liking
-        const heart = document.createElement('div');
-        heart.className = 'heart-animation';
-        document.body.appendChild(heart);
-        
-        setTimeout(() => {
-          document.body.removeChild(heart);
-        }, 1000);
-      } else {
-        handleSwipe('left');
-      }
+    if (Math.abs(info.offset.x) > swipeThreshold) {
+      const direction = info.offset.x > 0 ? "right" : "left";
+      handleSwipe(direction);
+    } else if (info.offset.y < -swipeThreshold) {
+      // Swipe up for Super Like
+      handleSwipe("superLike");
     } else {
-      // Reset card position if not swiped far enough
-      controls.start({
-        x: 0,
-        rotate: 0,
-        transition: { type: "spring", stiffness: 500, damping: 30 }
-      });
+      controls.start({ x: 0, y: 0, transition: { type: "spring", stiffness: 500, damping: 30 } });
     }
   };
 
   return {
     currentIndex,
     currentProfile,
-    direction,
-    dragging,
     controls,
     dragConstraints,
+    dragging,
+    setDragging,
     handleSwipe,
     handleDragEnd,
-    setDragging,
-    setCurrentIndex,
+    setCurrentIndex
   };
-}
+};

@@ -10,8 +10,8 @@ import NoMoreProfiles from '@/components/home/NoMoreProfiles';
 import MatchFilters, { FilterOptions } from '@/components/home/MatchFilters';
 import FeaturedMatch from '@/components/home/FeaturedMatch';
 import { useToast } from '@/components/ui/use-toast';
+import PremiumFeatures from '@/components/subscription/PremiumFeatures';
 
-// Explicitly type the profiles array with the Profile interface
 const enhancedProfiles = [
   {
     id: 1,
@@ -98,8 +98,11 @@ const enhancedProfiles = [
   }
 ] satisfies Profile[];
 
+const swipedProfiles: Array<{ profile: Profile; direction: string }> = [];
+
 const Home = () => {
   const { toast } = useToast();
+  const [userTier, setUserTier] = useState<'free' | 'basic' | 'gold' | 'platinum'>('free');
   const {
     currentIndex,
     currentProfile,
@@ -109,7 +112,9 @@ const Home = () => {
     handleDragEnd,
     setDragging,
     setCurrentIndex
-  } = useCardSwiper(enhancedProfiles);
+  } = useCardSwiper(enhancedProfiles, (profile, direction) => {
+    swipedProfiles.push({ profile, direction });
+  });
   
   const [filters, setFilters] = useState<FilterOptions>({
     ageRange: [18, 65],
@@ -132,8 +137,43 @@ const Home = () => {
     // In a real app, you would navigate to a detailed profile view
   };
   
-  // Find the featured profile - now TypeScript knows this is a Profile
   const featuredProfile = enhancedProfiles.find(profile => profile.featured === true);
+  
+  const handleRewind = () => {
+    if (swipedProfiles.length > 0) {
+      const lastSwiped = swipedProfiles.pop();
+      if (lastSwiped) {
+        setCurrentIndex(currentIndex + 1);
+        toast({
+          title: "Rewinded!",
+          description: `You've gone back to ${lastSwiped.profile.name}'s profile.`,
+        });
+      }
+    } else {
+      toast({
+        title: "No profiles to rewind",
+        description: "You haven't swiped on any profiles yet.",
+      });
+    }
+  };
+  
+  const handleSuperLike = () => {
+    if (currentProfile) {
+      handleSwipe("superLike");
+      toast({
+        title: "Super Like Sent!",
+        description: `${currentProfile.name} will be notified that you super liked them!`,
+        variant: "default",
+      });
+    }
+  };
+  
+  const handleBoost = () => {
+    toast({
+      title: "Profile Boosted!",
+      description: "Your profile will receive increased visibility for the next hour.",
+    });
+  };
   
   return (
     <AppLayout>
@@ -146,6 +186,13 @@ const Home = () => {
             onViewProfile={handleViewFeaturedProfile} 
           />
         )}
+        
+        <PremiumFeatures 
+          userTier={userTier} 
+          onRewind={handleRewind}
+          onSuperLike={handleSuperLike}
+          onBoost={handleBoost}
+        />
         
         <MatchFilters onApplyFilters={handleApplyFilters} />
         
