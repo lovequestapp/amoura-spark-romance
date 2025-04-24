@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import DateIdea from '@/components/profile/DateIdea';
@@ -11,6 +12,9 @@ import MatchFilters, { FilterOptions } from '@/components/home/MatchFilters';
 import FeaturedMatch from '@/components/home/FeaturedMatch';
 import { useToast } from '@/components/ui/use-toast';
 import PremiumFeatures from '@/components/subscription/PremiumFeatures';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const enhancedProfiles = [
   {
@@ -102,7 +106,9 @@ const swipedProfiles: Array<{ profile: Profile; direction: string }> = [];
 
 const Home = () => {
   const { toast } = useToast();
-  const [userTier, setUserTier] = useState<'free' | 'basic' | 'gold' | 'platinum'>('free');
+  const { user } = useAuth();
+  const { tier } = useSubscription();
+  
   const {
     currentIndex,
     currentProfile,
@@ -114,6 +120,11 @@ const Home = () => {
     setCurrentIndex
   } = useCardSwiper(enhancedProfiles, (profile, direction) => {
     swipedProfiles.push({ profile, direction });
+    
+    // Record profile view when swiping
+    if (user && profile.id) {
+      recordProfileView(profile.id);
+    }
   });
   
   const [filters, setFilters] = useState<FilterOptions>({
@@ -123,6 +134,29 @@ const Home = () => {
     interests: [],
     relationshipIntention: null,
   });
+  
+  useEffect(() => {
+    // Record a profile view when first viewing a profile
+    if (user && currentProfile?.id) {
+      recordProfileView(currentProfile.id);
+    }
+  }, [currentProfile?.id, user]);
+  
+  const recordProfileView = async (profileId: number | string) => {
+    if (!user) return;
+    
+    try {
+      // Call our record-profile-view function
+      await supabase.functions.invoke('record-profile-view', {
+        body: {
+          viewerId: user.id,
+          viewedId: String(profileId)
+        }
+      });
+    } catch (error) {
+      console.error("Error recording profile view:", error);
+    }
+  };
   
   const handleApplyFilters = (newFilters: FilterOptions) => {
     setFilters(newFilters);
@@ -143,7 +177,7 @@ const Home = () => {
     if (swipedProfiles.length > 0) {
       const lastSwiped = swipedProfiles.pop();
       if (lastSwiped) {
-        setCurrentIndex(currentIndex + 1);
+        setCurrentIndex(currentIndex - 1); // Go back one profile
         toast({
           title: "Rewinded!",
           description: `You've gone back to ${lastSwiped.profile.name}'s profile.`,
@@ -188,7 +222,6 @@ const Home = () => {
         )}
         
         <PremiumFeatures 
-          userTier={userTier} 
           onRewind={handleRewind}
           onSuperLike={handleSuperLike}
           onBoost={handleBoost}

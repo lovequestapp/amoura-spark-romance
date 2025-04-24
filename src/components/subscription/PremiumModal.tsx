@@ -5,36 +5,42 @@ import { Button } from '@/components/ui/button';
 import { Star, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { SubscriptionTier } from '@/contexts/SubscriptionContext';
 
 interface PremiumModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSubscribe?: (tier: SubscriptionTier) => void;
 }
 
-const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
+const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onSubscribe }) => {
   const { toast } = useToast();
+  const { tier: currentTier, updateSubscription } = useSubscription();
   
   const premiumPlans = [
     {
-      name: "Premium",
+      name: "Basic",
+      tier: "basic" as SubscriptionTier,
       price: "$9.99",
       period: "monthly",
       features: [
         "See who likes you",
         "Unlimited likes",
-        "Rewind last swipe",
+        "Rewind last swipe (5/week)",
         "5 Super Likes per week",
         "1 Boost per month"
       ]
     },
     {
       name: "Gold",
+      tier: "gold" as SubscriptionTier,
       price: "$19.99",
       period: "monthly",
       features: [
-        "All Premium features",
+        "All Basic features",
         "Profile priority in your area",
-        "See who likes you first",
+        "See who viewed your profile",
         "10 Super Likes per week",
         "2 Boosts per month",
         "Message before matching"
@@ -43,11 +49,12 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
     },
     {
       name: "Platinum",
+      tier: "platinum" as SubscriptionTier,
       price: "$29.99",
       period: "monthly",
       features: [
         "All Gold features",
-        "See who's viewed your profile",
+        "Unlimited Rewinds",
         "Unlimited Super Likes",
         "4 Boosts per month",
         "Priority customer support",
@@ -56,13 +63,26 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
     }
   ];
 
-  const handleSubscribe = (plan: string) => {
-    // In a real app, this would open a payment flow
-    toast({
-      title: "Coming Soon!",
-      description: `${plan} subscription will be available soon.`,
-    });
-    onClose();
+  const handleSubscribe = async (planTier: SubscriptionTier) => {
+    try {
+      await updateSubscription(planTier);
+      
+      if (onSubscribe) {
+        onSubscribe(planTier);
+      }
+      
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "There was an issue updating your subscription. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const isCurrentPlan = (planTier: SubscriptionTier) => {
+    return currentTier === planTier;
   };
   
   return (
@@ -82,11 +102,17 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
               transition={{ delay: index * 0.1 }}
               className={`bg-white rounded-xl border p-5 relative ${
                 plan.popular ? 'border-amoura-gold shadow-lg' : 'border-gray-200'
-              }`}
+              } ${isCurrentPlan(plan.tier) ? 'ring-2 ring-amoura-deep-pink' : ''}`}
             >
               {plan.popular && (
                 <div className="absolute top-0 right-6 transform -translate-y-1/2 bg-amoura-gold px-3 py-1 rounded-full text-xs font-medium text-black">
                   Most Popular
+                </div>
+              )}
+              
+              {isCurrentPlan(plan.tier) && (
+                <div className="absolute top-0 left-6 transform -translate-y-1/2 bg-amoura-deep-pink px-3 py-1 rounded-full text-xs font-medium text-white">
+                  Current Plan
                 </div>
               )}
               
@@ -110,14 +136,17 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
               </ul>
               
               <Button 
-                onClick={() => handleSubscribe(plan.name)}
+                onClick={() => handleSubscribe(plan.tier)}
+                disabled={isCurrentPlan(plan.tier)}
                 className={`w-full ${
-                  plan.popular 
-                    ? 'bg-gradient-to-r from-amber-400 to-amoura-gold hover:from-amber-500 hover:to-amber-400 text-black' 
-                    : 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90'
+                  isCurrentPlan(plan.tier) 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : plan.popular 
+                      ? 'bg-gradient-to-r from-amber-400 to-amoura-gold hover:from-amber-500 hover:to-amber-400 text-black' 
+                      : 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90'
                 }`}
               >
-                Subscribe
+                {isCurrentPlan(plan.tier) ? 'Current Plan' : 'Subscribe'}
               </Button>
             </motion.div>
           ))}

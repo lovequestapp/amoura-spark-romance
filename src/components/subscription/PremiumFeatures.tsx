@@ -10,17 +10,16 @@ import {
   Lock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import PremiumModal from './PremiumModal';
 
 interface PremiumFeaturesProps {
-  userTier: 'free' | 'basic' | 'gold' | 'platinum' | null;
   onRewind?: () => void;
   onSuperLike?: () => void;
   onBoost?: () => void;
 }
 
 export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({ 
-  userTier = 'free',
   onRewind,
   onSuperLike,
   onBoost
@@ -28,59 +27,80 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
   const { toast } = useToast();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   
-  // Count of available features based on tier
-  const superLikeCount = userTier === 'platinum' ? 'Unlimited' : 
-                        userTier === 'gold' ? '10/week' : 
-                        userTier === 'basic' ? '5/week' : '0';
+  const { 
+    tier, 
+    features, 
+    remainingRewinds,
+    remainingSuperLikes,
+    boostActive,
+    boostUntil,
+    performRewind,
+    performSuperLike,
+    activateBoost
+  } = useSubscription();
   
-  const boostCount = userTier === 'platinum' ? '4/month' : 
-                    userTier === 'gold' ? '2/month' : 
-                    userTier === 'basic' ? '1/month' : '0';
+  // Display count based on feature limits
+  const getFeatureCount = (feature: number | 'unlimited', remaining: number) => {
+    if (feature === 'unlimited') return 'Unlimited';
+    return `${remaining}/${feature}`;
+  };
   
   // Check if user has premium features
-  const canRewind = userTier !== 'free';
-  const canSuperLike = userTier !== 'free';
-  const canBoost = userTier !== 'free';
+  const canRewind = tier !== 'free';
+  const canSuperLike = tier !== 'free';
+  const canBoost = tier !== 'free';
   
-  const handleAction = (action: string) => {
-    if (userTier === 'free') {
-      setShowPremiumModal(true);
+  const handleRewind = async () => {
+    const canProceed = await performRewind();
+    
+    if (canProceed) {
+      if (onRewind) {
+        onRewind();
+      } else {
+        toast({
+          title: "Rewind",
+          description: "You've rewound to the previous profile.",
+        });
+      }
+    }
+  };
+  
+  const handleSuperLike = async () => {
+    const canProceed = await performSuperLike();
+    
+    if (canProceed) {
+      if (onSuperLike) {
+        onSuperLike();
+      } else {
+        toast({
+          title: "Super Like",
+          description: "You've super liked this profile!",
+        });
+      }
+    }
+  };
+  
+  const handleBoost = async () => {
+    // If already boosted, just show status
+    if (boostActive) {
+      const timeRemaining = boostUntil ? Math.ceil((boostUntil.getTime() - Date.now()) / 1000 / 60) : 0;
+      
+      toast({
+        title: "Boost Active",
+        description: `Your profile is already boosted for ${timeRemaining} more minutes.`,
+      });
       return;
     }
     
-    switch (action) {
-      case 'rewind':
-        if (onRewind) onRewind();
-        else {
-          toast({
-            title: "Rewind",
-            description: "You've rewinded to the previous profile.",
-          });
-        }
-        break;
-      case 'superLike':
-        if (onSuperLike) onSuperLike();
-        else {
-          toast({
-            title: "Super Like",
-            description: "You've super liked this profile!",
-          });
-        }
-        break;
-      case 'boost':
-        if (onBoost) onBoost();
-        else {
-          toast({
-            title: "Profile Boost",
-            description: "Your profile will receive more visibility for the next hour!",
-          });
-        }
-        break;
+    const success = await activateBoost();
+    
+    if (success && onBoost) {
+      onBoost();
     }
   };
   
   const renderTierBadge = () => {
-    if (!userTier || userTier === 'free') return null;
+    if (!tier || tier === 'free') return null;
     
     const colors: Record<string, string> = {
       'basic': 'bg-blue-100 text-blue-800',
@@ -89,8 +109,8 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
     };
     
     return (
-      <Badge className={`${colors[userTier]} capitalize`}>
-        {userTier} Member
+      <Badge className={`${colors[tier]} capitalize`}>
+        {tier} Member
       </Badge>
     );
   };
@@ -107,41 +127,62 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
           variant="outline"
           size="sm"
           className={`flex flex-col items-center py-2 ${!canRewind ? 'opacity-70' : ''}`}
-          onClick={() => handleAction('rewind')}
+          onClick={canRewind ? handleRewind : () => setShowPremiumModal(true)}
         >
           {!canRewind && <Lock size={12} className="absolute top-1 right-1" />}
           <Rewind size={18} className="mb-1" />
           <span className="text-xs">Rewind</span>
+          {canRewind && features.rewinds && (
+            <span className="text-[10px]">
+              {getFeatureCount(features.rewinds, remainingRewinds)}
+            </span>
+          )}
         </Button>
         
         <Button
           variant="outline"
           size="sm"
-          className={`flex flex-col items-center py-2 ${!canSuperLike ? 'opacity-70' : ''}`}
-          onClick={() => handleAction('superLike')}
+          className={`flex flex-col items-center py-2 ${!canSuperLike ? 'opacity-70' : ''} ${boostActive ? 'border-amoura-deep-pink' : ''}`}
+          onClick={canSuperLike ? handleSuperLike : () => setShowPremiumModal(true)}
         >
           {!canSuperLike && <Lock size={12} className="absolute top-1 right-1" />}
           <Star size={18} className="mb-1 text-blue-500" />
           <span className="text-xs">Super Like</span>
-          {canSuperLike && <span className="text-[10px]">{superLikeCount}</span>}
+          {canSuperLike && features.superLikes && (
+            <span className="text-[10px]">
+              {getFeatureCount(features.superLikes, remainingSuperLikes)}
+            </span>
+          )}
         </Button>
         
         <Button
-          variant="outline"
+          variant={boostActive ? "default" : "outline"}
           size="sm"
-          className={`flex flex-col items-center py-2 ${!canBoost ? 'opacity-70' : ''}`}
-          onClick={() => handleAction('boost')}
+          className={`flex flex-col items-center py-2 ${!canBoost ? 'opacity-70' : ''} ${boostActive ? 'bg-purple-500 hover:bg-purple-600 text-white' : ''}`}
+          onClick={canBoost ? handleBoost : () => setShowPremiumModal(true)}
         >
           {!canBoost && <Lock size={12} className="absolute top-1 right-1" />}
-          <ZapIcon size={18} className="mb-1 text-purple-500" />
+          <ZapIcon size={18} className={`mb-1 ${boostActive ? 'text-white' : 'text-purple-500'}`} />
           <span className="text-xs">Boost</span>
-          {canBoost && <span className="text-[10px]">{boostCount}</span>}
+          {boostActive && boostUntil && (
+            <span className="text-[10px]">
+              Active
+            </span>
+          )}
+          {canBoost && !boostActive && (
+            <span className="text-[10px]">
+              {features.boosts}/month
+            </span>
+          )}
         </Button>
       </div>
       
       <PremiumModal 
         isOpen={showPremiumModal} 
         onClose={() => setShowPremiumModal(false)} 
+        onSubscribe={(tier) => {
+          setShowPremiumModal(false);
+        }}
       />
     </div>
   );
