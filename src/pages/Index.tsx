@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -7,6 +6,7 @@ import FeaturesSection from '@/components/landing/FeaturesSection';
 import AlgorithmSection from '@/components/landing/AlgorithmSection';
 import AppMockup from '@/components/landing/AppMockup';
 import { Heart, Star } from "lucide-react";
+import { useAuth } from '@/contexts/AuthContext';
 
 const Testimonial = ({ quote, name, age, location, stars, delay = 0 }) => (
   <motion.div
@@ -27,6 +27,8 @@ const Testimonial = ({ quote, name, age, location, stars, delay = 0 }) => (
 );
 
 const Index = () => {
+  const { user } = useAuth();
+  
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -86,19 +88,21 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: 0.4 }}
                 className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 mb-8"
               >
-                <Button 
-                  className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                  asChild
-                >
-                  <Link to="/signup">Start Your Journey</Link>
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="rounded-full py-6 px-8 text-lg border-amoura-deep-pink text-amoura-deep-pink hover:bg-amoura-deep-pink/10 transition-all duration-300"
-                  asChild
-                >
-                  <Link to="/login">Already have an account?</Link>
-                </Button>
+                {user ? (
+                  <Button 
+                    className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    asChild
+                  >
+                    <Link to="/home">Go to Home</Link>
+                  </Button>
+                ) : (
+                  <Button 
+                    className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    asChild
+                  >
+                    <Link to="/auth">Get Started</Link>
+                  </Button>
+                )}
               </motion.div>
               
               <motion.div
