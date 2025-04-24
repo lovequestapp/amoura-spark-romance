@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { SubscriptionTier } from '@/contexts/SubscriptionContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PremiumModalProps {
   isOpen: boolean;
