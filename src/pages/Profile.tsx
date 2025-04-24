@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import BioEditDialog from '@/components/profile/BioEditDialog';
 import PromptsEditDialog from '@/components/profile/PromptsEditDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { type ProfilePrompt } from '@/services/profile';
+import { type Json } from '@/integrations/supabase/types';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -52,10 +54,24 @@ const Profile = () => {
         return;
       }
 
+      // Convert the Json[] to ProfilePrompt[] safely
+      const typedPrompts: ProfilePrompt[] = (data.prompts as Json[] || [])
+        .map(prompt => {
+          if (typeof prompt === 'object' && prompt !== null) {
+            return {
+              question: String(prompt.question || ''),
+              answer: String(prompt.answer || ''),
+              category: prompt.category ? String(prompt.category) : undefined
+            };
+          }
+          return { question: '', answer: '' };
+        })
+        .filter(prompt => prompt.question && prompt.answer);
+
       setProfileData({
         photos: data.photos || [],
         bio: data.bio || "",
-        prompts: data.prompts || []
+        prompts: typedPrompts
       });
     };
 

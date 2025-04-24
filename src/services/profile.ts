@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
+import type { Json } from "@/integrations/supabase/types";
 
 export interface ProfilePrompt {
   question: string;
@@ -33,10 +34,14 @@ export const uploadProfilePhoto = async (file: File): Promise<string | null> => 
 
 export const updateProfilePhotos = async (photos: string[]): Promise<boolean> => {
   try {
+    const user = await supabase.auth.getUser();
+    
+    if (!user.data.user) throw new Error("User not authenticated");
+
     const { error } = await supabase
       .from('profiles')
       .update({ photos })
-      .eq('id', supabase.auth.getUser().then(({ data }) => data.user?.id));
+      .eq('id', user.data.user.id);
 
     if (error) throw error;
     return true;
@@ -48,10 +53,14 @@ export const updateProfilePhotos = async (photos: string[]): Promise<boolean> =>
 
 export const updateProfileBio = async (bio: string): Promise<boolean> => {
   try {
+    const user = await supabase.auth.getUser();
+    
+    if (!user.data.user) throw new Error("User not authenticated");
+
     const { error } = await supabase
       .from('profiles')
       .update({ bio })
-      .eq('id', supabase.auth.getUser().then(({ data }) => data.user?.id));
+      .eq('id', user.data.user.id);
 
     if (error) throw error;
     return true;
@@ -77,10 +86,17 @@ export const fetchPrompts = async (): Promise<{ id: string; question: string; ca
 
 export const updateProfilePrompts = async (prompts: ProfilePrompt[]): Promise<boolean> => {
   try {
+    const user = await supabase.auth.getUser();
+    
+    if (!user.data.user) throw new Error("User not authenticated");
+
+    // Convert ProfilePrompt[] to Json[] for storage
+    const jsonPrompts = prompts as unknown as Json[];
+
     const { error } = await supabase
       .from('profiles')
-      .update({ prompts })
-      .eq('id', supabase.auth.getUser().then(({ data }) => data.user?.id));
+      .update({ prompts: jsonPrompts })
+      .eq('id', user.data.user.id);
 
     if (error) throw error;
     return true;
