@@ -110,7 +110,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_profile_views: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          viewer_id: string
+          viewed_at: string
+        }[]
+      }
+      get_subscriber_data: {
+        Args: { user_id_param: string }
+        Returns: {
+          remaining_rewinds: number
+          remaining_super_likes: number
+          boost_until: string
+        }[]
+      }
+      update_boost_until: {
+        Args: { user_id_param: string; boost_until_param: string }
+        Returns: undefined
+      }
+      update_remaining_rewinds: {
+        Args: { user_id_param: string; new_value: number }
+        Returns: undefined
+      }
+      update_remaining_super_likes: {
+        Args: { user_id_param: string; new_value: number }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

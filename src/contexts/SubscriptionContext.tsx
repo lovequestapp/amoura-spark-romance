@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type SubscriptionTier = 'free' | 'basic' | 'gold' | 'platinum';
 
-// Define types for RPC responses
 interface SubscriberData {
   remaining_rewinds: number;
   remaining_super_likes: number;
@@ -127,16 +126,10 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
         setSubscriptionEnd(data.subscription_end ? new Date(data.subscription_end) : null);
         setFeatures(data.features || features);
         
-        const { data: subscriberData, error: subscriberError } = await (supabase
-          .rpc('get_subscriber_data', { user_id_param: user.id }) as any) as {
-            data: SubscriberData | null;
-            error: Error | null;
-          };
+        const { data: subscriberData, error: subscriberError } = await supabase
+          .rpc('get_subscriber_data', { user_id_param: user.id });
           
-        if (subscriberError) {
-          console.error("Error fetching subscriber data:", subscriberError);
-          return;
-        }
+        if (subscriberError) throw subscriberError;
         
         if (subscriberData) {
           setRemainingRewinds(subscriberData.remaining_rewinds || 0);
@@ -207,10 +200,10 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     
     if (features.rewinds !== 'unlimited') {
       try {
-        const { error } = await (supabase.rpc('update_remaining_rewinds', {
+        const { error } = await supabase.rpc('update_remaining_rewinds', {
           user_id_param: user.id,
           new_value: remainingRewinds - 1
-        }) as any) as { data: null; error: Error | null };
+        });
           
         if (error) throw error;
         
@@ -243,10 +236,10 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     
     if (features.superLikes !== 'unlimited') {
       try {
-        const { error } = await (supabase.rpc('update_remaining_super_likes', {
+        const { error } = await supabase.rpc('update_remaining_super_likes', {
           user_id_param: user.id,
           new_value: remainingSuperLikes - 1
-        }) as any) as { data: null; error: Error | null };
+        });
           
         if (error) throw error;
         
@@ -272,10 +265,10 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     boostEnd.setHours(boostEnd.getHours() + 1);
     
     try {
-      const { error } = await (supabase.rpc('update_boost_until', {
+      const { error } = await supabase.rpc('update_boost_until', {
         user_id_param: user.id,
         boost_until_param: boostEnd.toISOString()
-      }) as any) as { data: null; error: Error | null };
+      });
         
       if (error) throw error;
       
@@ -326,3 +319,5 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     </SubscriptionContext.Provider>
   );
 };
+
+export default SubscriptionContext;

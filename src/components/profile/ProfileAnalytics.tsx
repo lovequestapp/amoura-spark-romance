@@ -42,13 +42,8 @@ const ProfileAnalytics = () => {
     try {
       setLoading(true);
       
-      // Explicitly type the RPC call with any to bypass type checking
-      // and then cast the result to the expected type
-      const { data: viewsData, error: viewsError } = await (supabase
-        .rpc('get_profile_views') as any) as { 
-          data: ProfileViewRPC[] | null; 
-          error: Error | null 
-        };
+      const { data: viewsData, error: viewsError } = await supabase
+        .rpc('get_profile_views');
       
       if (viewsError) throw viewsError;
       
