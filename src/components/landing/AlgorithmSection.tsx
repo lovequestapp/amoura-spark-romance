@@ -5,28 +5,24 @@ import { motion } from 'framer-motion';
 const AlgorithmSection = () => {
   const steps = [
     {
-      number: "01",
       title: "Emotional Intelligence Mapping",
       description: "Our proprietary algorithm analyzes your emotional patterns, values, and communication style to understand what truly matters in your relationships"
     },
     {
-      number: "02",
       title: "Multi-Dimensional Compatibility",
       description: "We assess over 136 psychological compatibility factors beyond superficial traits, creating match percentages based on genuine connection potential"
     },
     {
-      number: "03",
       title: "Adaptive Learning System",
       description: "As you interact, our AI continuously refines your compatibility models, recognizing subtle preference shifts to improve match quality over time"
     },
     {
-      number: "04",
       title: "Chemistry Prediction",
       description: "Using behavioral science, we identify potential romantic chemistry between users before they even meet, fostering more meaningful first interactions"
     }
   ];
 
-  // For the animation of the connecting line
+  // Animation variants for the connecting lines
   const lineVariants = {
     hidden: { pathLength: 0 },
     visible: { 
@@ -34,7 +30,6 @@ const AlgorithmSection = () => {
       transition: { 
         duration: 1.5,
         ease: "easeInOut",
-        delay: 0.2
       }
     }
   };
@@ -70,62 +65,66 @@ const AlgorithmSection = () => {
           </p>
         </motion.div>
 
-        <div className="relative">
-          {/* Mobile view */}
-          <div className="md:hidden space-y-8">
-            {steps.map((step, index) => (
-              <motion.div
-                key={step.number}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative bg-white rounded-xl p-6 shadow-md border border-gray-50"
-              >
-                <div className="absolute -top-2 -right-2 bg-amoura-deep-pink text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">
-                  {step.number}
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-amoura-black pr-6">{step.title}</h3>
+        {/* Mobile view - vertical layout with line connectors */}
+        <div className="md:hidden space-y-8">
+          {steps.map((step, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="relative"
+            >
+              {index > 0 && (
+                <motion.div
+                  initial={{ height: 0 }}
+                  whileInView={{ height: '40px' }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute -top-8 left-1/2 w-0.5 bg-amoura-deep-pink/20"
+                />
+              )}
+              <div className="bg-white rounded-xl p-6 shadow-md border border-gray-50">
+                <h3 className="text-xl font-semibold mb-3 text-amoura-black">{step.title}</h3>
                 <p className="text-gray-600">{step.description}</p>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        
+        {/* Desktop view with curved connecting lines */}
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+          {/* SVG connector lines */}
+          <svg className="absolute top-1/2 left-0 w-full h-24 -translate-y-1/2 z-0" 
+               preserveAspectRatio="none"
+               viewBox="0 0 1200 100"
+               style={{ pointerEvents: 'none' }}>
+            <motion.path
+              d="M100,50 C300,20 500,80 700,50 C900,20 1100,80 1200,50"
+              stroke="rgba(255, 20, 147, 0.2)"
+              strokeWidth="2"
+              fill="none"
+              variants={lineVariants}
+              initial="hidden"
+              whileInView="visible"
+            />
+          </svg>
           
-          {/* Desktop view with connecting lines */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-            {/* SVG connector lines */}
-            <svg className="absolute top-1/4 left-0 w-full h-1/2 z-0 pointer-events-none" viewBox="0 0 1200 100" preserveAspectRatio="none">
-              <motion.path
-                d="M0,50 C300,0 500,100 700,50 C900,0 1100,100 1200,50"
-                stroke="#FFC0CB"
-                strokeWidth="2"
-                strokeDasharray="5,5"
-                fill="none"
-                variants={lineVariants}
-                initial="hidden"
-                whileInView="visible"
-              />
-            </svg>
-            
-            {steps.map((step, index) => (
-              <motion.div
-                key={step.number}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.15 }}
-                className="relative z-10"
-              >
-                <div className="bg-white rounded-xl p-6 shadow-md h-full border border-gray-50 hover:shadow-lg transition-shadow">
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-amoura-deep-pink text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg">
-                    {step.number}
-                  </div>
-                  <div className="pt-4">
-                    <h3 className="text-xl font-semibold mb-3 text-amoura-black">{step.title}</h3>
-                    <p className="text-gray-600">{step.description}</p>
-                  </div>
+          {steps.map((step, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.15 }}
+              className="relative z-10"
+            >
+              <div className="bg-white rounded-xl p-6 shadow-md h-full border border-gray-50 hover:shadow-lg transition-shadow">
+                <div className="pt-2">
+                  <h3 className="text-xl font-semibold mb-3 text-amoura-black">{step.title}</h3>
+                  <p className="text-gray-600">{step.description}</p>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
         
         <motion.div
