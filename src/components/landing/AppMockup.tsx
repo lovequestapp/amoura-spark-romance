@@ -52,6 +52,13 @@ const AppMockup = () => {
     return path;
   };
 
+  // State to track active carousel slide
+  const [activeSlide, setActiveSlide] = React.useState(0);
+
+  const handleSlideChange = (index: number) => {
+    setActiveSlide(index);
+  };
+
   return (
     <section className="py-16 px-6 overflow-hidden bg-gradient-to-r from-white to-amoura-soft-pink">
       <div className="max-w-6xl mx-auto relative">
@@ -67,7 +74,10 @@ const AppMockup = () => {
         {/* Phone Mockup Carousel */}
         <div className="flex justify-center mb-20">
           <PhoneMockup>
-            <Carousel className="w-full h-full">
+            <Carousel 
+              className="w-full h-full"
+              onSlideChange={handleSlideChange}
+            >
               <CarouselContent className="h-full">
                 {phoneScreens.map((screen, index) => (
                   <CarouselItem key={index} className="h-full">
@@ -86,7 +96,7 @@ const AppMockup = () => {
                   <motion.div
                     key={index}
                     className="w-2 h-2 rounded-full bg-white/50"
-                    animate={{ opacity: index === 0 ? 1 : 0.5 }}
+                    animate={{ opacity: index === activeSlide ? 1 : 0.5 }}
                   />
                 ))}
               </div>
@@ -184,4 +194,3 @@ const AppMockup = () => {
 };
 
 export default AppMockup;
-
