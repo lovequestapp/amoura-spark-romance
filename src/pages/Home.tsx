@@ -11,8 +11,8 @@ import MatchFilters, { FilterOptions } from '@/components/home/MatchFilters';
 import FeaturedMatch from '@/components/home/FeaturedMatch';
 import { useToast } from '@/components/ui/use-toast';
 
-// Define the profiles array
-const enhancedProfiles: Profile[] = [
+// Explicitly type the profiles array with the Profile interface
+const enhancedProfiles = [
   {
     id: 1,
     name: "Emma",
@@ -96,7 +96,7 @@ const enhancedProfiles: Profile[] = [
     relationshipIntention: "Casual",
     personalityBadges: ["Social", "Spontaneous", "Foodie"]
   }
-];
+] satisfies Profile[];
 
 const Home = () => {
   const { toast } = useToast();
@@ -132,7 +132,7 @@ const Home = () => {
     // In a real app, you would navigate to a detailed profile view
   };
   
-  // Find the featured profile
+  // Find the featured profile - now TypeScript knows this is a Profile
   const featuredProfile = enhancedProfiles.find(profile => profile.featured === true);
   
   return (
@@ -142,7 +142,7 @@ const Home = () => {
         
         {featuredProfile && (
           <FeaturedMatch 
-            profile={featuredProfile as Profile} 
+            profile={featuredProfile} 
             onViewProfile={handleViewFeaturedProfile} 
           />
         )}
