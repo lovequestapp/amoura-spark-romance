@@ -9,7 +9,7 @@ interface CommunityFeedProps {
   activeTab: 'latest' | 'trending' | 'following';
 }
 
-// Mock data for demonstration
+// Enhanced mock data with more realistic content and images
 const posts = [
   {
     id: '1',
@@ -30,7 +30,8 @@ const posts = [
       name: 'Marcus Chen',
       avatar: '/photo-1581092795360-fd1ca04f0952',
     },
-    content: 'After 2 years of dating, I finally proposed yesterday! She said yes! Here are some tips that helped me plan the perfect proposal...',
+    content: 'After 2 years of dating, I finally proposed yesterday! She said yes! Here are some tips that helped me plan the perfect proposal:\n\n1. Choose a meaningful location\n2. Have a photographer ready\n3. Keep it intimate but special\n4. Make sure to capture the moment',
+    image: '/photo-1506744038136-46273834b3fb',
     tags: ['proposal', 'success', 'relationships'],
     likes: 156,
     comments: 47,
@@ -42,7 +43,7 @@ const posts = [
       name: 'Sophia Rodriguez',
       avatar: '/photo-1581091226825-a6a2a5aee158',
     },
-    content: 'Looking for advice: how soon is too soon to introduce someone you\'re dating to your family? We\'ve been seeing each other for about 3 months now.',
+    content: 'Looking for advice: how soon is too soon to introduce someone you\'re dating to your family? We\'ve been seeing each other for about 3 months now.\n\nI really like them and things are going well, but I\'m worried about timing. Would love to hear others\' experiences!',
     tags: ['advice', 'dating', 'family'],
     likes: 28,
     comments: 35,
@@ -54,7 +55,7 @@ const posts = [
       name: 'James Thompson',
       avatar: '/photo-1721322800607-8c38375eef04',
     },
-    content: 'Communication is key! Had a breakthrough conversation with my partner last night about our future goals. Sometimes just sitting down and talking openly makes all the difference.',
+    content: 'Communication is key! Had a breakthrough conversation with my partner last night about our future goals. Sometimes just sitting down and talking openly makes all the difference.\n\nHere\'s what helped us have a productive discussion:\n- Set aside dedicated time\n- No phones or distractions\n- Use "I feel" statements\n- Listen actively\n- Take breaks if needed',
     image: '/photo-1519389950473-47ba0277781c',
     tags: ['communication', 'relationships', 'growth'],
     likes: 89,
