@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import type { Json } from "@/integrations/supabase/types";
 
 interface OnboardingPhoto {
   file: File;
@@ -59,9 +60,16 @@ export const updateProfile = async (data: {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('No user found');
     
+    // Convert ProfilePrompt[] to Json[] for storage if present
+    const updateData = { ...data };
+    if (updateData.prompts) {
+      // Type assertion to convert ProfilePrompt[] to Json[]
+      updateData.prompts = updateData.prompts as unknown as Json[];
+    }
+    
     const { error } = await supabase
       .from('profiles')
-      .update(data)
+      .update(updateData)
       .eq('id', user.id);
 
     if (error) throw error;
