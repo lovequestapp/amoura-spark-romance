@@ -7,6 +7,12 @@ interface OnboardingPhoto {
   url: string;
 }
 
+export interface ProfilePrompt {
+  question: string;
+  answer: string;
+  category?: string;
+}
+
 export const uploadPhotos = async (photos: OnboardingPhoto[]): Promise<string[]> => {
   try {
     const uploadedUrls: string[] = [];
@@ -46,12 +52,17 @@ export const updateProfile = async (data: {
   relationship_type?: string;
   onboarding_step?: number;
   onboarding_completed?: boolean;
+  prompts?: ProfilePrompt[];
 }) => {
   try {
+    // Get user first before updating
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No user found');
+    
     const { error } = await supabase
       .from('profiles')
       .update(data)
-      .eq('id', supabase.auth.getUser().then(res => res.data.user?.id));
+      .eq('id', user.id);
 
     if (error) throw error;
   } catch (error) {

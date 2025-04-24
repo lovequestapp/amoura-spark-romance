@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -13,13 +14,16 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import OnboardingProgress from '@/components/onboarding/OnboardingProgress';
-import { updateProfile, uploadPhotos, saveInterests } from '@/services/onboarding';
+import { updateProfile, uploadPhotos, saveInterests, fetchInterests, ProfilePrompt } from '@/services/onboarding';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const totalSteps = 5;
   const [isLoading, setIsLoading] = useState(false);
+  const [availableInterests, setAvailableInterests] = useState<any[]>([]);
 
   // Form states
   const [photos, setPhotos] = useState<{ file: File; url: string; }[]>([]);
@@ -34,7 +38,21 @@ const Onboarding = () => {
     relationshipType: '',
   });
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [prompts, setPrompts] = useState([{ question: '', answer: '' }]);
+  const [prompts, setPrompts] = useState<ProfilePrompt[]>([{ question: '', answer: '' }]);
+
+  // Fetch interests when component mounts
+  useEffect(() => {
+    const getInterests = async () => {
+      try {
+        const interests = await fetchInterests();
+        if (interests) setAvailableInterests(interests);
+      } catch (error) {
+        console.error('Error fetching interests:', error);
+      }
+    };
+    
+    getInterests();
+  }, []);
 
   const handlePhotoUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
