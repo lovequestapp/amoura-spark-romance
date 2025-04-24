@@ -1,106 +1,78 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import WelcomeCard from "@/components/welcome/WelcomeCard";
+import FeaturesSection from '@/components/landing/FeaturesSection';
+import AlgorithmSection from '@/components/landing/AlgorithmSection';
+import AppMockup from '@/components/landing/AppMockup';
 
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  
-  const welcomeCards = [
-    {
-      title: "Find Your Perfect Match",
-      description: "Discover people who share your interests and values",
-      image: "/assets/welcome-1.jpg"
-    },
-    {
-      title: "Meaningful Connections",
-      description: "Go beyond swiping with rich profiles and prompts",
-      image: "/assets/welcome-2.jpg"
-    },
-    {
-      title: "Quality Conversations",
-      description: "Break the ice with personalized conversation starters",
-      image: "/assets/welcome-3.jpg"
-    }
-  ];
-  
-  const nextStep = () => {
-    if (currentStep < welcomeCards.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-  
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-amoura-soft-pink">
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-b from-white to-amoura-soft-pink">
+      {/* Hero Section */}
+      <section className="pt-16 pb-8 px-6">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-md mb-6"
+          className="max-w-4xl mx-auto text-center"
         >
           <div className="flex justify-center mb-8">
             <div className="relative">
-              <h1 className="text-5xl font-bold text-amoura-deep-pink">amoura</h1>
-              <span className="absolute -top-2 -right-4 text-amoura-gold text-3xl">✦</span>
+              <h1 className="text-6xl font-bold text-amoura-deep-pink">amoura</h1>
+              <span className="absolute -top-2 -right-4 text-amoura-gold text-4xl">✦</span>
             </div>
           </div>
-
-          <WelcomeCard
-            key={currentStep}
-            title={welcomeCards[currentStep].title}
-            description={welcomeCards[currentStep].description}
-            image={welcomeCards[currentStep].image}
-          />
-
-          <div className="flex justify-center gap-2 mt-6">
-            {welcomeCards.map((_, index) => (
-              <div 
-                key={index}
-                className={`h-2 rounded-full transition-all ${
-                  index === currentStep ? "w-8 bg-amoura-deep-pink" : "w-2 bg-gray-300"
-                }`}
-              />
-            ))}
+          
+          <h2 className="text-3xl md:text-4xl font-bold text-amoura-black mb-4">
+            Find Your Perfect Match
+          </h2>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Experience dating reimagined with AI-powered matches and meaningful connections
+          </p>
+          
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
+            <Button 
+              className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-8 text-lg"
+              asChild
+            >
+              <Link to="/signup">Get Started</Link>
+            </Button>
+            <Button 
+              variant="outline"
+              className="rounded-full py-6 px-8 text-lg"
+              asChild
+            >
+              <Link to="/login">Already have an account?</Link>
+            </Button>
           </div>
         </motion.div>
-        
-        <div className="w-full max-w-md space-y-4">
+      </section>
+
+      <AppMockup />
+      <FeaturesSection />
+      <AlgorithmSection />
+
+      {/* Final CTA Section */}
+      <section className="py-16 px-6 bg-gradient-to-b from-white to-amoura-soft-pink">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-4xl mx-auto text-center"
+        >
+          <h2 className="text-3xl font-bold mb-6 text-amoura-black">
+            Ready to Find Your Perfect Match?
+          </h2>
           <Button 
-            className="w-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 font-medium"
-            onClick={nextStep}
+            className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-12 text-lg"
+            asChild
           >
-            {currentStep === welcomeCards.length - 1 ? "Get Started" : "Next"}
+            <Link to="/signup">Join Amoura Today</Link>
           </Button>
-          
-          {currentStep === welcomeCards.length - 1 ? (
-            <div className="flex justify-center gap-6">
-              <Link to="/login" className="text-amoura-black font-medium">
-                Log in
-              </Link>
-              <Link to="/signup" className="text-amoura-deep-pink font-medium">
-                Sign up
-              </Link>
-            </div>
-          ) : (
-            <Button 
-              variant="ghost"
-              className="w-full text-gray-500"
-              onClick={() => setCurrentStep(welcomeCards.length - 1)}
-            >
-              Skip
-            </Button>
-          )}
-        </div>
-      </div>
+        </motion.div>
+      </section>
     </div>
   );
 };
