@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { X, Image, Loader2 } from 'lucide-react';
+import { Post } from './CommunityFeed';
 
 interface CreatePostFormProps {
-  onSuccess: () => void;
+  onSuccess: (post: Post) => void;
   onCancel: () => void;
 }
 
@@ -57,10 +58,26 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess, onCancel }) 
 
     setIsSubmitting(true);
     
-    // Simulate API call
+    // Create a new post object
+    const newPost: Post = {
+      id: Math.random().toString(), // In a real app, this would be generated on the server
+      author: {
+        name: "Current User",
+        avatar: "/photo-1581091226825-a6a2a5aee158", // Default avatar for the current user
+      },
+      content: content,
+      image: imagePreview || undefined,
+      tags: tags.length > 0 ? tags : ['general'],
+      likes: 0,
+      comments: 0,
+      timestamp: "Just now",
+      isUserPost: true,
+    };
+    
+    // Simulate API call delay
     setTimeout(() => {
       setIsSubmitting(false);
-      onSuccess();
+      onSuccess(newPost);
     }, 1000);
   };
 

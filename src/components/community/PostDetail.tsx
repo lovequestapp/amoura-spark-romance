@@ -14,27 +14,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-
-interface Author {
-  name: string;
-  avatar: string;
-}
+import { Post } from './CommunityFeed';
 
 interface Comment {
   id: string;
-  author: Author;
+  author: {
+    name: string;
+    avatar: string;
+  };
   content: string;
-  timestamp: string;
-}
-
-interface Post {
-  id: string;
-  author: Author;
-  content: string;
-  image?: string;
-  tags: string[];
-  likes: number;
-  comments: number;
   timestamp: string;
 }
 
@@ -42,9 +30,10 @@ interface PostDetailProps {
   post: Post | null;
   isOpen: boolean;
   onClose: () => void;
+  onTagClick?: (tag: string) => void;
 }
 
-const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose }) => {
+const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagClick }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post?.likes || 0);
   const [newComment, setNewComment] = useState('');
@@ -104,6 +93,14 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose }) => {
     });
   };
   
+  const handleTagClick = (e: React.MouseEvent, tag: string) => {
+    e.preventDefault();
+    if (onTagClick) {
+      onClose();
+      onTagClick(tag);
+    }
+  };
+  
   // Function to determine the correct image source
   const getImageSrc = (path: string) => {
     if (!path) return '';
@@ -143,6 +140,9 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose }) => {
               <h3 className="text-lg font-semibold">{post.author.name}</h3>
               <p className="text-sm text-muted-foreground">{post.timestamp}</p>
             </div>
+            {post.isUserPost && (
+              <Badge variant="outline" className="ml-auto">Your Post</Badge>
+            )}
           </div>
         </DialogHeader>
         
@@ -164,7 +164,12 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose }) => {
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
             {post.tags.map(tag => (
-              <Badge key={tag} variant="outline">
+              <Badge 
+                key={tag} 
+                variant="outline"
+                className="cursor-pointer hover:bg-muted transition-colors"
+                onClick={(e) => handleTagClick(e, tag)}
+              >
                 #{tag}
               </Badge>
             ))}

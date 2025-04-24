@@ -6,29 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle, Share } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
-
-interface Author {
-  name: string;
-  avatar: string;
-}
-
-interface Post {
-  id: string;
-  author: Author;
-  content: string;
-  image?: string;
-  tags: string[];
-  likes: number;
-  comments: number;
-  timestamp: string;
-}
+import { Post } from './CommunityFeed';
 
 interface PostCardProps {
   post: Post;
   isMobile: boolean;
+  onTagClick?: (tag: string) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post, isMobile }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
   const { toast } = useToast();
@@ -67,6 +53,13 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile }) => {
       description: "Comment functionality coming soon!",
     });
   };
+  
+  const handleTagClick = (e: React.MouseEvent, tag: string) => {
+    e.stopPropagation();
+    if (onTagClick) {
+      onTagClick(tag);
+    }
+  };
 
   // Function to determine the correct image source
   const getImageSrc = (path: string) => {
@@ -95,6 +88,9 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile }) => {
             <p className="font-medium">{post.author.name}</p>
             <p className="text-xs text-muted-foreground">{post.timestamp}</p>
           </div>
+          {post.isUserPost && (
+            <Badge variant="outline" className="ml-auto">Your Post</Badge>
+          )}
         </div>
         
         {/* Post content - truncated in card view */}
@@ -103,7 +99,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile }) => {
         {/* Tags */}
         <div className="flex flex-wrap gap-1 mb-3">
           {post.tags.map(tag => (
-            <Badge key={tag} variant="outline" className="text-xs">
+            <Badge 
+              key={tag} 
+              variant="outline" 
+              className={`text-xs cursor-pointer hover:bg-muted transition-colors ${tag === onTagClick ? 'bg-amoura-soft-pink text-amoura-deep-pink' : ''}`}
+              onClick={(e) => handleTagClick(e, tag)}
+            >
               #{tag}
             </Badge>
           ))}

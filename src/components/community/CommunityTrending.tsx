@@ -11,7 +11,11 @@ const trendingTags = [
   { name: 'success', count: 83 },
 ];
 
-const CommunityTrending = () => {
+interface CommunityTrendingProps {
+  onTagSelect?: (tag: string) => void;
+}
+
+const CommunityTrending: React.FC<CommunityTrendingProps> = ({ onTagSelect }) => {
   return (
     <div className="space-y-4">
       <Card>
@@ -20,7 +24,12 @@ const CommunityTrending = () => {
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           {trendingTags.map((tag) => (
-            <Badge key={tag.name} variant="outline" className="cursor-pointer hover:bg-muted transition-colors px-2 py-1">
+            <Badge 
+              key={tag.name} 
+              variant="outline" 
+              className="cursor-pointer hover:bg-muted transition-colors px-2 py-1"
+              onClick={() => onTagSelect && onTagSelect(tag.name)}
+            >
               #{tag.name}
               <span className="ml-1 text-xs text-muted-foreground">{tag.count}</span>
             </Badge>
