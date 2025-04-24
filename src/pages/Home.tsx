@@ -132,7 +132,7 @@ const Home = () => {
     // In a real app, you would navigate to a detailed profile view
   };
   
-  // Find the featured profile
+  // Find the featured profile and ensure it's a complete Profile object
   const featuredProfile = enhancedProfiles.find(profile => profile.featured);
   
   return (
@@ -142,7 +142,7 @@ const Home = () => {
         
         {featuredProfile && (
           <FeaturedMatch 
-            profile={featuredProfile as Profile} 
+            profile={featuredProfile} 
             onViewProfile={handleViewFeaturedProfile} 
           />
         )}
