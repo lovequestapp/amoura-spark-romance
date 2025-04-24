@@ -1,11 +1,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Verified, Heart, MessageCircle, Share2, MapPinIcon } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, DollarSign, MapPin, Verified } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar } from '@/components/ui/avatar';
-import ProfilePhotos from './ProfilePhotos';
-import ProfilePrompt from './ProfilePrompt';
+import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 
 interface DetailedProfileProps {
@@ -37,154 +35,210 @@ interface DetailedProfileProps {
 
 const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLike = () => {
+    toast({
+      title: "Profile Liked!",
+      description: `You've liked ${profile.name}'s profile. They'll be notified!`,
+      variant: "default",
+    });
+  };
+
+  const handlePaidMessage = () => {
+    toast({
+      title: "Premium Feature",
+      description: "Send a message before matching for $4.99",
+      action: (
+        <Button 
+          onClick={() => toast({ title: "Coming soon!", description: "This feature will be available soon." })}
+          className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
+        >
+          Send ($4.99)
+        </Button>
+      ),
+    });
+  };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="min-h-screen bg-white"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="min-h-screen bg-gradient-to-b from-white to-gray-50"
     >
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md p-4 flex items-center justify-between border-b">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft size={24} />
-        </Button>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline">
-            <Share2 className="w-4 h-4 mr-2" />
-            Share
+      {/* Sticky Header with Blur Effect */}
+      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="hover:bg-gray-100/80"
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-700" />
           </Button>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleLike}
+              size="lg"
+              className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Heart className="w-5 h-5 mr-2" />
+              Like Profile
+            </Button>
+          </div>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto pb-20">
-        {/* Hero Section */}
-        <div className="w-full aspect-[4/3]">
+        {/* Hero Section with Main Photo */}
+        <div className="relative w-full aspect-[4/5]">
           <img 
             src={profile.photos[0]} 
             alt={`${profile.name}'s main photo`}
             className="w-full h-full object-cover"
           />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+            <div className="text-white">
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                {profile.name}, {profile.age}
+                {profile.verified && (
+                  <Verified className="w-6 h-6 text-blue-400" />
+                )}
+              </h1>
+              <div className="flex items-center gap-2 mt-2 text-white/90">
+                <MapPin className="w-4 h-4" />
+                <span>{profile.location || profile.distance}</span>
+              </div>
+              <p className="text-white/80 mt-1">{profile.occupation}</p>
+            </div>
+          </div>
         </div>
 
-        {/* Basic Info Section */}
-        <div className="px-6 -mt-20 relative z-10">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-2xl font-bold flex items-center gap-2">
-                  {profile.name}, {profile.age}
-                  {profile.verified && (
-                    <Verified className="w-5 h-5 text-blue-500" />
-                  )}
-                </h1>
-                <div className="flex items-center gap-2 text-gray-600 mt-1">
-                  <MapPin className="w-4 h-4" />
-                  <span>{profile.location || profile.distance}</span>
-                </div>
-                <p className="text-gray-600 mt-1">{profile.occupation}</p>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button variant="outline" size="lg" className="rounded-full">
-                  <MessageCircle className="w-5 h-5" />
-                </Button>
-                <Button size="lg" className="rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90">
-                  <Heart className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
+        {/* Quick Action Bar */}
+        <div className="px-6 -mt-6 relative z-10">
+          <div className="bg-white rounded-2xl shadow-xl p-4 flex justify-between items-center">
+            <Button
+              variant="outline"
+              onClick={handlePaidMessage}
+              className="flex-1 mr-2 border-gray-200 hover:bg-gray-50"
+            >
+              <DollarSign className="w-4 h-4 mr-2 text-amoura-deep-pink" />
+              Send Paid Message
+            </Button>
+            <Button
+              onClick={handleLike}
+              className="flex-1 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
+            >
+              <Heart className="w-4 h-4 mr-2" />
+              Like Profile
+            </Button>
           </div>
         </div>
 
         {/* Bio Section */}
         {profile.bio && (
-          <div className="px-6 mt-6">
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h3 className="font-medium mb-2">About</h3>
-              <p className="text-gray-600">{profile.bio}</p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="px-6 mt-6"
+          >
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="font-semibold text-lg mb-3">About</h3>
+              <p className="text-gray-700 leading-relaxed">{profile.bio}</p>
             </div>
-          </div>
+          </motion.div>
         )}
 
-        {/* Second Photo */}
-        {profile.photos[1] && (
-          <div className="mt-6">
-            <img 
-              src={profile.photos[1]} 
-              alt={`${profile.name}'s second photo`}
-              className="w-full h-[400px] object-cover"
-            />
-          </div>
-        )}
-
-        {/* Prompts Section */}
-        {profile.prompts.length > 0 && (
-          <div className="px-6 mt-6 space-y-4">
-            <h3 className="font-medium">Prompts</h3>
-            {profile.prompts.map((prompt, index) => (
-              <ProfilePrompt
-                key={index}
-                question={prompt.question}
-                answer={prompt.answer}
+        {/* Photos & Prompts Interspersed */}
+        {profile.photos.slice(1).map((photo, index) => (
+          <React.Fragment key={index}>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + (index * 0.1) }}
+              className="mt-6"
+            >
+              <img 
+                src={photo} 
+                alt={`${profile.name}'s photo ${index + 2}`}
+                className="w-full h-[500px] object-cover rounded-lg shadow-lg"
               />
-            ))}
-          </div>
-        )}
+            </motion.div>
 
-        {/* Third Photo */}
-        {profile.photos[2] && (
-          <div className="mt-6">
-            <img 
-              src={profile.photos[2]} 
-              alt={`${profile.name}'s third photo`}
-              className="w-full h-[300px] object-cover"
-            />
-          </div>
-        )}
+            {profile.prompts[index] && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + (index * 0.1) }}
+                className="px-6 mt-6"
+              >
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-gray-100">
+                  <h4 className="text-sm text-gray-500 mb-2">{profile.prompts[index].question}</h4>
+                  <p className="text-gray-800 font-medium">{profile.prompts[index].answer}</p>
+                </div>
+              </motion.div>
+            )}
+          </React.Fragment>
+        ))}
 
-        {/* Personality & Interests */}
-        {(profile.traits || profile.interests) && (
-          <div className="px-6 mt-6">
-            <div className="bg-amoura-soft-pink/30 rounded-xl p-6">
-              {profile.traits && (
-                <div className="space-y-2">
-                  <h3 className="font-medium text-amoura-deep-pink mb-4">Personality Traits</h3>
-                  {profile.traits.map((trait) => (
-                    <div key={trait.name} className="flex items-center gap-2">
-                      <div className="text-sm text-gray-600 w-24">{trait.name}</div>
-                      <div className="flex-1 h-2 bg-white/50 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-amoura-deep-pink rounded-full"
-                          style={{ width: `${trait.score}%` }}
-                        />
-                      </div>
+        {/* Traits Section */}
+        {profile.traits && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="px-6 mt-6"
+          >
+            <div className="bg-gradient-to-br from-amoura-soft-pink to-white rounded-2xl p-6 shadow-sm">
+              <h3 className="font-semibold text-lg mb-4 text-gray-800">Personality Traits</h3>
+              <div className="space-y-3">
+                {profile.traits.map((trait) => (
+                  <div key={trait.name} className="space-y-1">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-700">{trait.name}</span>
+                      <span className="text-amoura-deep-pink font-medium">{trait.score}%</span>
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {profile.interests && (
-                <div className="mt-6">
-                  <h3 className="font-medium mb-3">Interests</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {profile.interests.map((interest, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-white rounded-full text-sm text-gray-700"
-                      >
-                        {interest}
-                      </span>
-                    ))}
+                    <div className="h-2 bg-white/50 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${trait.score}%` }}
+                        transition={{ duration: 1, delay: 0.6 }}
+                        className="h-full bg-amoura-deep-pink rounded-full"
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
-          </div>
+          </motion.div>
+        )}
+
+        {/* Interests Section */}
+        {profile.interests && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="px-6 mt-6"
+          >
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="font-semibold text-lg mb-4">Interests</h3>
+              <div className="flex flex-wrap gap-2">
+                {profile.interests.map((interest, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-2 bg-gray-50 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
+                  >
+                    {interest}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         )}
       </div>
     </motion.div>
