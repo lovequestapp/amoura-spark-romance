@@ -1,12 +1,31 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Heart, Star, Users, MessageCircle } from "lucide-react";
+import { useAuth } from '@/contexts/AuthContext';
 import FeaturesSection from '@/components/landing/FeaturesSection';
 import AlgorithmSection from '@/components/landing/AlgorithmSection';
 import AppMockup from '@/components/landing/AppMockup';
-import { Heart, Star } from "lucide-react";
-import { useAuth } from '@/contexts/AuthContext';
+
+const heroTextVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.7, staggerChildren: 0.2 }
+  }
+};
+
+const pulseAnimation = {
+  scale: [1, 1.05, 1],
+  transition: {
+    duration: 2,
+    repeat: Infinity,
+    ease: "easeInOut"
+  }
+};
 
 const Testimonial = ({ quote, name, age, location, stars, delay = 0 }) => (
   <motion.div
@@ -31,32 +50,62 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
+      {/* Enhanced Hero Section */}
       <section className="pt-24 pb-16 px-6 bg-gradient-to-br from-white via-amoura-soft-pink to-white overflow-hidden relative">
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-amoura-gold/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-amoura-deep-pink/5 rounded-full blur-3xl"></div>
+        {/* Animated background decorations */}
+        <motion.div 
+          animate={{
+            rotate: 360,
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-0 right-0 w-1/3 h-1/3 bg-amoura-gold/5 rounded-full blur-3xl"
+        />
+        <motion.div 
+          animate={{
+            rotate: -360,
+            scale: [1, 1.3, 1],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-amoura-deep-pink/5 rounded-full blur-3xl"
+        />
         
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={heroTextVariants}
           className="max-w-6xl mx-auto relative"
         >
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 text-center md:text-left mb-10 md:mb-0">
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5 }}
+                variants={{
+                  hidden: { scale: 0.8, opacity: 0 },
+                  visible: { 
+                    scale: 1, 
+                    opacity: 1,
+                    transition: {
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 20
+                    }
+                  }
+                }}
                 className="flex justify-center md:justify-start mb-6"
               >
                 <div className="relative">
                   <h1 className="text-6xl font-bold text-amoura-deep-pink">amoura</h1>
                   <motion.span 
-                    initial={{ rotate: 0 }}
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    animate={pulseAnimation}
                     className="absolute -top-2 -right-4 text-amoura-gold text-4xl"
                   >
                     ✦
@@ -65,27 +114,21 @@ const Index = () => {
               </motion.div>
               
               <motion.h2 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                variants={heroTextVariants}
                 className="text-4xl md:text-5xl lg:text-6xl font-bold text-amoura-black mb-6 leading-tight"
               >
                 Find Your <span className="text-amoura-deep-pink">Perfect Match</span> Through Science
               </motion.h2>
               
               <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
+                variants={heroTextVariants}
                 className="text-xl text-gray-600 mb-8 md:max-w-lg"
               >
                 Experience dating reimagined with AI-powered matches based on psychological compatibility for connections that truly matter
               </motion.p>
               
               <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                variants={heroTextVariants}
                 className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 mb-8"
               >
                 {user ? (
@@ -106,14 +149,16 @@ const Index = () => {
               </motion.div>
               
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
+                variants={heroTextVariants}
                 className="flex items-center gap-2 text-gray-500 justify-center md:justify-start"
               >
                 <div className="flex -space-x-2">
                   {[1,2,3].map(i => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white"></div>
+                    <motion.div 
+                      key={i}
+                      whileHover={{ scale: 1.1 }}
+                      className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white"
+                    />
                   ))}
                 </div>
                 <p className="text-sm font-medium">Join 100,000+ singles finding love every day</p>
