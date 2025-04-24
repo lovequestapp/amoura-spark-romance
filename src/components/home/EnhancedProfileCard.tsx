@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import PersonalityBadges from './PersonalityBadges';
 import ProfileHeader from './card/ProfileHeader';
 import MatchInfo from './card/MatchInfo';
 import CardActions from './card/CardActions';
-import { Profile } from './SwipeableCard';
+import { Profile } from '@/types/profile';
 
 interface EnhancedProfileCardProps {
   profile: Profile;
