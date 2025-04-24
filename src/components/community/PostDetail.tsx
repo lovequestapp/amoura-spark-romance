@@ -6,7 +6,7 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle, Share, Send } from 'lucide-react';
+import { Heart, MessageCircle, Share, Send, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
@@ -107,6 +107,15 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose }) => {
       <DialogContent className="max-w-2xl h-[90vh] overflow-y-auto p-0 gap-0 rounded-xl">
         <DialogHeader className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm p-4 border-b">
           <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="mr-2" 
+              onClick={onClose}
+              aria-label="Go back"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <img 
               src={`https://source.unsplash.com${post.author.avatar}`}
               alt={post.author.name}
