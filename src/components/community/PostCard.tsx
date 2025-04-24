@@ -68,6 +68,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile }) => {
     });
   };
 
+  // Function to determine the correct image source
+  const getImageSrc = (path: string) => {
+    if (path.startsWith('/lovable-uploads/')) {
+      return path;
+    }
+    return `https://source.unsplash.com${path}`;
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-all cursor-pointer">
       <CardContent className="p-4">
@@ -100,7 +108,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile }) => {
         {post.image && (
           <div className="mb-3 rounded-md overflow-hidden">
             <img 
-              src={`https://source.unsplash.com${post.image}`}
+              src={getImageSrc(post.image)}
               alt="Post content"
               className="w-full h-48 object-cover"
             />

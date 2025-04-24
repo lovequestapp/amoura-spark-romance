@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle, Share, Send, ArrowLeft } from 'lucide-react';
@@ -12,6 +13,7 @@ import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface Author {
   name: string;
@@ -101,10 +103,21 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose }) => {
       description: "Your comment has been added to the discussion",
     });
   };
+  
+  // Function to determine the correct image source
+  const getImageSrc = (path: string) => {
+    if (path.startsWith('/lovable-uploads/')) {
+      return path;
+    }
+    return `https://source.unsplash.com${path}`;
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl h-[90vh] overflow-y-auto p-0 gap-0 rounded-xl">
+        <VisuallyHidden>
+          <DialogTitle>Post by {post.author.name}</DialogTitle>
+        </VisuallyHidden>
         <DialogHeader className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm p-4 border-b">
           <div className="flex items-center gap-3">
             <Button 
@@ -136,7 +149,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose }) => {
           {post.image && (
             <Card className="overflow-hidden rounded-lg border">
               <img 
-                src={`https://source.unsplash.com${post.image}`}
+                src={getImageSrc(post.image)}
                 alt="Post content"
                 className="w-full h-auto object-cover"
               />
