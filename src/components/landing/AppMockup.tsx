@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -19,11 +18,11 @@ const AppMockup = () => {
   const isMobile = useIsMobile();
   
   const phoneScreens = [
-    '/lovable-uploads/c3b91871-0b81-4711-a02d-6771b41f44ed.png',
-    '/lovable-uploads/d96b24ef-01b0-41a0-afdf-564574149a3c.png',
-    '/lovable-uploads/955e854b-03c9-4efe-91de-ea62233f88eb.png'
+    '/lovable-uploads/f7f1da32-5c9f-4eb7-90a4-bdd65d3ce9cd.png',
+    '/lovable-uploads/4ca453c1-5ff3-4dd8-b79a-cefd30e9bb7b.png',
+    '/lovable-uploads/3142a1da-d5dd-4bb3-a17e-ed53224a994d.png'
   ];
-  
+
   const featureScreens = [
     {
       image: "/lovable-uploads/woman-laptop-1.jpg",
@@ -47,7 +46,6 @@ const AppMockup = () => {
 
   const handleCardClick = (path: string) => {
     if (!user) {
-      // If user is not logged in, redirect to auth page instead
       return "/auth";
     }
     return path;
@@ -56,15 +54,6 @@ const AppMockup = () => {
   return (
     <section className="py-16 px-6 overflow-hidden bg-gradient-to-r from-white to-amoura-soft-pink">
       <div className="max-w-6xl mx-auto relative">
-        <motion.h2 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-3xl md:text-4xl font-bold text-center mb-12 text-amoura-black"
-        >
-          Experience Dating Like Never Before
-        </motion.h2>
-        
         {/* Phone Mockup Carousel */}
         <div className="flex justify-center mb-20">
           <PhoneMockup>
@@ -82,8 +71,8 @@ const AppMockup = () => {
                       <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
                         <div className="flex justify-between items-center">
                           <div className="text-white">
-                            <h3 className="font-bold text-lg">Sophia, 28</h3>
-                            <p className="text-xs opacity-80">2 miles away</p>
+                            <h3 className="font-bold text-lg">Emma, 28</h3>
+                            <p className="text-xs opacity-80">3 miles away</p>
                           </div>
                           <div className="flex space-x-2">
                             <motion.button 
@@ -119,16 +108,7 @@ const AppMockup = () => {
             </Carousel>
           </PhoneMockup>
         </div>
-        
-        <motion.h3
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-2xl md:text-3xl font-semibold text-center mb-8 text-amoura-black"
-        >
-          Everything you need to find your match
-        </motion.h3>
-        
+
         {/* Feature Cards */}
         <div className="hidden md:block">
           <div className="flex space-x-8 justify-center">
