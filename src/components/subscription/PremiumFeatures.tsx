@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -40,16 +39,22 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
     activateBoost
   } = useSubscription();
   
-  // Display count based on feature limits
+  // Safe feature count display with type checking
   const getFeatureCount = (feature: number | 'unlimited', remaining: number) => {
     if (feature === 'unlimited') return 'Unlimited';
     return `${remaining}/${feature}`;
   };
   
+  // Safe feature availability check
+  const isFeatureAvailable = (feature: number | 'unlimited', remaining: number) => {
+    if (feature === 'unlimited') return true;
+    return remaining > 0;
+  };
+  
   // Check if user has premium features
-  const canRewind = tier !== 'foundation' || features.rewinds > 0;
-  const canSuperLike = tier !== 'foundation' || features.superLikes > 0;
-  const canBoost = tier !== 'foundation' && features.boosts > 0;
+  const canRewind = tier !== 'foundation' || (typeof features.rewinds === 'number' && features.rewinds > 0);
+  const canSuperLike = tier !== 'foundation' || (typeof features.superLikes === 'number' && features.superLikes > 0);
+  const canBoost = tier !== 'foundation' && (typeof features.boosts === 'number' && features.boosts > 0);
   
   const handleRewind = async () => {
     const canProceed = await performRewind();
@@ -100,27 +105,15 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
     }
   };
   
-  const renderTierBadge = () => {
-    if (!tier || tier === 'foundation') return null;
-    
-    const colors: Record<string, string> = {
-      'connection': 'bg-blue-100 text-blue-800',
-      'chemistry': 'bg-amber-100 text-amber-800',
-      'commitment': 'bg-purple-100 text-purple-800'
-    };
-    
-    return (
-      <Badge className={`${colors[tier]} capitalize`}>
-        {tier} Member
-      </Badge>
-    );
-  };
-  
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-medium">Premium Features</h3>
-        {renderTierBadge()}
+        {tier !== 'foundation' && (
+          <Badge className="capitalize">
+            {tier} Member
+          </Badge>
+        )}
       </div>
       
       <div className="grid grid-cols-3 gap-3">
@@ -131,7 +124,7 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
             className={cn(
               "relative w-full h-24 flex flex-col items-center justify-center gap-1 border-2",
               !canRewind ? "opacity-70 border-gray-200" : "border-blue-400 hover:border-blue-500 hover:bg-blue-50",
-              {"border-blue-500 bg-blue-50": remainingRewinds > 0}
+              {"border-blue-500 bg-blue-50": isFeatureAvailable(features.rewinds, remainingRewinds)}
             )}
             onClick={canRewind ? handleRewind : () => setShowPremiumModal(true)}
           >
@@ -144,7 +137,9 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
             {canRewind && features.rewinds && (
               <span className={cn(
                 "text-[10px] px-2 py-0.5 rounded-full",
-                remainingRewinds > 0 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+                isFeatureAvailable(features.rewinds, remainingRewinds) 
+                  ? "bg-blue-100 text-blue-700" 
+                  : "bg-gray-100 text-gray-600"
               )}>
                 {getFeatureCount(features.rewinds, remainingRewinds)}
               </span>
@@ -159,7 +154,7 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
             className={cn(
               "relative w-full h-24 flex flex-col items-center justify-center gap-1 border-2",
               !canSuperLike ? "opacity-70 border-gray-200" : "border-amber-400 hover:border-amber-500 hover:bg-amber-50",
-              {"border-amber-500 bg-amber-50": remainingSuperLikes > 0}
+              {"border-amber-500 bg-amber-50": isFeatureAvailable(features.superLikes, remainingSuperLikes)}
             )}
             onClick={canSuperLike ? handleSuperLike : () => setShowPremiumModal(true)}
           >
@@ -172,7 +167,9 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
             {canSuperLike && features.superLikes && (
               <span className={cn(
                 "text-[10px] px-2 py-0.5 rounded-full",
-                remainingSuperLikes > 0 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600"
+                isFeatureAvailable(features.superLikes, remainingSuperLikes) 
+                  ? "bg-amber-100 text-amber-700" 
+                  : "bg-gray-100 text-gray-600"
               )}>
                 {getFeatureCount(features.superLikes, remainingSuperLikes)}
               </span>
