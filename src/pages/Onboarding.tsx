@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -12,26 +11,116 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
 import OnboardingProgress from '@/components/onboarding/OnboardingProgress';
+import { updateProfile, uploadPhotos, saveInterests } from '@/services/onboarding';
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const totalSteps = 5;
+  const [isLoading, setIsLoading] = useState(false);
 
-  const nextStep = () => {
-    if (step < totalSteps) {
-      setStep(step + 1);
-    } else {
-      navigate('/home');
-    }
+  // Form states
+  const [photos, setPhotos] = useState<{ file: File; url: string; }[]>([]);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    birthDate: '',
+    gender: '',
+    pronouns: '',
+    height: '',
+    drinking: '',
+    education: '',
+    relationshipType: '',
+  });
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [prompts, setPrompts] = useState([{ question: '', answer: '' }]);
+
+  const handlePhotoUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    setPhotos(prev => [...prev, { file, url }]);
+  }, []);
+
+  const handleRemovePhoto = (index: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
-  const prevStep = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    } else {
-      navigate('/signup');
+  const handleNextStep = async () => {
+    setIsLoading(true);
+    try {
+      // Save data based on current step
+      switch (step) {
+        case 1: // Photos
+          if (photos.length < 3) {
+            toast({
+              title: "Not enough photos",
+              description: "Please upload at least 3 photos",
+              variant: "destructive",
+            });
+            return;
+          }
+          const uploadedUrls = await uploadPhotos(photos);
+          await updateProfile({ 
+            photos: uploadedUrls,
+            onboarding_step: step + 1 
+          });
+          break;
+
+        case 2: // Basic Info
+          await updateProfile({
+            birth_date: formData.birthDate,
+            gender: formData.gender as any,
+            pronouns: formData.pronouns,
+            onboarding_step: step + 1
+          });
+          break;
+
+        case 3: // Interests
+          if (selectedInterests.length < 5) {
+            toast({
+              title: "Not enough interests",
+              description: "Please select at least 5 interests",
+              variant: "destructive",
+            });
+            return;
+          }
+          await saveInterests(selectedInterests);
+          await updateProfile({ onboarding_step: step + 1 });
+          break;
+
+        case 4: // Lifestyle
+          await updateProfile({
+            height: parseInt(formData.height),
+            drinking: formData.drinking,
+            education: formData.education,
+            relationship_type: formData.relationshipType,
+            onboarding_step: step + 1
+          });
+          break;
+
+        case 5: // Prompts
+          await updateProfile({
+            prompts: prompts,
+            onboarding_step: step + 1,
+            onboarding_completed: true
+          });
+          navigate('/home');
+          return;
+      }
+
+      setStep(prev => prev + 1);
+    } catch (error) {
+      console.error('Error saving data:', error);
+      toast({
+        title: "Error",
+        description: "There was an error saving your data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -309,8 +398,9 @@ const Onboarding = () => {
     <div className="min-h-screen bg-white flex flex-col">
       <div className="p-4 flex items-center border-b">
         <button 
-          onClick={prevStep}
+          onClick={() => setStep(prev => prev > 1 ? prev - 1 : 1)}
           className="flex items-center text-gray-500"
+          disabled={isLoading}
         >
           <ArrowLeft size={18} className="mr-1" />
           Back
@@ -329,10 +419,11 @@ const Onboarding = () => {
       
       <div className="p-6 border-t">
         <Button
-          onClick={nextStep}
+          onClick={handleNextStep}
           className="w-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 font-medium"
+          disabled={isLoading}
         >
-          {step === totalSteps ? "Complete Profile" : "Continue"}
+          {isLoading ? "Saving..." : step === totalSteps ? "Complete Profile" : "Continue"}
         </Button>
       </div>
     </div>

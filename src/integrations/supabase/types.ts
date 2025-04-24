@@ -66,6 +66,27 @@ export type Database = {
         }
         Relationships: []
       }
+      interests: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string | null
@@ -240,33 +261,60 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          birth_date: string | null
           created_at: string
+          drinking: string | null
+          education: string | null
           full_name: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          height: number | null
           id: string
+          onboarding_completed: boolean | null
+          onboarding_step: number | null
           photos: string[] | null
           prompts: Json[] | null
+          pronouns: string | null
+          relationship_type: string | null
           updated_at: string
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           created_at?: string
+          drinking?: string | null
+          education?: string | null
           full_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          height?: number | null
           id: string
+          onboarding_completed?: boolean | null
+          onboarding_step?: number | null
           photos?: string[] | null
           prompts?: Json[] | null
+          pronouns?: string | null
+          relationship_type?: string | null
           updated_at?: string
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           created_at?: string
+          drinking?: string | null
+          education?: string | null
           full_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          height?: number | null
           id?: string
+          onboarding_completed?: boolean | null
+          onboarding_step?: number | null
           photos?: string[] | null
           prompts?: Json[] | null
+          pronouns?: string | null
+          relationship_type?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -317,6 +365,32 @@ export type Database = {
         }
         Relationships: []
       }
+      user_interests: {
+        Row: {
+          created_at: string
+          interest_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          interest_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          interest_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_interests_interest_id_fkey"
+            columns: ["interest_id"]
+            isOneToOne: false
+            referencedRelation: "interests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -364,7 +438,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      gender_type: "woman" | "man" | "nonbinary" | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -479,6 +553,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      gender_type: ["woman", "man", "nonbinary", "other"],
+    },
   },
 } as const
