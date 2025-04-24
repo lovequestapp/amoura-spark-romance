@@ -1,14 +1,16 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Heart, X, Info, Star, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import ProfilePhotos from '@/components/profile/ProfilePhotos';
 import ProfilePrompt from '@/components/profile/ProfilePrompt';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import PersonalityMatch from './PersonalityMatch';
 import PersonalityBadges from './PersonalityBadges';
-import { useToast } from '@/components/ui/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
+import ProfileHeader from './card/ProfileHeader';
+import MatchInfo from './card/MatchInfo';
+import CardActions from './card/CardActions';
 import { Profile } from './SwipeableCard';
 
 interface EnhancedProfileCardProps {
@@ -23,15 +25,6 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-  };
-  
-  const nextPrompt = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setPromptIndex((promptIndex + 1) % profile.prompts.length);
-  };
-
   const handleLike = () => {
     onSwipe('right');
     toast({
@@ -47,11 +40,9 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
     });
   };
 
-  const handleMessage = () => {
-    toast({
-      title: "Message Feature",
-      description: "You can message after matching with this profile.",
-    });
+  const nextPrompt = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPromptIndex((promptIndex + 1) % profile.prompts.length);
   };
   
   return (
@@ -62,34 +53,19 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.95, opacity: 0 }}
-      transition={{ 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 25
-      }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
     >
-      <ProfilePhotos photos={profile.photos} />
+      <ProfilePhotos photos={profile.photos} video={profile.video} />
       
       <div className="px-4 py-3">
-        <div className="flex justify-between items-baseline mb-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold flex items-center">
-              {profile.name}, {profile.age}
-              {profile.verified && (
-                <CheckCircle className="h-4 w-4 ml-1 text-blue-500 fill-white" />
-              )}
-            </h2>
-            {profile.premium && (
-              <Badge variant="premium" className="h-5">Premium</Badge>
-            )}
-            {profile.featured && (
-              <Badge className="bg-gradient-to-r from-amoura-gold to-amber-400 text-black h-5 flex items-center">
-                <Star className="h-3 w-3 mr-1 fill-black" /> Featured
-              </Badge>
-            )}
-          </div>
-          <span className="text-sm text-gray-500">{profile.distance}</span>
-        </div>
+        <ProfileHeader 
+          name={profile.name}
+          age={profile.age}
+          distance={profile.distance}
+          verified={profile.verified}
+          premium={profile.premium}
+          featured={profile.featured}
+        />
         
         <p className="text-gray-700 mb-3">{profile.occupation}</p>
         
@@ -104,18 +80,13 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
         
         {!expanded ? (
           <>
-            {profile.personalityMatch && (
-              <div 
-                onClick={() => setShowPersonality(true)}
-                className="flex items-center gap-1 text-sm text-amoura-deep-pink mb-3 cursor-pointer"
-              >
-                <Info size={14} />
-                <span>{profile.personalityMatch}% match with your personality</span>
-              </div>
-            )}
+            <MatchInfo 
+              personalityMatch={profile.personalityMatch}
+              onClick={() => setShowPersonality(true)}
+            />
             
             <Button 
-              onClick={toggleExpand}
+              onClick={() => setExpanded(true)}
               variant="ghost" 
               className="w-full flex justify-between items-center py-2 px-0 hover:bg-amoura-soft-pink hover:text-amoura-deep-pink transition-colors"
             >
@@ -191,38 +162,14 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
               )}
             </AnimatePresence>
             
-            <div className="flex justify-between">
-              <Button
-                onClick={handlePass}
-                variant="outline"
-                size="sm"
-                className="rounded-full"
-              >
-                <X size={16} className="mr-1" />
-                Pass
-              </Button>
-              
-              <Button
-                onClick={handleMessage}
-                size="sm"
-                className="rounded-full bg-transparent border border-amoura-deep-pink text-amoura-deep-pink hover:bg-amoura-soft-pink"
-              >
-                <MessageCircle size={16} className="mr-1" />
-                Message
-              </Button>
-              
-              <Button
-                onClick={handleLike}
-                size="sm"
-                className="rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
-              >
-                <Heart size={16} className="mr-1" />
-                Like
-              </Button>
-            </div>
+            <CardActions
+              profileName={profile.name}
+              onLike={handleLike}
+              onPass={handlePass}
+            />
             
             <Button 
-              onClick={toggleExpand}
+              onClick={() => setExpanded(false)}
               variant="ghost" 
               className="w-full flex justify-between items-center py-2 px-0 mt-2 hover:bg-amoura-soft-pink hover:text-amoura-deep-pink transition-colors"
             >
