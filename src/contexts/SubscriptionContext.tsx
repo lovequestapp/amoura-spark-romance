@@ -1,10 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
-export type SubscriptionTier = 'free' | 'basic' | 'gold' | 'platinum';
+export type SubscriptionTier = 'foundation' | 'connection' | 'chemistry' | 'commitment';
 
 interface SubscriberData {
   remaining_rewinds: number;
@@ -15,11 +14,20 @@ interface SubscriberData {
 interface SubscriptionFeatures {
   rewinds: number | 'unlimited';
   superLikes: number | 'unlimited';
-  boosts: number;
+  boosts: number | 'unlimited';
+  likesPerDay: number | 'unlimited';
   profileVisibility: 'normal' | 'boosted' | 'prioritized';
   messageBeforeMatch: boolean;
   incognitoMode: boolean;
   analytics: boolean;
+  viewersList: boolean;
+  travelMode: boolean;
+  hideOnlineStatus: boolean;
+  aiProfileOptimization: boolean;
+  matchReport: boolean;
+  vipSupport: boolean;
+  advancedFilters: boolean;
+  adFree: boolean;
 }
 
 interface SubscriptionContextType {
@@ -40,17 +48,26 @@ interface SubscriptionContextType {
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType>({
-  tier: 'free',
+  tier: 'foundation',
   isSubscribed: false,
   subscriptionEnd: null,
   features: {
     rewinds: 0,
     superLikes: 0,
     boosts: 0,
+    likesPerDay: 0,
     profileVisibility: 'normal',
     messageBeforeMatch: false,
     incognitoMode: false,
     analytics: false,
+    viewersList: false,
+    travelMode: false,
+    hideOnlineStatus: false,
+    aiProfileOptimization: false,
+    matchReport: false,
+    vipSupport: false,
+    advancedFilters: false,
+    adFree: false,
   },
   remainingRewinds: 0,
   remainingSuperLikes: 0,
@@ -67,17 +84,26 @@ const SubscriptionContext = createContext<SubscriptionContextType>({
 export const useSubscription = () => useContext(SubscriptionContext);
 
 export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [tier, setTier] = useState<SubscriptionTier>('free');
+  const [tier, setTier] = useState<SubscriptionTier>('foundation');
   const [subscriptionEnd, setSubscriptionEnd] = useState<Date | null>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [features, setFeatures] = useState<SubscriptionFeatures>({
     rewinds: 0,
     superLikes: 0,
     boosts: 0,
+    likesPerDay: 0,
     profileVisibility: 'normal',
     messageBeforeMatch: false,
     incognitoMode: false,
     analytics: false,
+    viewersList: false,
+    travelMode: false,
+    hideOnlineStatus: false,
+    aiProfileOptimization: false,
+    matchReport: false,
+    vipSupport: false,
+    advancedFilters: false,
+    adFree: false,
   });
   const [remainingRewinds, setRemainingRewinds] = useState(0);
   const [remainingSuperLikes, setRemainingSuperLikes] = useState(0);
@@ -91,16 +117,25 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     if (user) {
       checkSubscription();
     } else {
-      setTier('free');
+      setTier('foundation');
       setSubscriptionEnd(null);
       setFeatures({
         rewinds: 0,
         superLikes: 0,
         boosts: 0,
+        likesPerDay: 0,
         profileVisibility: 'normal',
         messageBeforeMatch: false,
         incognitoMode: false,
         analytics: false,
+        viewersList: false,
+        travelMode: false,
+        hideOnlineStatus: false,
+        aiProfileOptimization: false,
+        matchReport: false,
+        vipSupport: false,
+        advancedFilters: false,
+        adFree: false,
       });
       setRemainingRewinds(0);
       setRemainingSuperLikes(0);
@@ -111,7 +146,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   
   const checkSubscription = async () => {
     if (!user) {
-      setTier('free');
+      setTier('foundation');
       return;
     }
     
@@ -123,7 +158,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
       if (error) throw error;
       
       if (data) {
-        setTier(data.subscription_tier || 'free');
+        setTier(data.subscription_tier || 'foundation');
         setSubscriptionEnd(data.subscription_end ? new Date(data.subscription_end) : null);
         setFeatures(data.features || features);
         
@@ -186,7 +221,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   const performRewind = async () => {
     if (!user) return false;
     
-    if (tier === 'free') {
+    if (tier === 'foundation') {
       setShowPremiumModal(true);
       return false;
     }
@@ -222,7 +257,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   const performSuperLike = async () => {
     if (!user) return false;
     
-    if (tier === 'free') {
+    if (tier === 'foundation') {
       setShowPremiumModal(true);
       return false;
     }
@@ -258,7 +293,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   const activateBoost = async () => {
     if (!user) return false;
     
-    if (tier === 'free') {
+    if (tier === 'foundation') {
       setShowPremiumModal(true);
       return false;
     }
@@ -302,7 +337,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     <SubscriptionContext.Provider
       value={{
         tier,
-        isSubscribed: tier !== 'free',
+        isSubscribed: tier !== 'foundation',
         subscriptionEnd,
         features,
         remainingRewinds,

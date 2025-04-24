@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -19,45 +20,63 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onSubscrib
   
   const premiumPlans = [
     {
-      name: "Basic",
-      tier: "basic" as SubscriptionTier,
-      price: "$9.99",
-      period: "monthly",
+      name: "Foundation",
+      tier: "foundation" as SubscriptionTier,
+      price: "Free",
+      period: "",
       features: [
-        "See who likes you",
-        "Unlimited likes",
-        "Rewind last swipe (5/week)",
-        "5 Super Likes per week",
-        "1 Boost per month"
+        "8 Likes per day",
+        "1 Rewind per day",
+        "1 Super Like per week",
+        "Match & message freely",
+        "Basic filters"
       ]
     },
     {
-      name: "Gold",
-      tier: "gold" as SubscriptionTier,
-      price: "$19.99",
+      name: "Connection",
+      tier: "connection" as SubscriptionTier,
+      price: "$12.99",
       period: "monthly",
       features: [
-        "All Basic features",
-        "Profile priority in your area",
-        "See who viewed your profile",
-        "10 Super Likes per week",
-        "2 Boosts per month",
-        "Message before matching"
+        "Unlimited Likes",
+        "3 Rewinds per day",
+        "5 Super Likes per week",
+        "1 Boost per month",
+        "See who liked you",
+        "Advanced filters",
+        "Ad-free",
+        "Priority visibility"
       ],
       popular: true
     },
     {
-      name: "Platinum",
-      tier: "platinum" as SubscriptionTier,
-      price: "$29.99",
+      name: "Chemistry",
+      tier: "chemistry" as SubscriptionTier,
+      price: "$22.99",
       period: "monthly",
       features: [
-        "All Gold features",
+        "All Connection features",
         "Unlimited Rewinds",
-        "Unlimited Super Likes",
-        "4 Boosts per month",
-        "Priority customer support",
-        "Incognito mode"
+        "10 Super Likes per week",
+        "2 Boosts per month",
+        "Message before matching",
+        "Profile viewers list",
+        "Travel mode",
+        "Hide online status"
+      ]
+    },
+    {
+      name: "Commitment",
+      tier: "commitment" as SubscriptionTier,
+      price: "$34.99",
+      period: "monthly",
+      features: [
+        "All Chemistry features",
+        "Unlimited Super Likes & Boosts",
+        "Incognito Mode",
+        "AI Profile Optimization",
+        "Monthly Match Report",
+        "VIP Support Access"
       ]
     }
   ];
@@ -86,14 +105,14 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onSubscrib
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl h-[90vh] overflow-hidden flex flex-col p-0 rounded-xl">
+      <DialogContent className="max-w-6xl h-[90vh] overflow-hidden flex flex-col p-0 rounded-xl">
         <DialogHeader className="bg-gradient-to-r from-amber-400 to-amoura-gold p-6 text-center shrink-0">
-          <DialogTitle className="text-3xl font-bold text-black">Upgrade to Premium</DialogTitle>
-          <p className="text-black/75">Unlock all features and maximize your matches</p>
+          <DialogTitle className="text-3xl font-bold text-black">Choose Your Perfect Plan</DialogTitle>
+          <p className="text-black/75">Find the plan that matches your dating goals</p>
         </DialogHeader>
         
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {premiumPlans.map((plan, index) => (
               <motion.div
                 key={plan.name}
@@ -123,7 +142,9 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onSubscrib
                 
                 <div className="mb-4">
                   <span className="text-2xl font-bold">{plan.price}</span>
-                  <span className="text-gray-500">/{plan.period}</span>
+                  {plan.period && (
+                    <span className="text-gray-500">/{plan.period}</span>
+                  )}
                 </div>
                 
                 <ul className="space-y-2 mb-5">
@@ -143,10 +164,12 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onSubscrib
                       ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                       : plan.popular 
                         ? 'bg-gradient-to-r from-amber-400 to-amoura-gold hover:from-amber-500 hover:to-amber-400 text-black' 
-                        : 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90'
+                        : plan.tier === 'foundation'
+                          ? 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                          : 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90'
                   }`}
                 >
-                  {isCurrentPlan(plan.tier) ? 'Current Plan' : 'Subscribe'}
+                  {isCurrentPlan(plan.tier) ? 'Current Plan' : plan.tier === 'foundation' ? 'Free Plan' : 'Subscribe'}
                 </Button>
               </motion.div>
             ))}

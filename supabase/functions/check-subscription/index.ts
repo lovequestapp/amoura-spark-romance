@@ -47,10 +47,10 @@ serve(async (req) => {
     const requestData = await req.json();
     
     // Get tier from request body rather than URL params
-    const tier = requestData.tier || 'free';
+    const tier = requestData.tier || 'foundation';
     
     let subscriptionEnd = null;
-    if (tier !== 'free') {
+    if (tier !== 'foundation') {
       // Set subscription end to 30 days from now for demo
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + 30);
@@ -65,7 +65,7 @@ serve(async (req) => {
       email: user.email,
       user_id: user.id,
       stripe_customer_id: `demo_${tier}_${user.id.substring(0, 8)}`,
-      subscribed: tier !== 'free',
+      subscribed: tier !== 'foundation',
       subscription_tier: tier,
       subscription_end: subscriptionEnd,
       remaining_super_likes: features.superLikes === 'unlimited' ? 999 : features.superLikes,
@@ -73,10 +73,10 @@ serve(async (req) => {
       updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id' });
 
-    logStep("Updated database with subscription info", { subscribed: tier !== 'free', tier });
+    logStep("Updated database with subscription info", { subscribed: tier !== 'foundation', tier });
     
     return new Response(JSON.stringify({
-      subscribed: tier !== 'free',
+      subscribed: tier !== 'foundation',
       subscription_tier: tier,
       subscription_end: subscriptionEnd,
       features: features
@@ -97,45 +97,81 @@ serve(async (req) => {
 // Feature configurations based on tier
 function getTierFeatures(tier: string) {
   switch (tier) {
-    case 'platinum':
+    case 'commitment':
       return {
         rewinds: 'unlimited',
         superLikes: 'unlimited',
-        boosts: 4,
+        boosts: 'unlimited',
+        likesPerDay: 'unlimited',
         profileVisibility: 'prioritized',
         messageBeforeMatch: true,
         incognitoMode: true,
         analytics: true,
+        viewersList: true,
+        travelMode: true,
+        hideOnlineStatus: true,
+        aiProfileOptimization: true,
+        matchReport: true,
+        vipSupport: true,
+        advancedFilters: true,
+        adFree: true,
       };
-    case 'gold':
+    case 'chemistry':
       return {
-        rewinds: 10,
+        rewinds: 'unlimited',
         superLikes: 10,
         boosts: 2,
-        profileVisibility: 'boosted',
+        likesPerDay: 'unlimited',
+        profileVisibility: 'prioritized',
         messageBeforeMatch: true,
         incognitoMode: false,
         analytics: true,
+        viewersList: true,
+        travelMode: true,
+        hideOnlineStatus: true,
+        aiProfileOptimization: false,
+        matchReport: false,
+        vipSupport: false,
+        advancedFilters: true,
+        adFree: true,
       };
-    case 'basic':
+    case 'connection':
       return {
-        rewinds: 5,
+        rewinds: 3,
         superLikes: 5,
         boosts: 1,
-        profileVisibility: 'normal',
+        likesPerDay: 'unlimited',
+        profileVisibility: 'boosted',
         messageBeforeMatch: false,
         incognitoMode: false,
         analytics: false,
+        viewersList: true,
+        travelMode: false,
+        hideOnlineStatus: false,
+        aiProfileOptimization: false,
+        matchReport: false,
+        vipSupport: false,
+        advancedFilters: true,
+        adFree: true,
       };
-    default:
+    default: // foundation (free)
       return {
-        rewinds: 0,
-        superLikes: 0,
+        rewinds: 1,
+        superLikes: 1,
         boosts: 0,
+        likesPerDay: 8,
         profileVisibility: 'normal',
         messageBeforeMatch: false,
         incognitoMode: false,
         analytics: false,
+        viewersList: false,
+        travelMode: false,
+        hideOnlineStatus: false,
+        aiProfileOptimization: false,
+        matchReport: false,
+        vipSupport: false,
+        advancedFilters: false,
+        adFree: false,
       };
   }
 }

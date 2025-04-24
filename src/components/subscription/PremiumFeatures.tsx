@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -46,9 +47,9 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
   };
   
   // Check if user has premium features
-  const canRewind = tier !== 'free';
-  const canSuperLike = tier !== 'free';
-  const canBoost = tier !== 'free';
+  const canRewind = tier !== 'foundation' || features.rewinds > 0;
+  const canSuperLike = tier !== 'foundation' || features.superLikes > 0;
+  const canBoost = tier !== 'foundation' && features.boosts > 0;
   
   const handleRewind = async () => {
     const canProceed = await performRewind();
@@ -100,12 +101,12 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
   };
   
   const renderTierBadge = () => {
-    if (!tier || tier === 'free') return null;
+    if (!tier || tier === 'foundation') return null;
     
     const colors: Record<string, string> = {
-      'basic': 'bg-blue-100 text-blue-800',
-      'gold': 'bg-amber-100 text-amber-800',
-      'platinum': 'bg-purple-100 text-purple-800'
+      'connection': 'bg-blue-100 text-blue-800',
+      'chemistry': 'bg-amber-100 text-amber-800',
+      'commitment': 'bg-purple-100 text-purple-800'
     };
     
     return (
@@ -202,7 +203,7 @@ export const PremiumFeatures: React.FC<PremiumFeaturesProps> = ({
               </span>
             ) : canBoost && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                {features.boosts}/month
+                {features.boosts === 'unlimited' ? 'Unlimited' : `${features.boosts}/month`}
               </span>
             )}
           </Button>

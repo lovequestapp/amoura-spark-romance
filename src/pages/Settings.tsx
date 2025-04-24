@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { tier, isSubscribed, subscriptionEnd } = useSubscription();
+  const { tier, isSubscribed, subscriptionEnd, features } = useSubscription();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const formatDate = (date: Date | null) => {
@@ -31,18 +32,29 @@ const Settings = () => {
 
   const getTierBadge = () => {
     const colors: Record<string, string> = {
-      'basic': 'bg-blue-100 text-blue-800',
-      'gold': 'bg-amber-100 text-amber-800',
-      'platinum': 'bg-purple-100 text-purple-800'
+      'connection': 'bg-blue-100 text-blue-800',
+      'chemistry': 'bg-amber-100 text-amber-800',
+      'commitment': 'bg-purple-100 text-purple-800'
     };
     
-    if (tier === 'free') return null;
+    if (tier === 'foundation') return null;
     
     return (
       <Badge className={`${colors[tier]} capitalize`}>
         {tier}
       </Badge>
     );
+  };
+
+  const isPremiumFeature = (requiredTier: string) => {
+    const tierLevels = {
+      'foundation': 0,
+      'connection': 1,
+      'chemistry': 2,
+      'commitment': 3
+    };
+    
+    return tierLevels[tier as keyof typeof tierLevels] < tierLevels[requiredTier as keyof typeof tierLevels];
   };
 
   return (
@@ -67,8 +79,8 @@ const Settings = () => {
           
           <p className="text-sm text-gray-600 mb-4">
             {isSubscribed 
-              ? `Your ${tier} subscription is active until ${formatDate(subscriptionEnd)}.` 
-              : "You don't have an active subscription. Upgrade to access premium features!"}
+              ? `Your ${tier} plan is active until ${formatDate(subscriptionEnd)}.` 
+              : "You're on the Foundation (free) plan. Upgrade to access premium features!"}
           </p>
           
           <button 
@@ -142,6 +154,46 @@ const Settings = () => {
                 </SelectContent>
               </Select>
             </div>
+            
+            {features.advancedFilters ? (
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Advanced Filters
+                  </label>
+                  <Badge className="bg-blue-100 text-blue-800">
+                    {tier !== 'foundation' ? tier : 'Premium'}
+                  </Badge>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Height</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Education</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Relationship Goals</span>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="border border-gray-100 p-3 rounded-md bg-gray-50">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium">Advanced Filters</p>
+                    <p className="text-xs text-gray-500">Filter by height, education, and more</p>
+                  </div>
+                  <Badge className="bg-gray-100 text-gray-500 cursor-pointer" onClick={() => setShowPremiumModal(true)}>
+                    Connection+
+                  </Badge>
+                </div>
+              </div>
+            )}
           </div>
         </section>
         
@@ -164,8 +216,18 @@ const Settings = () => {
                 <p className="font-medium">Show online status</p>
                 <p className="text-sm text-gray-500">Let others know when you're active</p>
               </div>
-              <Switch defaultChecked />
+              <Switch defaultChecked disabled={features.hideOnlineStatus} />
             </div>
+            
+            {features.hideOnlineStatus && (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Hide online status</p>
+                  <p className="text-sm text-gray-500">Hide your activity status from others</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            )}
             
             <div className="flex items-center justify-between">
               <div>
@@ -189,12 +251,12 @@ const Settings = () => {
                 <p className="text-sm text-gray-500">Only show your profile to people you like</p>
               </div>
               <div className="flex items-center gap-2">
-                {tier !== 'platinum' && (
+                {isPremiumFeature('commitment') && (
                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                    Platinum
+                    Commitment
                   </span>
                 )}
-                <Switch disabled={tier !== 'platinum'} />
+                <Switch disabled={isPremiumFeature('commitment')} checked={features.incognitoMode} />
               </div>
             </div>
             
@@ -204,14 +266,24 @@ const Settings = () => {
                 <p className="text-sm text-gray-500">Send messages before matching</p>
               </div>
               <div className="flex items-center gap-2">
-                {!['gold', 'platinum'].includes(tier) && (
+                {isPremiumFeature('chemistry') && (
                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                    Gold+
+                    Chemistry+
                   </span>
                 )}
-                <Switch disabled={!['gold', 'platinum'].includes(tier)} />
+                <Switch disabled={isPremiumFeature('chemistry')} checked={features.messageBeforeMatch} />
               </div>
             </div>
+            
+            {features.travelMode && (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Travel Mode</p>
+                  <p className="text-sm text-gray-500">Change location for your next trip</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            )}
           </div>
         </section>
         
@@ -221,7 +293,10 @@ const Settings = () => {
           <h2 className="text-lg font-medium mb-4">Account</h2>
           
           <div className="space-y-4">
-            <button className="block w-full text-left py-2 text-amoura-deep-pink">
+            <button 
+              onClick={() => setShowPremiumModal(true)}
+              className="block w-full text-left py-2 text-amoura-deep-pink"
+            >
               Upgrade to Premium
             </button>
             <button className="block w-full text-left py-2 text-gray-700">
