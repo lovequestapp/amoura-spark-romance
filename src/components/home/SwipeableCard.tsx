@@ -15,6 +15,11 @@ export interface Profile {
   verified?: boolean;
   featured?: boolean;
   personalityMatch?: number;
+  video?: {
+    url: string;
+    thumbnail: string;
+    duration: number;
+  };
   prompts: {
     question: string;
     answer: string;

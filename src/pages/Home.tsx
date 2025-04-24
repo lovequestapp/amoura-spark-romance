@@ -20,6 +20,11 @@ const enhancedProfiles: Profile[] = [
     distance: "3 miles away",
     occupation: "Graphic Designer",
     photos: ["/assets/profile-1a.jpg", "/assets/profile-1b.jpg", "/assets/profile-1c.jpg"],
+    video: {
+      url: "https://example.com/sample-video.mp4",
+      thumbnail: "/assets/profile-1-video-thumb.jpg",
+      duration: 45
+    },
     bio: "Coffee addict, design enthusiast, and weekend hiker. Looking for someone to share laughs and adventures with.",
     personalityMatch: 85,
     verified: true,
