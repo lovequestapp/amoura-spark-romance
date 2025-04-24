@@ -1,18 +1,20 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { StarIcon } from 'lucide-react';
+import { Eye, Heart, Compass } from 'lucide-react';
 
 interface ProfileStatsProps {
-  matchRate?: number;
-  responseRate?: number;
+  profileViews?: number;
+  superLikes?: number;
+  adventurePoints?: number;
   popularity?: 'rising' | 'very high' | 'high' | 'average';
   verified?: boolean;
 }
 
 const ProfileStats: React.FC<ProfileStatsProps> = ({
-  matchRate = 65,
-  responseRate = 92,
+  profileViews = 124,
+  superLikes = 18,
+  adventurePoints = 850,
   popularity = 'high',
   verified = true
 }) => {
@@ -20,15 +22,29 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({
     <div className="bg-white rounded-xl p-4 shadow-sm">
       <h3 className="font-medium text-gray-800 mb-3">Profile Stats</h3>
       
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div className="text-center p-3 bg-amoura-soft-pink/30 rounded-lg">
-          <p className="text-sm text-gray-600">Match Rate</p>
-          <p className="text-xl font-bold text-amoura-deep-pink">{matchRate}%</p>
+          <div className="flex justify-center mb-1">
+            <Eye className="text-amoura-deep-pink" size={20} />
+          </div>
+          <p className="text-sm text-gray-600">Profile Views</p>
+          <p className="text-xl font-bold text-amoura-deep-pink">{profileViews}</p>
         </div>
         
         <div className="text-center p-3 bg-amoura-soft-pink/30 rounded-lg">
-          <p className="text-sm text-gray-600">Response Rate</p>
-          <p className="text-xl font-bold text-amoura-deep-pink">{responseRate}%</p>
+          <div className="flex justify-center mb-1">
+            <Heart className="text-amoura-deep-pink" size={20} />
+          </div>
+          <p className="text-sm text-gray-600">Super Likes</p>
+          <p className="text-xl font-bold text-amoura-deep-pink">{superLikes}</p>
+        </div>
+
+        <div className="text-center p-3 bg-amoura-soft-pink/30 rounded-lg">
+          <div className="flex justify-center mb-1">
+            <Compass className="text-amoura-deep-pink" size={20} />
+          </div>
+          <p className="text-sm text-gray-600">Adventure Points</p>
+          <p className="text-xl font-bold text-amoura-deep-pink">{adventurePoints}</p>
         </div>
       </div>
       
@@ -52,3 +68,4 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({
 };
 
 export default ProfileStats;
+
