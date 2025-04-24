@@ -91,7 +91,7 @@ const Messages = () => {
           sender: msg.sender_id === user.id ? 'user' : 'match',
           time: msg.created_at,
           seen: !!msg.seen_at,
-          message_type: msg.message_type
+          message_type: msg.message_type as 'text' | 'voice' | 'image'  // Fixed: explicitly cast to allowed values
         }));
         
         setMessages(formattedMessages);
@@ -117,7 +117,7 @@ const Messages = () => {
                     sender: 'match',
                     time: newMsg.created_at,
                     seen: false,
-                    message_type: newMsg.message_type
+                    message_type: newMsg.message_type as 'text' | 'voice' | 'image'  // Fixed: explicitly cast to allowed values
                   };
                   
                   setMessages(prev => [...prev, formattedMsg]);
@@ -176,7 +176,7 @@ const Messages = () => {
         sender: 'user',
         time: sentMessage.created_at,
         seen: false,
-        message_type: 'text'
+        message_type: 'text'  // Fixed: use literal value instead of string variable
       };
       
       setMessages(prev => [...prev, formattedMsg]);
@@ -201,7 +201,7 @@ const Messages = () => {
         sender: 'user',
         time: sentMessage.created_at,
         seen: false,
-        message_type: 'voice'
+        message_type: 'voice'  // Fixed: use literal value instead of string variable
       };
       
       setMessages(prev => [...prev, formattedMsg]);
@@ -328,9 +328,9 @@ const Messages = () => {
           </form>
         )}
         
-        {/* Ice Breaker at bottom */}
+        {/* Ice Breaker positioned below message input */}
         {(messages.length === 0 || messages.length < 3) && !showVoiceRecorder && (
-          <div className="p-3 pt-0">
+          <div className="p-3 mt-2">
             <IceBreaker onUse={useIceBreaker} />
           </div>
         )}
