@@ -1,12 +1,11 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Heart, Compass, Star } from 'lucide-react';
+import { Eye, Heart, Star } from 'lucide-react';
 
 interface ProfileStatsProps {
   profileViews?: number;
   superLikes?: number;
-  adventurePoints?: number;
   popularity?: 'rising' | 'very high' | 'high' | 'average';
   verified?: boolean;
 }
@@ -14,7 +13,6 @@ interface ProfileStatsProps {
 const ProfileStats: React.FC<ProfileStatsProps> = ({
   profileViews = 124,
   superLikes = 18,
-  adventurePoints = 850,
   popularity = 'high',
   verified = true
 }) => {
@@ -22,7 +20,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({
     <div className="bg-white rounded-xl p-4 shadow-sm">
       <h3 className="font-medium text-gray-800 mb-3">Profile Stats</h3>
       
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="text-center p-3 bg-amoura-soft-pink/30 rounded-lg">
           <div className="flex justify-center mb-1">
             <Eye className="text-amoura-deep-pink" size={20} />
@@ -37,14 +35,6 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({
           </div>
           <p className="text-sm text-gray-600">Super Likes</p>
           <p className="text-xl font-bold text-amoura-deep-pink">{superLikes}</p>
-        </div>
-
-        <div className="text-center p-3 bg-amoura-soft-pink/30 rounded-lg">
-          <div className="flex justify-center mb-1">
-            <Compass className="text-amoura-deep-pink" size={20} />
-          </div>
-          <p className="text-sm text-gray-600">Adventure Points</p>
-          <p className="text-xl font-bold text-amoura-deep-pink">{adventurePoints}</p>
         </div>
       </div>
       

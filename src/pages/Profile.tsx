@@ -5,16 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useNavigate } from 'react-router-dom';
 import ProfileStats from '@/components/profile/ProfileStats';
 import ProfileGallery from '@/components/profile/ProfileGallery';
 import ProfileAnalytics from '@/components/profile/ProfileAnalytics';
 import PremiumFeatures from '@/components/subscription/PremiumFeatures';
+import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
   const { user } = useAuth();
   const { tier, isSubscribed, openUpgradeModal } = useSubscription();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Sample user profile data
+  // Sample user profile data - in a real app, this would come from an API
   const profile = {
     photos: ['/assets/profile-1a.jpg', '/assets/profile-1b.jpg', '/assets/profile-1c.jpg'],
     bio: "Lover of travel, good food, and interesting conversations. Looking for someone who shares my passion for adventure and trying new things.",
@@ -31,14 +35,32 @@ const Profile = () => {
     ]
   };
 
+  const handleEditPhotos = () => {
+    toast({
+      description: "Photo upload functionality will be available soon!",
+    });
+  };
+
+  const handleEditBio = () => {
+    toast({
+      description: "Bio editing will be available soon!",
+    });
+  };
+
+  const handleEditPrompts = () => {
+    toast({
+      description: "Prompt editing will be available soon!",
+    });
+  };
+
   return (
     <AppLayout>
       <div className="p-4 max-w-3xl mx-auto">
         {/* Profile header */}
         <div className="flex items-center gap-4 mb-6">
           <Avatar className="h-20 w-20 border-2 border-amoura-deep-pink">
-            <AvatarImage src="/assets/profile-1a.jpg" />
-            <AvatarFallback>You</AvatarFallback>
+            <AvatarImage src={user?.avatar_url || '/assets/profile-1a.jpg'} />
+            <AvatarFallback>{user?.email?.[0]?.toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
             <h1 className="text-2xl font-bold">Your Profile</h1>
@@ -48,14 +70,23 @@ const Profile = () => {
 
         {/* Profile stats - now first */}
         <div className="mb-6">
-          <ProfileStats />
+          <ProfileStats 
+            profileViews={124}
+            superLikes={18}
+            popularity="high"
+            verified={true}
+          />
         </div>
 
         {/* Profile gallery */}
         <div className="mt-6">
           <h2 className="font-medium text-lg mb-2">Your Photos</h2>
           <ProfileGallery photos={profile.photos} />
-          <Button variant="outline" className="w-full mt-3">
+          <Button 
+            variant="outline" 
+            className="w-full mt-3"
+            onClick={handleEditPhotos}
+          >
             Edit Photos
           </Button>
         </div>
@@ -66,7 +97,11 @@ const Profile = () => {
           <div className="bg-white p-4 rounded-lg border">
             <p>{profile.bio}</p>
           </div>
-          <Button variant="outline" className="w-full mt-3">
+          <Button 
+            variant="outline" 
+            className="w-full mt-3"
+            onClick={handleEditBio}
+          >
             Edit Bio
           </Button>
         </div>
@@ -80,12 +115,16 @@ const Profile = () => {
               <p className="mt-1">{prompt.answer}</p>
             </div>
           ))}
-          <Button variant="outline" className="w-full mt-3">
+          <Button 
+            variant="outline" 
+            className="w-full mt-3"
+            onClick={handleEditPrompts}
+          >
             Edit Prompts
           </Button>
         </div>
 
-        {/* Premium features - moved to bottom */}
+        {/* Premium features */}
         <div className="mt-8">
           {!isSubscribed && (
             <div className="bg-gradient-to-r from-amoura-deep-pink to-amoura-gold p-4 rounded-lg mb-4 text-white flex justify-between items-center">
@@ -106,17 +145,23 @@ const Profile = () => {
           <PremiumFeatures />
         </div>
 
-        {/* Profile analytics - moved to bottom */}
+        {/* Profile analytics */}
         <div className="mt-6">
           <ProfileAnalytics />
         </div>
         
         {/* Account settings */}
         <div className="mt-8 flex justify-center gap-4 mb-20">
-          <Button variant="outline" onClick={() => window.location.href = '/settings'}>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/settings')}
+          >
             Account Settings
           </Button>
-          <Button variant="default">
+          <Button 
+            variant="default"
+            onClick={() => navigate('/profile/edit')}
+          >
             Edit Profile
           </Button>
         </div>
