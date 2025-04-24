@@ -132,7 +132,7 @@ const Home = () => {
   };
   
   // Find the featured profile and ensure it's a complete Profile object
-  const featuredProfile = enhancedProfiles.find(profile => profile.featured);
+  const featuredProfile = enhancedProfiles.find(profile => profile.featured === true);
   
   return (
     <AppLayout>
