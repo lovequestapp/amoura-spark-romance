@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,6 +19,13 @@ interface ProfileView {
   viewed_at: string;
 }
 
+// Define the type for the RPC response
+interface ProfileViewRPC {
+  id: string;
+  viewer_id: string;
+  viewed_at: string;
+}
+
 const ProfileAnalytics = () => {
   const [profileViews, setProfileViews] = useState<ProfileView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,8 +43,12 @@ const ProfileAnalytics = () => {
     try {
       setLoading(true);
       
+      // Use typed response for RPC call
       const { data: viewsData, error: viewsError } = await supabase
-        .rpc('get_profile_views');
+        .rpc('get_profile_views') as { 
+          data: ProfileViewRPC[] | null; 
+          error: Error | null 
+        };
       
       if (viewsError) throw viewsError;
       
