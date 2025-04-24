@@ -1,28 +1,56 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import PhoneMockup from '@/components/ui/phone-mockup';
 import { 
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel";
+import PhoneMockup from '@/components/ui/phone-mockup';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Heart, MessageCircle } from 'lucide-react';
 
 const AppMockup = () => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   
   const phoneScreens = [
-    '/lovable-uploads/775b1c0b-229a-46b3-9428-6831e4fb6b1e.png',
-    '/lovable-uploads/47129695-da2d-45c2-af99-edd3aa1c1244.png',
-    '/lovable-uploads/d087d2b0-450b-402c-91f9-cc0841a89716.png'
+    '/lovable-uploads/c3b91871-0b81-4711-a02d-6771b41f44ed.png',
+    '/lovable-uploads/d96b24ef-01b0-41a0-afdf-564574149a3c.png',
+    '/lovable-uploads/955e854b-03c9-4efe-91de-ea62233f88eb.png'
   ];
   
-  // State to track active carousel slide
-  const [activeSlide, setActiveSlide] = React.useState(0);
+  const featureScreens = [
+    {
+      image: "/lovable-uploads/woman-laptop-1.jpg",
+      title: "Discover",
+      description: "Find people who share your interests",
+      path: "/home"
+    },
+    {
+      image: "/lovable-uploads/woman-laptop-2.jpg",
+      title: "Connect",
+      description: "Start meaningful conversations",
+      path: "/matches"
+    },
+    {
+      image: "/lovable-uploads/man-laptop.jpg",
+      title: "Community",
+      description: "Join our vibrant dating community",
+      path: "/community"
+    }
+  ];
 
-  const handleSlideChange = (index: number) => {
-    setActiveSlide(index);
+  const handleCardClick = (path: string) => {
+    if (!user) {
+      // If user is not logged in, redirect to auth page instead
+      return "/auth";
+    }
+    return path;
   };
 
   return (
@@ -37,42 +65,143 @@ const AppMockup = () => {
           Experience Dating Like Never Before
         </motion.h2>
         
-        {/* Phone Mockup with Carousel */}
-        <div className="flex justify-center">
-          <div className="relative w-[280px] h-[580px] mx-auto">
-            <div className="absolute inset-0 bg-amoura-black rounded-[40px] p-3 shadow-2xl">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-[30px] bg-amoura-black rounded-b-[14px] z-10"></div>
-              <div className="w-full h-full rounded-[32px] overflow-hidden border-[8px] border-amoura-black bg-white relative">
-                <Carousel 
-                  className="w-full h-full"
-                  onSlideChange={handleSlideChange}
+        {/* Phone Mockup Carousel */}
+        <div className="flex justify-center mb-20">
+          <PhoneMockup>
+            <Carousel className="w-full h-full">
+              <CarouselContent className="h-full">
+                {phoneScreens.map((screen, index) => (
+                  <CarouselItem key={index} className="h-full">
+                    <div className="relative w-full h-full">
+                      <img 
+                        src={screen} 
+                        alt={`App Screen ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* App UI overlay elements */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                        <div className="flex justify-between items-center">
+                          <div className="text-white">
+                            <h3 className="font-bold text-lg">Sophia, 28</h3>
+                            <p className="text-xs opacity-80">2 miles away</p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <motion.button 
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
+                            >
+                              <MessageCircle className="w-5 h-5 text-white" />
+                            </motion.button>
+                            <motion.button 
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="w-10 h-10 bg-amoura-deep-pink rounded-full flex items-center justify-center"
+                            >
+                              <Heart className="w-5 h-5 text-white" />
+                            </motion.button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                {phoneScreens.map((_, index) => (
+                  <motion.div
+                    key={index}
+                    className="w-2 h-2 rounded-full bg-white/50"
+                    animate={{ opacity: index === 0 ? 1 : 0.5 }}
+                  />
+                ))}
+              </div>
+            </Carousel>
+          </PhoneMockup>
+        </div>
+        
+        <motion.h3
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="text-2xl md:text-3xl font-semibold text-center mb-8 text-amoura-black"
+        >
+          Everything you need to find your match
+        </motion.h3>
+        
+        {/* Feature Cards */}
+        <div className="hidden md:block">
+          <div className="flex space-x-8 justify-center">
+            {featureScreens.map((screen, index) => (
+              <Link 
+                key={screen.title}
+                to={handleCardClick(screen.path)}
+                className="block flex-shrink-0 w-64"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                  }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 transition-all"
                 >
-                  <CarouselContent className="h-full">
-                    {phoneScreens.map((screen, index) => (
-                      <CarouselItem key={index} className="h-full">
-                        <div className="relative w-full h-full">
-                          <img 
-                            src={screen} 
-                            alt={`App Screen ${index + 1}`}
+                  <div className="relative h-[480px]">
+                    <img
+                      src={screen.image}
+                      alt={screen.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
+                      <h3 className="font-semibold text-lg">{screen.title}</h3>
+                      <p className="text-sm text-white/90">{screen.description}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </Link>
+            ))}
+          </div>
+        </div>
+        
+        {/* Mobile Feature Carousel */}
+        <div className="md:hidden">
+          <Carousel>
+            <CarouselContent>
+              {featureScreens.map((screen, index) => (
+                <CarouselItem key={screen.title} className="pl-4 md:basis-1/2">
+                  <Link to={handleCardClick(screen.path)} className="block">
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.5 }}
+                      className="w-full"
+                    >
+                      <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+                        <div className="relative h-[400px]">
+                          <img
+                            src={screen.image}
+                            alt={screen.title}
                             className="w-full h-full object-cover"
                           />
+                          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
+                            <h3 className="font-semibold text-lg">{screen.title}</h3>
+                            <p className="text-sm text-white/90">{screen.description}</p>
+                          </div>
                         </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
-                    {phoneScreens.map((_, index) => (
-                      <motion.div
-                        key={index}
-                        className={`w-2 h-2 rounded-full ${activeSlide === index ? 'bg-white' : 'bg-white/50'}`}
-                      />
-                    ))}
-                  </div>
-                </Carousel>
-                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1/3 h-1 bg-gray-800 rounded-full"></div>
-              </div>
+                      </div>
+                    </motion.div>
+                  </Link>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="flex justify-center gap-2 mt-4">
+              <CarouselPrevious className="static transform-none mx-0" />
+              <CarouselNext className="static transform-none mx-0" />
             </div>
-          </div>
+          </Carousel>
         </div>
       </div>
     </section>
