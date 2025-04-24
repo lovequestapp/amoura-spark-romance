@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 interface StandoutProfile {
   id: number;
@@ -19,11 +20,27 @@ interface StandoutCardProps {
 }
 
 const StandoutCard: React.FC<StandoutCardProps> = ({ profile }) => {
+  const { toast } = useToast();
+
+  const handleLike = () => {
+    toast({
+      title: "Profile Liked!",
+      description: `You liked ${profile.name}'s profile. We'll let them know!`,
+    });
+  };
+
+  const handleComment = () => {
+    toast({
+      title: "Comment Feature",
+      description: "Coming soon! You'll be able to comment on prompts.",
+    });
+  };
+
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow">
       <div className="relative">
         <img 
-          src={profile.photo} 
+          src={`https://source.unsplash.com${profile.photo}`}
           alt={profile.name}
           className="w-full aspect-[4/3] object-cover"
         />
@@ -44,12 +61,14 @@ const StandoutCard: React.FC<StandoutCardProps> = ({ profile }) => {
           <Button
             variant="outline"
             className="flex-1 rounded-full border-amoura-deep-pink text-amoura-deep-pink hover:bg-amoura-soft-pink hover:text-amoura-deep-pink hover:border-amoura-deep-pink"
+            onClick={handleComment}
           >
             <MessageCircle size={18} className="mr-2" />
             Comment
           </Button>
           <Button
             className="flex-1 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
+            onClick={handleLike}
           >
             <Heart size={18} className="mr-2" />
             Like

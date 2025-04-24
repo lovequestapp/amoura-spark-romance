@@ -8,7 +8,7 @@ const standouts = [
     id: 1,
     name: "Olivia",
     age: 29,
-    photo: "/assets/standout-1.jpg",
+    photo: "/photo-1581091226825-a6a2a5aee158",
     prompt: {
       question: "My simple pleasures...",
       answer: "Singing in the car, finding money in old pockets, and watching the sunrise with a cup of tea."
@@ -18,7 +18,7 @@ const standouts = [
     id: 2,
     name: "Daniel",
     age: 31,
-    photo: "/assets/standout-2.jpg",
+    photo: "/photo-1581092795360-fd1ca04f0952",
     prompt: {
       question: "We'll get along if...",
       answer: "You appreciate dad jokes, enjoy trying new cuisines, and aren't afraid to be a little weird sometimes."
@@ -28,7 +28,7 @@ const standouts = [
     id: 3,
     name: "Rebecca",
     age: 27,
-    photo: "/assets/standout-3.jpg",
+    photo: "/photo-1649972904349-6e44c42644a7",
     prompt: {
       question: "A perfect date would be...",
       answer: "Starting with a cooking class where we make something delicious, then enjoying our creation in a park with a bottle of wine."
@@ -38,7 +38,7 @@ const standouts = [
     id: 4,
     name: "Michael",
     age: 32,
-    photo: "/assets/standout-4.jpg",
+    photo: "/photo-1721322800607-8c38375eef04",
     prompt: {
       question: "I'm looking for...",
       answer: "Someone who values deep conversations, loves to travel, and can teach me something new. Bonus points if you have a cute dog."
