@@ -2,6 +2,8 @@
 import React from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import StandoutCard from '@/components/profile/StandoutCard';
+import { motion } from 'framer-motion';
+import { SparklesIcon } from 'lucide-react';
 
 const standouts = [
   {
@@ -50,12 +52,22 @@ const Standouts = () => {
   return (
     <AppLayout>
       <div className="p-4">
-        <h1 className="text-2xl font-bold mb-2">Today's Standouts</h1>
+        <div className="flex items-center mb-2">
+          <SparklesIcon className="text-amoura-gold mr-2" size={24} />
+          <h1 className="text-2xl font-bold">Today's Standouts</h1>
+        </div>
         <p className="text-gray-500 mb-6">Profiles that caught our attention</p>
         
         <div className="grid grid-cols-1 gap-6">
-          {standouts.map((profile) => (
-            <StandoutCard key={profile.id} profile={profile} />
+          {standouts.map((profile, index) => (
+            <motion.div
+              key={profile.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+            >
+              <StandoutCard profile={profile} />
+            </motion.div>
           ))}
         </div>
       </div>
