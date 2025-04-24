@@ -8,7 +8,7 @@ interface CommunityFeedProps {
   activeTab: 'latest' | 'trending' | 'following';
 }
 
-// Expanded mock data for demonstration
+// Mock data for demonstration
 const posts = [
   {
     id: '1',
@@ -16,7 +16,7 @@ const posts = [
       name: 'Emma Wilson',
       avatar: '/photo-1649972904349-6e44c42644a7',
     },
-    content: 'Just had an amazing first date at the new rooftop restaurant downtown! The views were incredible and conversation flowed easily. Anyone else have good first date spots to recommend? I feel like the setting really made a difference in how relaxed we both felt.\n\nThinking of planning a second date soon. Any ideas?',
+    content: 'Just had an amazing first date at the new rooftop restaurant downtown! The views were incredible and conversation flowed easily. Anyone else have good first date spots to recommend?',
     image: '/photo-1486312338219-ce68d2c6f44d',
     tags: ['dating', 'firstdate', 'advice'],
     likes: 42,
@@ -29,8 +29,7 @@ const posts = [
       name: 'Marcus Chen',
       avatar: '/photo-1581092795360-fd1ca04f0952',
     },
-    content: 'After 2 years of dating, I finally proposed yesterday! She said yes! Here are some tips that helped me plan the perfect proposal:\n\n1. Pay attention to what she mentions casually about her dream proposal\n2. Involve friends/family if that's important to her\n3. Hire a photographer to capture the moment\n4. Have a celebration planned for afterward\n\nSo grateful for all the advice I got from this community during our relationship!',
-    image: '/photo-1515934751635-c81c6bc9a2d8',
+    content: 'After 2 years of dating, I finally proposed yesterday! She said yes! Here are some tips that helped me plan the perfect proposal...',
     tags: ['proposal', 'success', 'relationships'],
     likes: 156,
     comments: 47,
@@ -42,7 +41,7 @@ const posts = [
       name: 'Sophia Rodriguez',
       avatar: '/photo-1581091226825-a6a2a5aee158',
     },
-    content: 'Looking for advice: how soon is too soon to introduce someone you\'re dating to your family? We\'ve been seeing each other for about 3 months now and things are getting serious. My parents are pretty traditional and I don\'t want to give them the wrong impression by bringing someone home too early, but also don\'t want to wait too long.',
+    content: 'Looking for advice: how soon is too soon to introduce someone you\'re dating to your family? We\'ve been seeing each other for about 3 months now.',
     tags: ['advice', 'dating', 'family'],
     likes: 28,
     comments: 35,
@@ -54,7 +53,7 @@ const posts = [
       name: 'James Thompson',
       avatar: '/photo-1721322800607-8c38375eef04',
     },
-    content: 'Communication is key! Had a breakthrough conversation with my partner last night about our future goals. Sometimes just sitting down and talking openly makes all the difference.\n\nWe realized we both want similar things but had different timelines in mind. Now we\'ve created a shared plan that makes us both happy. Highly recommend setting aside specific time for these "state of the relationship" talks.',
+    content: 'Communication is key! Had a breakthrough conversation with my partner last night about our future goals. Sometimes just sitting down and talking openly makes all the difference.',
     image: '/photo-1519389950473-47ba0277781c',
     tags: ['communication', 'relationships', 'growth'],
     likes: 89,
@@ -67,20 +66,7 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({ activeTab }) => {
   const isMobile = useIsMobile();
   
   // In a real app, we would filter posts based on the activeTab
-  const getDisplayPosts = () => {
-    switch (activeTab) {
-      case 'trending':
-        return [...posts].sort((a, b) => b.likes - a.likes);
-      case 'following':
-        // In a real app, would filter by followed users
-        return posts.filter((_, index) => index % 2 === 0);
-      case 'latest':
-      default:
-        return posts;
-    }
-  };
-  
-  const displayPosts = getDisplayPosts();
+  const displayPosts = posts;
   
   return (
     <div className="space-y-4">

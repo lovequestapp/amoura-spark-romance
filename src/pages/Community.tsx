@@ -7,7 +7,7 @@ import CommunityTabs from '@/components/community/CommunityTabs';
 import CommunityTrending from '@/components/community/CommunityTrending';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { motion } from 'framer-motion';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState<'latest' | 'trending' | 'following'>('latest');
@@ -29,7 +29,7 @@ const Community = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto px-4 py-2 md:p-4">
+      <div className="max-w-4xl mx-auto p-4">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-2xl font-bold">Community</h1>
@@ -43,13 +43,19 @@ const Community = () => {
 
           <CommunityTabs activeTab={activeTab} onChange={handleTabChange} />
           
+          {isMobile ? null : (
+            <div className="hidden md:block sticky top-4">
+              <CommunityTrending />
+            </div>
+          )}
+
           <div className="md:flex gap-6">
             <div className="flex-grow">
               <CommunityFeed activeTab={activeTab} />
             </div>
             
             {isMobile ? null : (
-              <div className="hidden md:block w-72 shrink-0">
+              <div className="hidden md:block w-72">
                 <div className="sticky top-4">
                   <CommunityTrending />
                 </div>

@@ -4,9 +4,8 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle, Share } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
-import PostDetail from './PostDetail';
 
 interface Author {
   name: string;
@@ -32,11 +31,9 @@ interface PostCardProps {
 const PostCard: React.FC<PostCardProps> = ({ post, isMobile }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
-  const [showDetail, setShowDetail] = useState(false);
   const { toast } = useToast();
 
-  const handleLike = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleLike = () => {
     if (liked) {
       setLiked(false);
       setLikeCount(likeCount - 1);
@@ -52,13 +49,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile }) => {
     }
   };
 
-  const handleComment = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowDetail(true);
+  const handleComment = () => {
+    toast({
+      title: "Comments",
+      description: "Comment functionality coming soon!",
+    });
   };
 
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleShare = () => {
     toast({
       title: "Post shared",
       description: "Link copied to clipboard!",
@@ -66,79 +64,70 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile }) => {
   };
 
   return (
-    <>
-      <Card 
-        className="overflow-hidden hover:shadow-md transition-all cursor-pointer"
-        onClick={() => setShowDetail(true)}
-      >
-        <CardContent className="p-0">
-          <div className="p-4">
-            {/* Author info */}
-            <div className="flex items-center gap-3 mb-3">
-              <img 
-                src={`https://source.unsplash.com${post.author.avatar}`}
-                alt={post.author.name}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <div>
-                <p className="font-medium">{post.author.name}</p>
-                <p className="text-xs text-muted-foreground">{post.timestamp}</p>
-              </div>
+    <Card className="overflow-hidden hover:shadow-md transition-all">
+      <CardContent className="p-0">
+        <div className="p-4">
+          {/* Author info */}
+          <div className="flex items-center gap-3 mb-3">
+            <img 
+              src={`https://source.unsplash.com${post.author.avatar}`}
+              alt={post.author.name}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div>
+              <p className="font-medium">{post.author.name}</p>
+              <p className="text-xs text-muted-foreground">{post.timestamp}</p>
             </div>
-            
-            {/* Post content */}
-            <p className="mb-3 whitespace-pre-line line-clamp-4">{post.content}</p>
-            
-            {/* Tags */}
-            <div className="flex flex-wrap gap-1 mb-3">
-              {post.tags.map(tag => (
-                <Badge key={tag} variant="outline" className="text-xs">
-                  #{tag}
-                </Badge>
-              ))}
-            </div>
-            
-            {/* Image (if present) */}
-            {post.image && (
-              <div className="mb-3 rounded-md overflow-hidden">
-                <img 
-                  src={`https://source.unsplash.com${post.image}`} 
-                  alt="Post content" 
-                  className="w-full h-auto object-cover max-h-80"
-                />
-              </div>
-            )}
           </div>
-        </CardContent>
+          
+          {/* Post content */}
+          <p className="mb-3 whitespace-pre-line">{post.content}</p>
+          
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1 mb-3">
+            {post.tags.map(tag => (
+              <Badge key={tag} variant="outline" className="text-xs">
+                #{tag}
+              </Badge>
+            ))}
+          </div>
+          
+          {/* Image (if present) */}
+          {post.image && (
+            <div className="mb-3 rounded-md overflow-hidden">
+              <img 
+                src={`https://source.unsplash.com${post.image}`} 
+                alt="Post content" 
+                className="w-full h-auto object-cover max-h-80"
+              />
+            </div>
+          )}
+        </div>
+      </CardContent>
+      
+      <CardFooter className="p-2 border-t flex justify-between">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className={`gap-2 ${liked ? 'text-amoura-deep-pink' : ''}`}
+          onClick={handleLike}
+        >
+          <motion.div whileTap={{ scale: 1.4 }}>
+            <Heart size={isMobile ? 18 : 16} className={liked ? "fill-amoura-deep-pink text-amoura-deep-pink" : ""} />
+          </motion.div>
+          {likeCount}
+        </Button>
         
-        <CardFooter className="p-2 border-t flex justify-between">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={`gap-2 ${liked ? 'text-amoura-deep-pink' : ''}`}
-            onClick={handleLike}
-          >
-            <motion.div whileTap={{ scale: 1.4 }}>
-              <Heart size={isMobile ? 18 : 16} className={liked ? "fill-amoura-deep-pink text-amoura-deep-pink" : ""} />
-            </motion.div>
-            {likeCount}
-          </Button>
-          
-          <Button variant="ghost" size="sm" className="gap-2" onClick={handleComment}>
-            <MessageCircle size={isMobile ? 18 : 16} />
-            {post.comments}
-          </Button>
-          
-          <Button variant="ghost" size="sm" onClick={handleShare}>
-            <Share size={isMobile ? 18 : 16} />
-          </Button>
-        </CardFooter>
-      </Card>
-
-      {showDetail && (
-        <PostDetail post={post} onClose={() => setShowDetail(false)} />
-      )}
-    </>
+        <Button variant="ghost" size="sm" className="gap-2" onClick={handleComment}>
+          <MessageCircle size={isMobile ? 18 : 16} />
+          {post.comments}
+        </Button>
+        
+        <Button variant="ghost" size="sm" onClick={handleShare}>
+          <Share size={isMobile ? 18 : 16} />
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 
