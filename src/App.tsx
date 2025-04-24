@@ -24,10 +24,10 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AnimatePresence mode="wait">
-        <BrowserRouter>
+      <BrowserRouter>
+        <Toaster />
+        <Sonner />
+        <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
@@ -42,8 +42,8 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </AnimatePresence>
+        </AnimatePresence>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
