@@ -34,24 +34,6 @@ const Profile = () => {
   return (
     <AppLayout>
       <div className="p-4 max-w-3xl mx-auto">
-        {/* Header with subscription banner */}
-        {!isSubscribed && (
-          <div className="bg-gradient-to-r from-amoura-deep-pink to-amoura-gold p-4 rounded-lg mb-4 text-white flex justify-between items-center">
-            <div>
-              <h2 className="font-bold">Upgrade to Premium</h2>
-              <p className="text-sm">Get more visibility and premium features</p>
-            </div>
-            <Button 
-              onClick={openUpgradeModal}
-              size="sm"
-              variant="secondary"
-              className="bg-white text-amoura-deep-pink hover:bg-gray-100"
-            >
-              View Plans
-            </Button>
-          </div>
-        )}
-        
         {/* Profile header */}
         <div className="flex items-center gap-4 mb-6">
           <Avatar className="h-20 w-20 border-2 border-amoura-deep-pink">
@@ -63,16 +45,12 @@ const Profile = () => {
             <p className="text-gray-600">{user?.email}</p>
           </div>
         </div>
-        
-        {/* Premium features */}
-        <PremiumFeatures />
-        
-        {/* Profile analytics */}
-        <ProfileAnalytics />
-        
-        {/* Profile stats */}
-        <ProfileStats />
-        
+
+        {/* Profile stats - now first */}
+        <div className="mb-6">
+          <ProfileStats />
+        </div>
+
         {/* Profile gallery */}
         <div className="mt-6">
           <h2 className="font-medium text-lg mb-2">Your Photos</h2>
@@ -106,9 +84,35 @@ const Profile = () => {
             Edit Prompts
           </Button>
         </div>
+
+        {/* Premium features - moved to bottom */}
+        <div className="mt-8">
+          {!isSubscribed && (
+            <div className="bg-gradient-to-r from-amoura-deep-pink to-amoura-gold p-4 rounded-lg mb-4 text-white flex justify-between items-center">
+              <div>
+                <h2 className="font-bold">Upgrade to Premium</h2>
+                <p className="text-sm">Get more visibility and premium features</p>
+              </div>
+              <Button 
+                onClick={openUpgradeModal}
+                size="sm"
+                variant="secondary"
+                className="bg-white text-amoura-deep-pink hover:bg-gray-100"
+              >
+                View Plans
+              </Button>
+            </div>
+          )}
+          <PremiumFeatures />
+        </div>
+
+        {/* Profile analytics - moved to bottom */}
+        <div className="mt-6">
+          <ProfileAnalytics />
+        </div>
         
         {/* Account settings */}
-        <div className="mt-8 flex justify-center gap-4">
+        <div className="mt-8 flex justify-center gap-4 mb-20">
           <Button variant="outline" onClick={() => window.location.href = '/settings'}>
             Account Settings
           </Button>
