@@ -23,6 +23,8 @@ import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import ProfileDetail from "@/pages/ProfileDetail";
 import DetailedProfileView from "@/components/profile/DetailedProfileView";
+import AdminLayout from "@/components/admin/AdminLayout";
+import Dashboard from "@/pages/admin/Dashboard";
 
 // Create a new query client instance
 const queryClient = new QueryClient();
@@ -53,6 +55,12 @@ const App = () => {
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/profile/:id" element={<ProfileDetail />} />
                     <Route path="*" element={<NotFound />} />
+                    
+                    {/* Admin routes */}
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<Dashboard />} />
+                      {/* Additional admin routes will be added here */}
+                    </Route>
                   </Routes>
                 </AnimatePresence>
               </TooltipProvider>

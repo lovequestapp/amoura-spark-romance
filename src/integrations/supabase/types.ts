@@ -391,11 +391,44 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      admin_dashboard_stats: {
+        Row: {
+          completed_profiles: number | null
+          paid_subscribers: number | null
+          total_profile_views: number | null
+          total_users: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      assign_admin_role: {
+        Args: { user_id_param: string }
+        Returns: undefined
+      }
       get_profile_views: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -414,6 +447,14 @@ export type Database = {
       }
       has_liked_post: {
         Args: { post_id_param: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       like_post: {
@@ -438,6 +479,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "user"
       gender_type: "woman" | "man" | "nonbinary" | "other"
     }
     CompositeTypes: {
@@ -554,6 +596,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       gender_type: ["woman", "man", "nonbinary", "other"],
     },
   },
