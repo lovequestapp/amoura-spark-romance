@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,20 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+
+// Import all page components
+import Index from "@/pages/Index";
+import AuthPage from "@/pages/auth/AuthPage";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
+import Onboarding from "@/pages/Onboarding";
+import Home from "@/pages/Home";
+import Community from "@/pages/Community";
+import Matches from "@/pages/Matches";
+import Messages from "@/pages/Messages";
+import Profile from "@/pages/Profile";
+import Settings from "@/pages/Settings";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
