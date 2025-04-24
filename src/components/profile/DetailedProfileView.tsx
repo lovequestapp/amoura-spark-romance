@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Heart, MessageCircle, DollarSign, MapPin, Verified } from 'lucide-react';
@@ -116,20 +117,20 @@ const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
           </div>
         </div>
 
-        {/* Quick Action Bar with Aligned Buttons */}
+        {/* Quick Action Bar */}
         <div className="px-6 -mt-6 relative z-10">
-          <div className="bg-white rounded-2xl shadow-xl p-4 flex space-x-2 items-center">
+          <div className="bg-white rounded-2xl shadow-xl p-4 flex justify-between items-center">
             <Button
               variant="outline"
               onClick={handlePaidMessage}
-              className="flex-1 border-gray-200 hover:bg-gray-50 text-gray-700"
+              className="flex-1 mr-2 border-gray-200 hover:bg-gray-50"
             >
               <DollarSign className="w-4 h-4 mr-2 text-amoura-deep-pink" />
               Send Paid Message
             </Button>
             <Button
               onClick={handleLike}
-              className="flex-1 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white"
+              className="flex-1 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
             >
               <Heart className="w-4 h-4 mr-2" />
               Like Profile
