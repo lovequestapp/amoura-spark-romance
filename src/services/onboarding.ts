@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 
@@ -65,6 +66,7 @@ export const updateProfile = async (data: {
     
     // If prompts exist, convert them to the required format for Supabase
     if (prompts) {
+      // Use type assertion to fix type compatibility issue
       updateData.prompts = prompts as unknown as Json[];
     }
     
@@ -76,6 +78,21 @@ export const updateProfile = async (data: {
     if (error) throw error;
   } catch (error) {
     console.error('Error updating profile:', error);
+    throw error;
+  }
+};
+
+export const fetchInterests = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('interests')
+      .select('*')
+      .order('category');
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching interests:', error);
     throw error;
   }
 };
@@ -104,21 +121,6 @@ export const saveInterests = async (interestIds: string[]) => {
     if (error) throw error;
   } catch (error) {
     console.error('Error saving interests:', error);
-    throw error;
-  }
-};
-
-export const fetchInterests = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('interests')
-      .select('*')
-      .order('category');
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Error fetching interests:', error);
     throw error;
   }
 };

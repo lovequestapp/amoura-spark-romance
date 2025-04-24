@@ -1,11 +1,22 @@
-import React, { useState, useCallback } from 'react';
+
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import PhotoUploader from '@/components/profile/PhotoUploader';
 import OnboardingProgress from '@/components/onboarding/OnboardingProgress';
-import { updateProfile, uploadPhotos, ProfilePrompt } from '@/services/onboarding';
+import { updateProfile, uploadPhotos, ProfilePrompt, fetchInterests, saveInterests } from '@/services/onboarding';
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { ArrowLeft, Plus, X } from "lucide-react";
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -28,6 +39,7 @@ const Onboarding = () => {
   });
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [prompts, setPrompts] = useState<ProfilePrompt[]>([{ question: '', answer: '' }]);
+  const [availableInterests, setAvailableInterests] = useState<any[]>([]);
 
   // Fetch interests when component mounts
   useEffect(() => {
