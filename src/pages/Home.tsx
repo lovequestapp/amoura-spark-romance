@@ -1,14 +1,12 @@
-
-import React, { useState, useRef } from 'react';
-import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, X, Star } from "lucide-react";
-import { motion, AnimatePresence, PanInfo, useAnimation } from "framer-motion";
-import { useToast } from '@/components/ui/use-toast';
+import React from 'react';
+import { AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import DateIdea from '@/components/profile/DateIdea';
-import EnhancedProfileCard from '@/components/home/EnhancedProfileCard';
-import { Badge } from '@/components/ui/badge';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from "@/components/ui/button";
+import { Heart, X } from "lucide-react";
+import { useCardSwiper } from '@/hooks/use-card-swiper';
+import SwipeableCard from '@/components/home/SwipeableCard';
+import NoMoreProfiles from '@/components/home/NoMoreProfiles';
 
 const enhancedProfiles = [
   {
@@ -82,64 +80,15 @@ const enhancedProfiles = [
 ];
 
 const Home = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState<string | null>(null);
-  const [dragging, setDragging] = useState(false);
-  const { toast } = useToast();
-  const isMobile = useIsMobile();
-  const controls = useAnimation();
-  
-  const currentProfile = enhancedProfiles[currentIndex];
-  
-  const handleSwipe = (dir: string) => {
-    setDirection(dir);
-    
-    // Animate the card in the appropriate direction
-    controls.start({
-      x: dir === 'right' ? 400 : -400,
-      rotate: dir === 'right' ? 30 : -30,
-      opacity: 0,
-      transition: { type: "spring", stiffness: 400, damping: 40 }
-    }).then(() => {
-      if (currentIndex < enhancedProfiles.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        setCurrentIndex(-1); // When we've gone through all profiles, reset to show a message
-      }
-      setDirection(null);
-    });
-  };
-
-  const dragConstraints = useRef(null);
-
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    setDragging(false);
-    const threshold = 100;
-    
-    if (Math.abs(info.offset.x) > threshold) {
-      if (info.offset.x > 0) {
-        handleSwipe('right');
-        
-        // Create heart animation effect when liking
-        const heart = document.createElement('div');
-        heart.className = 'heart-animation';
-        document.body.appendChild(heart);
-        
-        setTimeout(() => {
-          document.body.removeChild(heart);
-        }, 1000);
-      } else {
-        handleSwipe('left');
-      }
-    } else {
-      // Reset card position if not swiped far enough
-      controls.start({
-        x: 0,
-        rotate: 0,
-        transition: { type: "spring", stiffness: 500, damping: 30 }
-      });
-    }
-  };
+  const {
+    currentIndex,
+    currentProfile,
+    controls,
+    dragConstraints,
+    handleSwipe,
+    handleDragEnd,
+    setDragging,
+  } = useCardSwiper(enhancedProfiles);
   
   return (
     <AppLayout>
@@ -153,62 +102,15 @@ const Home = () => {
           >
             <AnimatePresence mode="wait">
               {currentIndex >= 0 ? (
-                <motion.div
-                  key={currentProfile.id}
-                  drag={isMobile ? "x" : false}
+                <SwipeableCard
+                  profile={currentProfile}
+                  controls={controls}
                   dragConstraints={dragConstraints}
-                  dragElastic={0.7}
                   onDragStart={() => setDragging(true)}
                   onDragEnd={handleDragEnd}
-                  animate={controls}
-                  initial={{ x: 0, rotate: 0, scale: 0.95, opacity: 0 }}
-                  whileInView={{ scale: 1, opacity: 1 }}
-                  className="touch-none"
-                  style={{ touchAction: "pan-y" }}
-                >
-                  <EnhancedProfileCard 
-                    profile={currentProfile} 
-                    onSwipe={handleSwipe}
-                  />
-                </motion.div>
+                />
               ) : (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                  className="text-center p-6 mx-auto"
-                  style={{ maxWidth: isMobile ? "90%" : "400px" }}
-                >
-                  <div className="mb-4">
-                    <span className="text-6xl">✨</span>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">You've seen all profiles for now</h3>
-                  <p className="text-gray-500 mb-6">Check back soon or adjust your preferences to see more people</p>
-                  
-                  <div className="space-y-4">
-                    <Button
-                      onClick={() => setCurrentIndex(0)}
-                      className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white w-full"
-                    >
-                      Refresh Profiles
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      className="w-full flex items-center justify-center gap-2"
-                      onClick={() => {
-                        toast({
-                          title: "Premium Feature",
-                          description: "Upgrade to see more profiles!",
-                        });
-                      }}
-                    >
-                      <Star size={16} className="text-amoura-gold" />
-                      <span>Upgrade to See More</span>
-                      <Badge variant="premium" className="ml-1">Premium</Badge>
-                    </Button>
-                  </div>
-                </motion.div>
+                <NoMoreProfiles onRefresh={() => currentIndex === -1 && setCurrentIndex(0)} />
               )}
             </AnimatePresence>
           </motion.div>
