@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -16,21 +15,21 @@ const AppMockup = () => {
   
   const screens = [
     {
-      image: "/photo-1581091226825-a6a2a5aee158",
+      image: "/lovable-uploads/d087d2b0-450b-402c-91f9-cc0841a89716.png",
       title: "Discover",
       description: "Find people who share your interests",
       path: "/home"
     },
     {
-      image: "/photo-1649972904349-6e44c42644a7",
+      image: "/lovable-uploads/f572c971-a715-43c4-84b3-ce8d82790d45.png",
       title: "Connect",
       description: "Start meaningful conversations",
-      path: "/messages"
+      path: "/matches"
     },
     {
-      image: "/photo-1581092795360-fd1ca04f0952",
-      title: "Meet",
-      description: "Turn online connections into real dates",
+      image: "/lovable-uploads/4388b48e-0a4b-4870-9e6b-55b46b986162.png",
+      title: "Community",
+      description: "Join our vibrant dating community",
       path: "/community"
     }
   ];
@@ -75,7 +74,7 @@ const AppMockup = () => {
                 >
                   <div className="relative h-[480px]">
                     <img
-                      src={`https://source.unsplash.com${screen.image}`}
+                      src={screen.image}
                       alt={screen.title}
                       className="w-full h-full object-cover"
                     />
@@ -90,7 +89,6 @@ const AppMockup = () => {
           </div>
         </div>
         
-        {/* Mobile carousel version */}
         <div className="md:hidden">
           <Carousel>
             <CarouselContent>
@@ -107,7 +105,7 @@ const AppMockup = () => {
                       <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                         <div className="relative h-[400px]">
                           <img
-                            src={`https://source.unsplash.com${screen.image}`}
+                            src={screen.image}
                             alt={screen.title}
                             className="w-full h-full object-cover"
                           />
