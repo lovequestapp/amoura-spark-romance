@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 
@@ -22,7 +21,6 @@ const AlgorithmSection = () => {
     }
   ];
 
-  // Animation variants for the connecting lines
   const lineVariants = {
     hidden: { pathLength: 0 },
     visible: { 
@@ -35,10 +33,9 @@ const AlgorithmSection = () => {
   };
 
   return (
-    <section className="py-24 px-6 bg-gradient-to-b from-amoura-soft-pink via-white to-white relative overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
-        <div className="absolute top-20 left-10 w-64 h-64 rounded-full bg-amoura-deep-pink blur-3xl"></div>
+    <section className="py-24 px-6 bg-gradient-to-br from-amoura-soft-pink via-white to-amoura-soft-pink/30 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <div className="absolute top-20 left-10 w-96 h-96 rounded-full bg-amoura-deep-pink blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-amoura-gold blur-3xl"></div>
       </div>
       
@@ -65,7 +62,6 @@ const AlgorithmSection = () => {
           </p>
         </motion.div>
 
-        {/* Mobile view - vertical layout with line connectors */}
         <div className="md:hidden space-y-8">
           {steps.map((step, index) => (
             <motion.div
@@ -91,9 +87,7 @@ const AlgorithmSection = () => {
           ))}
         </div>
         
-        {/* Desktop view with curved connecting lines */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-          {/* SVG connector lines */}
           <svg className="absolute top-1/2 left-0 w-full h-24 -translate-y-1/2 z-0" 
                preserveAspectRatio="none"
                viewBox="0 0 1200 100"
