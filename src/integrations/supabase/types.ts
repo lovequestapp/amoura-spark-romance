@@ -269,6 +269,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"] | null
           height: number | null
           id: string
+          is_admin_account: boolean | null
           onboarding_completed: boolean | null
           onboarding_step: number | null
           photos: string[] | null
@@ -289,6 +290,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           height?: number | null
           id: string
+          is_admin_account?: boolean | null
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
           photos?: string[] | null
@@ -309,6 +311,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           height?: number | null
           id?: string
+          is_admin_account?: boolean | null
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
           photos?: string[] | null
@@ -427,6 +430,10 @@ export type Database = {
     Functions: {
       assign_admin_role: {
         Args: { user_id_param: string }
+        Returns: undefined
+      }
+      create_admin_user: {
+        Args: { email: string; user_id: string }
         Returns: undefined
       }
       get_profile_views: {
