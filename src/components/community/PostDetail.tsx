@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -18,6 +17,14 @@ import { Post, Comment } from '@/types/community';
 import { addComment, fetchComments, likePost, unlikePost } from '@/services/community';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreVertical, Trash2 } from 'lucide-react';
+import { deletePost } from '@/services/community';
 
 interface PostDetailProps {
   post: Post | null;
@@ -45,7 +52,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
         setLiked(!!post.isLiked);
       }
       
-      // Load comments when post is opened
       if (isOpen) {
         loadComments();
       }
@@ -88,14 +94,12 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
         setLiked(true);
         setLikeCount(newLikeCount);
         
-        // Show heart animation
         const heart = document.createElement('div');
         heart.className = 'heart-animation';
         document.body.appendChild(heart);
         setTimeout(() => document.body.removeChild(heart), 1000);
       }
       
-      // Update the posts queries to reflect the like change
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['user-posts'] });
       queryClient.invalidateQueries({ queryKey: ['trending-posts'] });
@@ -109,7 +113,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
   };
 
   const handleShare = () => {
-    // Create a URL with the post ID
     const postUrl = `${window.location.origin}/community?post=${post.id}`;
     navigator.clipboard.writeText(postUrl);
     
@@ -138,7 +141,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
         setComments([comment, ...comments]);
         setNewComment('');
         
-        // Update post data in queries
         queryClient.invalidateQueries({ queryKey: ['posts'] });
         queryClient.invalidateQueries({ queryKey: ['user-posts'] });
         queryClient.invalidateQueries({ queryKey: ['trending-posts'] });
@@ -161,8 +163,32 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
       onTagClick(tag);
     }
   };
-  
-  // Function to determine the correct image source
+
+  const handleDelete = async () => {
+    if (!post) return;
+    
+    try {
+      await deletePost(post.id);
+      
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+      queryClient.invalidateQueries({ queryKey: ['trending-posts'] });
+      
+      toast({
+        title: "Post deleted",
+        description: "Your post has been successfully deleted",
+      });
+      
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete post. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getImageSrc = (path?: string) => {
     if (!path) return '';
     
@@ -200,16 +226,36 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
               <p className="text-sm text-muted-foreground">{post.timestamp}</p>
             </div>
             {post.isUserPost && (
-              <Badge variant="outline" className="ml-auto">Your Post</Badge>
+              <div className="ml-auto flex items-center gap-2">
+                <Badge variant="outline">Your Post</Badge>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-8 w-8"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem 
+                      className="text-destructive focus:text-destructive"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete post
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             )}
           </div>
         </DialogHeader>
         
         <div className="p-4 space-y-4" id="post-content">
-          {/* Post content */}
           <p className="text-lg whitespace-pre-line">{post.content}</p>
           
-          {/* Image with better presentation */}
           {post.image && (
             <Card className="overflow-hidden rounded-lg border">
               <img 
@@ -220,7 +266,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
             </Card>
           )}
           
-          {/* Tags */}
           <div className="flex flex-wrap gap-2">
             {post.tags.map(tag => (
               <Badge 
@@ -234,7 +279,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
             ))}
           </div>
           
-          {/* Interaction buttons */}
           <div className="flex items-center gap-4 py-4 border-t border-b">
             <Button 
               variant="ghost" 
@@ -257,7 +301,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
             </Button>
           </div>
           
-          {/* Comment section */}
           <div className="space-y-4">
             <div className="flex gap-2">
               <Textarea
@@ -276,7 +319,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
               </Button>
             </div>
             
-            {/* Comments list */}
             <div className="space-y-4">
               {loadingComments ? (
                 <p className="text-center text-muted-foreground">Loading comments...</p>

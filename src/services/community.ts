@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
 import { Post, Comment } from "@/types/community";
@@ -369,4 +368,22 @@ export const fetchComments = async (postId: string): Promise<Comment[]> => {
   }));
 
   return commentResults;
+};
+
+// Function to delete a post
+export const deletePost = async (postId: string): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('community_posts')
+      .delete()
+      .eq('id', postId);
+
+    if (error) {
+      console.error("Error deleting post:", error);
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error in deletePost:", error);
+    throw error;
+  }
 };

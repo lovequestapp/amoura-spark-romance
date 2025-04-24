@@ -1,14 +1,20 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle, Share } from 'lucide-react';
+import { Heart, MessageCircle, Share, MoreVertical, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { Post } from '@/types/community';
-import { likePost, unlikePost } from '@/services/community';
+import { likePost, unlikePost, deletePost } from '@/services/community';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useQueryClient } from '@tanstack/react-query';
 
 interface PostCardProps {
   post: Post;
@@ -22,8 +28,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
   const { toast } = useToast();
-  
-  // Initialize the liked state based on if the user has liked this post
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     if ('isLiked' in post) {
       setLiked(!!post.isLiked);
@@ -31,7 +37,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
   }, [post]);
 
   const handleLike = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent opening the post detail
+    e.stopPropagation();
     
     if (!user) {
       toast({
@@ -52,7 +58,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
         setLiked(true);
         setLikeCount(newLikeCount);
         
-        // Show heart animation
         const heart = document.createElement('div');
         heart.className = 'heart-animation';
         document.body.appendChild(heart);
@@ -70,7 +75,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Create a URL with the post ID
     const postUrl = `${window.location.origin}/community?post=${post.id}`;
     navigator.clipboard.writeText(postUrl);
     
@@ -82,9 +86,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
 
   const handleComment = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Opening the full post will naturally focus on the comment section
   };
-  
+
   const handleTagClick = (e: React.MouseEvent, tag: string) => {
     e.stopPropagation();
     if (onTagClick) {
@@ -92,7 +95,29 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
     }
   };
 
-  // Function to determine the correct image source
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      await deletePost(post.id);
+      
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+      queryClient.invalidateQueries({ queryKey: ['trending-posts'] });
+      
+      toast({
+        title: "Post deleted",
+        description: "Your post has been successfully deleted",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete post. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getImageSrc = (path?: string) => {
     if (!path) return '';
     
@@ -106,7 +131,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
   return (
     <Card className="overflow-hidden hover:shadow-md transition-all cursor-pointer">
       <CardContent className="p-4">
-        {/* Author info */}
         <div className="flex items-center gap-3 mb-3">
           <img 
             src={getImageSrc(post.author.avatar)}
@@ -118,14 +142,35 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
             <p className="text-xs text-muted-foreground">{post.timestamp}</p>
           </div>
           {post.isUserPost && (
-            <Badge variant="outline" className="ml-auto">Your Post</Badge>
+            <div className="ml-auto flex items-center gap-2">
+              <Badge variant="outline">Your Post</Badge>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8" 
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem 
+                    className="text-destructive focus:text-destructive"
+                    onClick={handleDelete}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete post
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
         </div>
         
-        {/* Post content - truncated in card view */}
         <p className="mb-3 line-clamp-3">{post.content}</p>
         
-        {/* Tags */}
         <div className="flex flex-wrap gap-1 mb-3">
           {post.tags.map(tag => (
             <Badge 
@@ -139,7 +184,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
           ))}
         </div>
         
-        {/* Image preview */}
         {post.image && (
           <div className="mb-3 rounded-md overflow-hidden">
             <img 
