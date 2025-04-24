@@ -56,6 +56,7 @@ const ProfileGallery: React.FC<ProfileGalleryProps> = ({
             className={`absolute top-1/2 left-2 z-20 h-8 w-8 rounded-full bg-white/80 flex items-center justify-center shadow-sm -translate-y-1/2 transition-opacity ${
               currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
             }`}
+            aria-label="Previous photo"
           >
             <ChevronLeft size={20} className="text-gray-800" />
           </button>
@@ -66,6 +67,7 @@ const ProfileGallery: React.FC<ProfileGalleryProps> = ({
             className={`absolute top-1/2 right-2 z-20 h-8 w-8 rounded-full bg-white/80 flex items-center justify-center shadow-sm -translate-y-1/2 transition-opacity ${
               currentIndex === photos.length - 1 ? 'opacity-50 cursor-not-allowed' : 'opacity-90 hover:opacity-100'
             }`}
+            aria-label="Next photo"
           >
             <ChevronRight size={20} className="text-gray-800" />
           </button>
@@ -91,6 +93,7 @@ const ProfileGallery: React.FC<ProfileGalleryProps> = ({
         <button 
           onClick={onAddPhoto}
           className="absolute bottom-4 right-4 z-20 h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-md"
+          aria-label="Add photo"
         >
           <Plus size={20} className="text-amoura-deep-pink" />
         </button>

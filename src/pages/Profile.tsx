@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,12 +11,14 @@ import ProfileGallery from '@/components/profile/ProfileGallery';
 import ProfileAnalytics from '@/components/profile/ProfileAnalytics';
 import PremiumFeatures from '@/components/subscription/PremiumFeatures';
 import { useToast } from '@/hooks/use-toast';
+import PremiumModal from '@/components/subscription/PremiumModal';
 
 const Profile = () => {
   const { user } = useAuth();
   const { tier, isSubscribed, openUpgradeModal } = useSubscription();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   // Sample user profile data - in a real app, this would come from an API
   const profile = {
@@ -36,21 +38,15 @@ const Profile = () => {
   };
 
   const handleEditPhotos = () => {
-    toast({
-      description: "Photo upload functionality will be available soon!",
-    });
+    navigate('/profile/photos');
   };
 
   const handleEditBio = () => {
-    toast({
-      description: "Bio editing will be available soon!",
-    });
+    navigate('/profile/bio');
   };
 
   const handleEditPrompts = () => {
-    toast({
-      description: "Prompt editing will be available soon!",
-    });
+    navigate('/profile/prompts');
   };
 
   // Get user initials for avatar fallback
@@ -89,7 +85,7 @@ const Profile = () => {
         {/* Profile gallery */}
         <div className="mt-6">
           <h2 className="font-medium text-lg mb-2">Your Photos</h2>
-          <ProfileGallery photos={profile.photos} />
+          <ProfileGallery photos={profile.photos} editable={true} onAddPhoto={handleEditPhotos} />
           <Button 
             variant="outline" 
             className="w-full mt-3"
@@ -141,7 +137,7 @@ const Profile = () => {
                 <p className="text-sm">Get more visibility and premium features</p>
               </div>
               <Button 
-                onClick={openUpgradeModal}
+                onClick={() => setShowPremiumModal(true)}
                 size="sm"
                 variant="secondary"
                 className="bg-white text-amoura-deep-pink hover:bg-gray-100"
@@ -174,6 +170,12 @@ const Profile = () => {
           </Button>
         </div>
       </div>
+
+      {/* Premium Modal */}
+      <PremiumModal 
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
     </AppLayout>
   );
 };
