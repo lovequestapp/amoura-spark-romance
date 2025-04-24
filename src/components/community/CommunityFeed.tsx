@@ -40,7 +40,7 @@ type SortOption = 'newest' | 'oldest' | 'most-liked' | 'most-commented';
 const CommunityFeed: React.FC<CommunityFeedProps> = ({ 
   activeTab, 
   onTagSelect, 
-  selectedTag,
+  selectedTag = '',
   userPosts,
   allPosts 
 }) => {
@@ -191,6 +191,7 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
               post={post} 
               isMobile={isMobile} 
               onTagClick={(tag) => onTagSelect && onTagSelect(tag)}
+              selectedTag={selectedTag}
             />
           </motion.div>
         ))

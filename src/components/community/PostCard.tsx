@@ -12,9 +12,10 @@ interface PostCardProps {
   post: Post;
   isMobile: boolean;
   onTagClick?: (tag: string) => void;
+  selectedTag?: string;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selectedTag }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
   const { toast } = useToast();
@@ -102,7 +103,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick }) => {
             <Badge 
               key={tag} 
               variant="outline" 
-              className={`text-xs cursor-pointer hover:bg-muted transition-colors ${tag === onTagClick ? 'bg-amoura-soft-pink text-amoura-deep-pink' : ''}`}
+              className={`text-xs cursor-pointer hover:bg-muted transition-colors ${tag === selectedTag ? 'bg-amoura-soft-pink text-amoura-deep-pink' : ''}`}
               onClick={(e) => handleTagClick(e, tag)}
             >
               #{tag}

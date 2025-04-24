@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import CommunityFeed, { Post } from '@/components/community/CommunityFeed';
@@ -140,12 +139,6 @@ const Community = () => {
 
           <CommunityTabs activeTab={activeTab} onChange={handleTabChange} />
           
-          {isMobile ? null : (
-            <div className="hidden md:block sticky top-4">
-              <CommunityTrending onTagSelect={handleTagSelect} />
-            </div>
-          )}
-
           <div className="md:flex gap-6">
             <div className="flex-grow">
               <CommunityFeed 
@@ -157,13 +150,9 @@ const Community = () => {
               />
             </div>
             
-            {isMobile ? null : (
-              <div className="hidden md:block w-72">
-                <div className="sticky top-4">
-                  <CommunityTrending onTagSelect={handleTagSelect} />
-                </div>
-              </div>
-            )}
+            <div className="hidden md:block w-72 sticky top-4">
+              <CommunityTrending onTagSelect={handleTagSelect} />
+            </div>
           </div>
         </div>
 

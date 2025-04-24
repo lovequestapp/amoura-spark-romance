@@ -31,9 +31,10 @@ interface PostDetailProps {
   isOpen: boolean;
   onClose: () => void;
   onTagClick?: (tag: string) => void;
+  selectedTag?: string;
 }
 
-const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagClick }) => {
+const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagClick, selectedTag }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post?.likes || 0);
   const [newComment, setNewComment] = useState('');
@@ -167,7 +168,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
               <Badge 
                 key={tag} 
                 variant="outline"
-                className="cursor-pointer hover:bg-muted transition-colors"
+                className={`cursor-pointer hover:bg-muted transition-colors ${tag === selectedTag ? 'bg-amoura-soft-pink text-amoura-deep-pink' : ''}`}
                 onClick={(e) => handleTagClick(e, tag)}
               >
                 #{tag}
