@@ -152,13 +152,24 @@ const Index = () => {
                 className="flex items-center gap-2 text-gray-500 justify-center md:justify-start"
               >
                 <div className="flex -space-x-2">
-                  {[1,2,3].map(i => (
-                    <motion.div 
-                      key={i}
-                      whileHover={{ scale: 1.1 }}
-                      className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white"
-                    />
-                  ))}
+                  <motion.img 
+                    src="/photo-1649972904349-6e44c42644a7"
+                    alt="Community member"
+                    whileHover={{ scale: 1.1 }}
+                    className="w-8 h-8 rounded-full object-cover border-2 border-white"
+                  />
+                  <motion.img 
+                    src="/photo-1581091226825-a6a2a5aee158"
+                    alt="Community member"
+                    whileHover={{ scale: 1.1 }}
+                    className="w-8 h-8 rounded-full object-cover border-2 border-white"
+                  />
+                  <motion.img 
+                    src="/photo-1581090464777-f3220bbe1a8b"
+                    alt="Community member"
+                    whileHover={{ scale: 1.1 }}
+                    className="w-8 h-8 rounded-full object-cover border-2 border-white"
+                  />
                 </div>
                 <p className="text-sm font-medium">Join 100,000+ singles finding love every day</p>
               </motion.div>
