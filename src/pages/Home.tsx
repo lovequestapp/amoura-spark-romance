@@ -15,7 +15,7 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
-const enhancedProfiles = [
+export const enhancedProfiles = [
   {
     id: 1,
     name: "Emma",
