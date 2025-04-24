@@ -40,7 +40,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
   return (
     <motion.div 
       layout
-      className="swipe-card touch-none"
+      className="swipe-card touch-none mx-auto"
+      style={{ maxWidth: 'calc(100% - 24px)', width: '100%' }}
     >
       <ProfilePhotos photos={profile.photos} />
       
@@ -58,7 +59,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
           <Button 
             onClick={toggleExpand}
             variant="ghost" 
-            className="w-full flex justify-between items-center py-2 px-0"
+            className="w-full flex justify-between items-center py-2 px-0 hover:bg-amoura-soft-pink hover:text-amoura-deep-pink transition-colors"
           >
             <span>View profile</span>
             <span>↓</span>
@@ -118,7 +119,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
             <Button 
               onClick={toggleExpand}
               variant="ghost" 
-              className="w-full flex justify-between items-center py-2 px-0 mt-2"
+              className="w-full flex justify-between items-center py-2 px-0 mt-2 hover:bg-amoura-soft-pink hover:text-amoura-deep-pink transition-colors"
             >
               <span>Close</span>
               <span>↑</span>

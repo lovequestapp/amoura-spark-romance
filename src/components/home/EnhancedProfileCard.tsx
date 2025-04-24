@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PersonalityMatch from './PersonalityMatch';
 import { useToast } from '@/components/ui/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Profile {
   id: number;
@@ -39,6 +40,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
   const [promptIndex, setPromptIndex] = useState(0);
   const [showPersonality, setShowPersonality] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const toggleExpand = () => {
     setExpanded(!expanded);
@@ -74,11 +76,16 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
   return (
     <motion.div 
       layout
-      className="swipe-card touch-none"
+      className="swipe-card touch-none mx-auto"
+      style={{ maxWidth: isMobile ? 'calc(100% - 24px)' : '400px', width: '100%' }}
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.95, opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 300, 
+        damping: 25
+      }}
     >
       <ProfilePhotos photos={profile.photos} />
       
@@ -112,7 +119,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
             <Button 
               onClick={toggleExpand}
               variant="ghost" 
-              className="w-full flex justify-between items-center py-2 px-0"
+              className="w-full flex justify-between items-center py-2 px-0 hover:bg-amoura-soft-pink hover:text-amoura-deep-pink transition-colors"
             >
               <span>View profile</span>
               <span>↓</span>
@@ -126,6 +133,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
                   className="mb-4"
                 >
                   <PersonalityMatch 
@@ -145,6 +153,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
                   <p className="text-gray-700 mb-4">{profile.bio}</p>
                   
@@ -217,7 +226,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
             <Button 
               onClick={toggleExpand}
               variant="ghost" 
-              className="w-full flex justify-between items-center py-2 px-0 mt-2"
+              className="w-full flex justify-between items-center py-2 px-0 mt-2 hover:bg-amoura-soft-pink hover:text-amoura-deep-pink transition-colors"
             >
               <span>Close</span>
               <span>↑</span>

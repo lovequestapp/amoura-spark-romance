@@ -47,7 +47,11 @@ const StandoutCard: React.FC<StandoutCardProps> = ({ profile }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+    <motion.div 
+      whileHover={{ y: -5 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+    >
       <div className="relative">
         <img 
           src={`https://source.unsplash.com${profile.photo}`}
@@ -105,7 +109,7 @@ const StandoutCard: React.FC<StandoutCardProps> = ({ profile }) => {
           </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

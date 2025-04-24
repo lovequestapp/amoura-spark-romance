@@ -2,12 +2,13 @@
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, X, Star } from "lucide-react";
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { motion, AnimatePresence, PanInfo, useAnimation } from "framer-motion";
 import { useToast } from '@/components/ui/use-toast';
 import AppLayout from '@/components/layout/AppLayout';
 import DateIdea from '@/components/profile/DateIdea';
 import EnhancedProfileCard from '@/components/home/EnhancedProfileCard';
 import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const enhancedProfiles = [
   {
@@ -85,32 +86,58 @@ const Home = () => {
   const [direction, setDirection] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const controls = useAnimation();
   
   const currentProfile = enhancedProfiles[currentIndex];
   
   const handleSwipe = (dir: string) => {
     setDirection(dir);
-    setTimeout(() => {
+    
+    // Animate the card in the appropriate direction
+    controls.start({
+      x: dir === 'right' ? 400 : -400,
+      rotate: dir === 'right' ? 30 : -30,
+      opacity: 0,
+      transition: { type: "spring", stiffness: 400, damping: 40 }
+    }).then(() => {
       if (currentIndex < enhancedProfiles.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
-        // When we've gone through all profiles, reset to show a message
-        setCurrentIndex(-1);
+        setCurrentIndex(-1); // When we've gone through all profiles, reset to show a message
       }
       setDirection(null);
-    }, 300);
+    });
   };
 
   const dragConstraints = useRef(null);
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setDragging(false);
-    if (Math.abs(info.offset.x) > 100) {
+    const threshold = 100;
+    
+    if (Math.abs(info.offset.x) > threshold) {
       if (info.offset.x > 0) {
         handleSwipe('right');
+        
+        // Create heart animation effect when liking
+        const heart = document.createElement('div');
+        heart.className = 'heart-animation';
+        document.body.appendChild(heart);
+        
+        setTimeout(() => {
+          document.body.removeChild(heart);
+        }, 1000);
       } else {
         handleSwipe('left');
       }
+    } else {
+      // Reset card position if not swiped far enough
+      controls.start({
+        x: 0,
+        rotate: 0,
+        transition: { type: "spring", stiffness: 500, damping: 30 }
+      });
     }
   };
   
@@ -128,17 +155,16 @@ const Home = () => {
               {currentIndex >= 0 ? (
                 <motion.div
                   key={currentProfile.id}
-                  drag="x"
+                  drag={isMobile ? "x" : false}
                   dragConstraints={dragConstraints}
+                  dragElastic={0.7}
                   onDragStart={() => setDragging(true)}
                   onDragEnd={handleDragEnd}
-                  animate={{ 
-                    x: direction === 'right' ? 300 : direction === 'left' ? -300 : 0,
-                    rotate: direction === 'right' ? 20 : direction === 'left' ? -20 : 0,
-                    scale: dragging ? 1.03 : 1
-                  }}
-                  transition={{ duration: 0.5 }}
+                  animate={controls}
+                  initial={{ x: 0, rotate: 0, scale: 0.95, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
                   className="touch-none"
+                  style={{ touchAction: "pan-y" }}
                 >
                   <EnhancedProfileCard 
                     profile={currentProfile} 
@@ -149,7 +175,9 @@ const Home = () => {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center p-6"
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className="text-center p-6 mx-auto"
+                  style={{ maxWidth: isMobile ? "90%" : "400px" }}
                 >
                   <div className="mb-4">
                     <span className="text-6xl">✨</span>
@@ -191,7 +219,7 @@ const Home = () => {
             <Button
               onClick={() => handleSwipe("left")}
               size="lg"
-              className="h-16 w-16 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 shadow-sm"
+              className="h-16 w-16 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 shadow-sm transform transition-transform active:scale-95"
             >
               <X size={24} className="text-gray-500" />
             </Button>
@@ -199,7 +227,7 @@ const Home = () => {
             <Button
               onClick={() => handleSwipe("right")}
               size="lg"
-              className="h-16 w-16 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-md"
+              className="h-16 w-16 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-md transform transition-transform active:scale-95"
             >
               <Heart size={24} className="text-white" />
             </Button>
