@@ -60,11 +60,15 @@ export const updateProfile = async (data: {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('No user found');
     
-    // Convert ProfilePrompt[] to Json[] for storage if present
-    const updateData = { ...data };
-    if (updateData.prompts) {
-      // Type assertion to convert ProfilePrompt[] to Json[]
-      updateData.prompts = updateData.prompts as unknown as Json[];
+    // Create a new update data object without the prompts field
+    const { prompts, ...updateDataWithoutPrompts } = data;
+    
+    // Prepare the final update data
+    const updateData: any = { ...updateDataWithoutPrompts };
+    
+    // If prompts exist, convert them to the required format for Supabase
+    if (prompts) {
+      updateData.prompts = prompts as unknown as Json[];
     }
     
     const { error } = await supabase
