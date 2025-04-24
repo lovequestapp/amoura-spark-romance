@@ -142,7 +142,7 @@ const Home = () => {
         
         {featuredProfile && (
           <FeaturedMatch 
-            profile={featuredProfile} 
+            profile={featuredProfile as Profile} 
             onViewProfile={handleViewFeaturedProfile} 
           />
         )}

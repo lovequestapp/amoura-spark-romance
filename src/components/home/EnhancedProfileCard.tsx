@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Info } from 'lucide-react';
 import ProfilePhotos from '@/components/profile/ProfilePhotos';
 import ProfilePrompt from '@/components/profile/ProfilePrompt';
 import PersonalityMatch from './PersonalityMatch';
