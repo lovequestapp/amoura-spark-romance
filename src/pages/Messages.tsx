@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ArrowLeft, Image, Send } from 'lucide-react';
@@ -26,7 +25,7 @@ const conversations: Record<string, {
     match: {
       id: 1,
       name: 'Emma',
-      photo: '/assets/profile-1a.jpg'
+      photo: '/lovable-uploads/955e854b-03c9-4efe-91de-ea62233f88eb.png'
     },
     messages: []
   },
@@ -34,7 +33,7 @@ const conversations: Record<string, {
     match: {
       id: 2,
       name: 'Alex',
-      photo: '/assets/profile-2a.jpg'
+      photo: '/lovable-uploads/d96b24ef-01b0-41a0-afdf-564574149a3c.png'
     },
     messages: [
       {
@@ -50,7 +49,7 @@ const conversations: Record<string, {
     match: {
       id: 3,
       name: 'Sofia',
-      photo: '/assets/profile-3a.jpg'
+      photo: '/lovable-uploads/c3b91871-0b81-4711-a02d-6771b41f44ed.png'
     },
     messages: [
       {

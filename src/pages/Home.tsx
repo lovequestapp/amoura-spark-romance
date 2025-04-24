@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -23,7 +22,11 @@ const enhancedProfiles = [
     age: 28,
     distance: "3 miles away",
     occupation: "Graphic Designer",
-    photos: ["/assets/profile-1a.jpg", "/assets/profile-1b.jpg", "/assets/profile-1c.jpg"],
+    photos: [
+      "/lovable-uploads/955e854b-03c9-4efe-91de-ea62233f88eb.png",
+      "/lovable-uploads/d96b24ef-01b0-41a0-afdf-564574149a3c.png",
+      "/lovable-uploads/c3b91871-0b81-4711-a02d-6771b41f44ed.png"
+    ],
     video: {
       url: "https://example.com/sample-video.mp4",
       thumbnail: "/assets/profile-1-video-thumb.jpg",
