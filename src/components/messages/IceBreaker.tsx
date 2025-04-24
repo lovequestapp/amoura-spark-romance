@@ -13,7 +13,11 @@ const iceBreakers = [
   "What's your go-to karaoke song?"
 ];
 
-const IceBreaker = () => {
+interface IceBreakerProps {
+  onUse?: (text: string) => void;
+}
+
+const IceBreaker: React.FC<IceBreakerProps> = ({ onUse }) => {
   const [currentIceBreaker, setCurrentIceBreaker] = useState(
     iceBreakers[Math.floor(Math.random() * iceBreakers.length)]
   );
@@ -24,6 +28,12 @@ const IceBreaker = () => {
       newIceBreaker = iceBreakers[Math.floor(Math.random() * iceBreakers.length)];
     }
     setCurrentIceBreaker(newIceBreaker);
+  };
+  
+  const handleUse = () => {
+    if (onUse) {
+      onUse(currentIceBreaker);
+    }
   };
   
   return (
@@ -55,6 +65,7 @@ const IceBreaker = () => {
         <Button
           size="sm"
           className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
+          onClick={handleUse}
         >
           Use this
         </Button>

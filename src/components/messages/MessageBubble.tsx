@@ -1,0 +1,50 @@
+
+import React from 'react';
+import { format } from 'date-fns';
+
+interface MessageBubbleProps {
+  message: {
+    id: string;
+    text?: string | null;
+    voice_url?: string | null;
+    sender: 'user' | 'match';
+    time: string;
+    seen?: boolean;
+    message_type?: 'text' | 'voice' | 'image';
+  };
+}
+
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+  const isUser = message.sender === 'user';
+  
+  return (
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div 
+        className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+          isUser 
+            ? 'bg-amoura-deep-pink text-white' 
+            : 'bg-gray-100 text-gray-800'
+        }`}
+      >
+        {message.message_type === 'voice' && message.voice_url ? (
+          <audio src={message.voice_url} controls className="max-w-full h-10" />
+        ) : (
+          <p className="break-words">{message.text}</p>
+        )}
+        
+        <div className="flex items-center justify-end gap-1 mt-1">
+          <span className={`text-xs ${isUser ? 'text-white/70' : 'text-gray-500'}`}>
+            {format(new Date(message.time), 'h:mm a')}
+          </span>
+          {isUser && (
+            <span className="text-xs text-white/70">
+              {message.seen ? '✓✓' : '✓'}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MessageBubble;
