@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import DateIdea from '@/components/profile/DateIdea';
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,9 @@ const enhancedProfiles = [
         question: "My simple pleasures...",
         answer: "Morning coffee with a good book, sunset beach walks, and finding hidden cafés in new cities."
       }
-    ]
+    ],
+    relationshipIntention: "Dating",
+    personalityBadges: ["Adventurous", "Creative", "Thoughtful"]
   },
   {
     id: 2,
@@ -77,7 +78,9 @@ const enhancedProfiles = [
         question: "We'll get along if...",
         answer: "You like trying new restaurants as much as I do, and you're up for spontaneous weekend trips."
       }
-    ]
+    ],
+    relationshipIntention: "Casual",
+    personalityBadges: ["Social", "Spontaneous", "Foodie"]
   }
 ];
 
@@ -103,7 +106,6 @@ const Home = () => {
   
   const handleApplyFilters = (newFilters: FilterOptions) => {
     setFilters(newFilters);
-    // In a real app, this would trigger a refetch of profiles based on filters
     console.log("Filters applied:", newFilters);
   };
   
@@ -112,7 +114,6 @@ const Home = () => {
       <div className="flex-1 flex flex-col p-4">
         <DateIdea />
         
-        {/* Add Match Filters component */}
         <MatchFilters onApplyFilters={handleApplyFilters} />
         
         <div className="flex-1 flex items-center justify-center relative">
@@ -127,7 +128,7 @@ const Home = () => {
                   controls={controls}
                   dragConstraints={dragConstraints}
                   onDragStart={() => setDragging(true)}
-                  onDragEnd={handleDragEnd}
+                  onDragEnd={(event, info) => handleDragEnd(event, info)}
                 />
               ) : (
                 <NoMoreProfiles onRefresh={() => currentIndex === -1 && setCurrentIndex(0)} />

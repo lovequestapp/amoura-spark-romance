@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion, useAnimation, PanInfo } from 'framer-motion';
 import EnhancedProfileCard from './EnhancedProfileCard';
 
 interface Profile {
@@ -29,7 +30,7 @@ interface SwipeableCardProps {
   controls: ReturnType<typeof useAnimation>;
   dragConstraints: React.RefObject<HTMLDivElement>;
   onDragStart: () => void;
-  onDragEnd: (info: any) => void;
+  onDragEnd: (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void;
 }
 
 const SwipeableCard: React.FC<SwipeableCardProps> = ({
@@ -67,9 +68,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
       dragConstraints={dragConstraints}
       dragElastic={0.8}
       onDragStart={onDragStart}
-      onDragEnd={(event, info) => {
-        onDragEnd(info);
-      }}
+      onDragEnd={onDragEnd}
       style={{ originX: 0.5 }}
       className="relative"
     >
