@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './AuthContext';
@@ -128,9 +127,8 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
         setSubscriptionEnd(data.subscription_end ? new Date(data.subscription_end) : null);
         setFeatures(data.features || features);
         
-        // Use typed response for RPC call
-        const { data: subscriberData, error: subscriberError } = await supabase
-          .rpc('get_subscriber_data', { user_id_param: user.id }) as {
+        const { data: subscriberData, error: subscriberError } = await (supabase
+          .rpc('get_subscriber_data', { user_id_param: user.id }) as any) as {
             data: SubscriberData | null;
             error: Error | null;
           };
@@ -209,10 +207,10 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     
     if (features.rewinds !== 'unlimited') {
       try {
-        const { error } = await supabase.rpc('update_remaining_rewinds', {
+        const { error } = await (supabase.rpc('update_remaining_rewinds', {
           user_id_param: user.id,
           new_value: remainingRewinds - 1
-        }) as { data: null; error: Error | null };
+        }) as any) as { data: null; error: Error | null };
           
         if (error) throw error;
         
@@ -245,10 +243,10 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     
     if (features.superLikes !== 'unlimited') {
       try {
-        const { error } = await supabase.rpc('update_remaining_super_likes', {
+        const { error } = await (supabase.rpc('update_remaining_super_likes', {
           user_id_param: user.id,
           new_value: remainingSuperLikes - 1
-        }) as { data: null; error: Error | null };
+        }) as any) as { data: null; error: Error | null };
           
         if (error) throw error;
         
@@ -274,10 +272,10 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     boostEnd.setHours(boostEnd.getHours() + 1);
     
     try {
-      const { error } = await supabase.rpc('update_boost_until', {
+      const { error } = await (supabase.rpc('update_boost_until', {
         user_id_param: user.id,
         boost_until_param: boostEnd.toISOString()
-      }) as { data: null; error: Error | null };
+      }) as any) as { data: null; error: Error | null };
         
       if (error) throw error;
       

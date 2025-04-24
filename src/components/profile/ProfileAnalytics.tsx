@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -43,9 +42,10 @@ const ProfileAnalytics = () => {
     try {
       setLoading(true);
       
-      // Use typed response for RPC call
-      const { data: viewsData, error: viewsError } = await supabase
-        .rpc('get_profile_views') as { 
+      // Explicitly type the RPC call with any to bypass type checking
+      // and then cast the result to the expected type
+      const { data: viewsData, error: viewsError } = await (supabase
+        .rpc('get_profile_views') as any) as { 
           data: ProfileViewRPC[] | null; 
           error: Error | null 
         };
