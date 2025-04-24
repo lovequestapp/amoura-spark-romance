@@ -1,64 +1,39 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Star } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
+import { RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
-import PremiumModal from '../subscription/PremiumModal';
 
 interface NoMoreProfilesProps {
   onRefresh: () => void;
 }
 
 const NoMoreProfiles: React.FC<NoMoreProfilesProps> = ({ onRefresh }) => {
-  const { toast } = useToast();
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
-
-  const handlePremiumClick = () => {
-    setShowPremiumModal(true);
-  };
-
   return (
-    <>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="text-center p-6 mx-auto"
-        style={{ maxWidth: "400px" }}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className="flex flex-col items-center justify-center p-8 text-center"
+    >
+      <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+        <RefreshCw className="w-8 h-8 text-gray-400" />
+      </div>
+      <h3 className="text-xl font-semibold text-gray-800 mb-2">
+        No More Profiles
+      </h3>
+      <p className="text-gray-500 mb-6 max-w-[240px]">
+        You've seen all profiles for now. Check back later or adjust your filters.
+      </p>
+      <Button
+        onClick={onRefresh}
+        variant="outline"
+        className="rounded-full"
       >
-        <div className="mb-4">
-          <span className="text-6xl">✨</span>
-        </div>
-        <h3 className="text-2xl font-bold mb-2">You've seen all profiles for now</h3>
-        <p className="text-gray-500 mb-6">Check back soon or adjust your preferences to see more people</p>
-        
-        <div className="space-y-4">
-          <Button
-            onClick={onRefresh}
-            className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white w-full"
-          >
-            Refresh Profiles
-          </Button>
-          
-          <Button
-            variant="outline"
-            className="w-full flex items-center justify-center gap-2"
-            onClick={handlePremiumClick}
-          >
-            <Star size={16} className="text-amoura-gold" />
-            <span>Upgrade to See More</span>
-            <Badge variant="premium" className="ml-1">Premium</Badge>
-          </Button>
-        </div>
-      </motion.div>
-      
-      <PremiumModal 
-        isOpen={showPremiumModal} 
-        onClose={() => setShowPremiumModal(false)} 
-      />
-    </>
+        <RefreshCw className="w-4 h-4 mr-2" />
+        Refresh
+      </Button>
+    </motion.div>
   );
 };
 

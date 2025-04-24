@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import DateIdea from '@/components/profile/DateIdea';
 import { Button } from "@/components/ui/button";
-import { Heart, X } from "lucide-react";
+import { Heart, X, Sparkles } from "lucide-react";
 import { useCardSwiper } from '@/hooks/use-card-swiper';
-import SwipeableCard, { Profile } from '@/components/home/SwipeableCard';
+import SwipeableCard from '@/components/home/SwipeableCard';
 import NoMoreProfiles from '@/components/home/NoMoreProfiles';
-import MatchFilters, { FilterOptions } from '@/components/home/MatchFilters';
+import MatchFilters from '@/components/home/MatchFilters';
 import FeaturedMatch from '@/components/home/FeaturedMatch';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import PremiumFeatures from '@/components/subscription/PremiumFeatures';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Profile } from '@/types/profile';
 
 export const enhancedProfiles = [
   {
@@ -214,64 +215,102 @@ const Home = () => {
   
   return (
     <AppLayout>
-      <div className="flex-1 flex flex-col p-4">
-        <DateIdea />
-        
-        {featuredProfile && (
-          <FeaturedMatch 
-            profile={featuredProfile} 
-            onViewProfile={handleViewFeaturedProfile} 
-          />
-        )}
-        
-        <PremiumFeatures 
-          onRewind={handleRewind}
-          onSuperLike={handleSuperLike}
-          onBoost={handleBoost}
-        />
-        
-        <MatchFilters onApplyFilters={handleApplyFilters} />
-        
-        <div className="flex-1 flex items-center justify-center relative">
-          <div 
-            ref={dragConstraints}
-            className="w-full max-w-sm"
-          >
-            <AnimatePresence mode="wait">
-              {currentIndex >= 0 ? (
-                <SwipeableCard
-                  profile={currentProfile}
-                  controls={controls}
-                  dragConstraints={dragConstraints}
-                  onDragStart={() => setDragging(true)}
-                  onDragEnd={(event, info) => handleDragEnd(event, info)}
-                />
-              ) : (
-                <NoMoreProfiles onRefresh={() => currentIndex === -1 && setCurrentIndex(0)} />
+      <div className="flex-1 flex flex-col bg-gray-50/80">
+        <div className="relative">
+          <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white to-transparent pointer-events-none" />
+          
+          <div className="container max-w-5xl mx-auto px-4 pt-6 pb-20">
+            <div className="flex flex-col gap-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
+              >
+                <DateIdea />
+              </motion.div>
+              
+              {featuredProfile && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <FeaturedMatch 
+                    profile={featuredProfile} 
+                    onViewProfile={handleViewFeaturedProfile}
+                  />
+                </motion.div>
               )}
-            </AnimatePresence>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+              >
+                <div className="p-4 border-b border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-medium">Discover</h2>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {}}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Filters
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="relative min-h-[500px] flex items-center justify-center p-4">
+                  <div 
+                    ref={dragConstraints}
+                    className="w-full"
+                  >
+                    <AnimatePresence mode="wait">
+                      {currentIndex >= 0 ? (
+                        <SwipeableCard
+                          profile={currentProfile}
+                          controls={controls}
+                          dragConstraints={dragConstraints}
+                          onDragStart={() => setDragging(true)}
+                          onDragEnd={handleDragEnd}
+                        />
+                      ) : (
+                        <NoMoreProfiles onRefresh={() => currentIndex === -1 && setCurrentIndex(0)} />
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </motion.div>
+              
+              {currentIndex >= 0 && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="fixed bottom-6 left-0 right-0 flex justify-center gap-4 px-4"
+                >
+                  <Button
+                    onClick={() => handleSwipe("left")}
+                    size="lg"
+                    className="h-14 w-14 rounded-full bg-white shadow-lg hover:shadow-xl border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transform transition-all active:scale-95"
+                  >
+                    <X className="h-6 w-6 text-gray-500" />
+                  </Button>
+                  
+                  <Button
+                    onClick={() => handleSwipe("right")}
+                    size="lg"
+                    className="h-14 w-14 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-lg hover:shadow-xl transform transition-all active:scale-95"
+                  >
+                    <Heart className="h-6 w-6 text-white" />
+                  </Button>
+                </motion.div>
+              )}
+            </div>
           </div>
         </div>
-        
-        {currentIndex >= 0 && (
-          <div className="flex justify-center gap-4 py-6">
-            <Button
-              onClick={() => handleSwipe("left")}
-              size="lg"
-              className="h-16 w-16 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 shadow-sm transform transition-transform active:scale-95"
-            >
-              <X size={24} className="text-gray-500" />
-            </Button>
-            
-            <Button
-              onClick={() => handleSwipe("right")}
-              size="lg"
-              className="h-16 w-16 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-md transform transition-transform active:scale-95"
-            >
-              <Heart size={24} className="text-white" />
-            </Button>
-          </div>
-        )}
       </div>
     </AppLayout>
   );
