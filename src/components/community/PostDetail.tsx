@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,17 +14,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { Post } from './CommunityFeed';
-
-interface Comment {
-  id: string;
-  author: {
-    name: string;
-    avatar: string;
-  };
-  content: string;
-  timestamp: string;
-}
+import { Post, Comment } from '@/types/community';
+import { addComment, fetchComments, likePost, unlikePost } from '@/services/community';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PostDetailProps {
   post: Post | null;
@@ -35,63 +28,130 @@ interface PostDetailProps {
 }
 
 const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagClick, selectedTag }) => {
+  const { user } = useAuth();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post?.likes || 0);
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [submittingComment, setSubmittingComment] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (post) {
       setLikeCount(post.likes);
+      if ('isLiked' in post) {
+        setLiked(!!post.isLiked);
+      }
+      
+      // Load comments when post is opened
+      if (isOpen) {
+        loadComments();
+      }
     }
-  }, [post]);
+  }, [post, isOpen]);
+  
+  const loadComments = async () => {
+    if (!post) return;
+    
+    setLoadingComments(true);
+    try {
+      const fetchedComments = await fetchComments(post.id);
+      setComments(fetchedComments);
+    } catch (error) {
+      console.error('Error loading comments:', error);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
 
   if (!post) return null;
 
-  const handleLike = () => {
-    if (liked) {
-      setLiked(false);
-      setLikeCount(prev => prev - 1);
-    } else {
-      setLiked(true);
-      setLikeCount(prev => prev + 1);
+  const handleLike = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to like posts",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      if (liked) {
+        const newLikeCount = await unlikePost(post.id);
+        setLiked(false);
+        setLikeCount(newLikeCount);
+      } else {
+        const newLikeCount = await likePost(post.id);
+        setLiked(true);
+        setLikeCount(newLikeCount);
+        
+        // Show heart animation
+        const heart = document.createElement('div');
+        heart.className = 'heart-animation';
+        document.body.appendChild(heart);
+        setTimeout(() => document.body.removeChild(heart), 1000);
+      }
       
-      // Show heart animation
-      const heart = document.createElement('div');
-      heart.className = 'heart-animation';
-      document.body.appendChild(heart);
-      setTimeout(() => document.body.removeChild(heart), 1000);
+      // Update the posts queries to reflect the like change
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+      queryClient.invalidateQueries({ queryKey: ['trending-posts'] });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update like. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
   const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
+    // Create a URL with the post ID
+    const postUrl = `${window.location.origin}/community?post=${post.id}`;
+    navigator.clipboard.writeText(postUrl);
+    
     toast({
       title: "Link copied!",
       description: "Post link has been copied to your clipboard",
     });
   };
 
-  const handleComment = () => {
-    if (!newComment.trim()) return;
+  const handleSubmitComment = async () => {
+    if (!newComment.trim() || !user) {
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to comment",
+          variant: "destructive"
+        });
+      }
+      return;
+    }
     
-    const comment: Comment = {
-      id: Math.random().toString(),
-      author: {
-        name: "Current User",
-        avatar: "/photo-1581091226825-a6a2a5aee158",
-      },
-      content: newComment,
-      timestamp: "Just now"
-    };
-
-    setComments([comment, ...comments]);
-    setNewComment('');
-    toast({
-      title: "Comment posted!",
-      description: "Your comment has been added to the discussion",
-    });
+    setSubmittingComment(true);
+    try {
+      const comment = await addComment(post.id, newComment);
+      if (comment) {
+        setComments([comment, ...comments]);
+        setNewComment('');
+        
+        // Update post data in queries
+        queryClient.invalidateQueries({ queryKey: ['posts'] });
+        queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+        queryClient.invalidateQueries({ queryKey: ['trending-posts'] });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to post comment. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmittingComment(false);
+    }
   };
   
   const handleTagClick = (e: React.MouseEvent, tag: string) => {
@@ -103,12 +163,10 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
   };
   
   // Function to determine the correct image source
-  const getImageSrc = (path: string) => {
+  const getImageSrc = (path?: string) => {
     if (!path) return '';
     
-    if (path.startsWith('/lovable-uploads/')) {
-      return path;
-    } else if (path.startsWith('https://')) {
+    if (path.startsWith('/lovable-uploads/') || path.startsWith('https://')) {
       return path;
     } else {
       return `https://source.unsplash.com${path}`;
@@ -133,7 +191,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <img 
-              src={`https://source.unsplash.com${post.author.avatar}`}
+              src={getImageSrc(post.author.avatar)}
               alt={post.author.name}
               className="w-12 h-12 rounded-full object-cover"
             />
@@ -155,7 +213,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
           {post.image && (
             <Card className="overflow-hidden rounded-lg border">
               <img 
-                src={getImageSrc(post.image)}
+                src={post.image}
                 alt="Post content"
                 className="w-full h-auto object-cover"
               />
@@ -203,36 +261,47 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, isOpen, onClose, onTagCli
           <div className="space-y-4">
             <div className="flex gap-2">
               <Textarea
-                placeholder="Write a comment..."
+                placeholder={user ? "Write a comment..." : "Sign in to comment"}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 className="flex-grow resize-none"
+                disabled={!user || submittingComment}
               />
-              <Button onClick={handleComment} className="self-end">
+              <Button 
+                onClick={handleSubmitComment} 
+                className="self-end"
+                disabled={!user || submittingComment || !newComment.trim()}
+              >
                 <Send className="h-4 w-4" />
               </Button>
             </div>
             
             {/* Comments list */}
             <div className="space-y-4">
-              {comments.map((comment) => (
-                <Card key={comment.id} className="p-4">
-                  <div className="flex gap-3">
-                    <img
-                      src={`https://source.unsplash.com${comment.author.avatar}`}
-                      alt={comment.author.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                    <div className="flex-grow">
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-medium">{comment.author.name}</h4>
-                        <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
+              {loadingComments ? (
+                <p className="text-center text-muted-foreground">Loading comments...</p>
+              ) : comments.length === 0 ? (
+                <p className="text-center text-muted-foreground">No comments yet. Be the first to comment!</p>
+              ) : (
+                comments.map((comment) => (
+                  <Card key={comment.id} className="p-4">
+                    <div className="flex gap-3">
+                      <img
+                        src={getImageSrc(comment.author.avatar)}
+                        alt={comment.author.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <div className="flex-grow">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-medium">{comment.author.name}</h4>
+                          <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
+                        </div>
+                        <p className="mt-1 text-sm">{comment.content}</p>
                       </div>
-                      <p className="mt-1 text-sm">{comment.content}</p>
                     </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))
+              )}
             </div>
           </div>
         </div>

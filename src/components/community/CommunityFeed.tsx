@@ -6,25 +6,9 @@ import PostDetail from './PostDetail';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Post } from '@/types/community';
 import { X } from 'lucide-react';
-
-// Enhanced post type with additional fields
-export interface Author {
-  name: string;
-  avatar: string;
-}
-
-export interface Post {
-  id: string;
-  author: Author;
-  content: string;
-  image?: string;
-  tags: string[];
-  likes: number;
-  comments: number;
-  timestamp: string;
-  isUserPost?: boolean;
-}
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface CommunityFeedProps {
   activeTab: 'latest' | 'trending' | 'my-feed';
@@ -32,6 +16,7 @@ interface CommunityFeedProps {
   selectedTag?: string;
   userPosts: Post[];
   allPosts: Post[];
+  isLoading?: boolean;
 }
 
 // Sort options
@@ -42,7 +27,8 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
   onTagSelect, 
   selectedTag = '',
   userPosts,
-  allPosts 
+  allPosts,
+  isLoading = false
 }) => {
   const isMobile = useIsMobile();
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -55,7 +41,7 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
     
     switch(activeTab) {
       case 'trending':
-        filteredPosts = [...allPosts].filter(post => post.likes > 30);
+        filteredPosts = [...allPosts];
         break;
       case 'my-feed':
         filteredPosts = [...userPosts];
@@ -63,13 +49,6 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
       default: // latest
         filteredPosts = [...allPosts];
         break;
-    }
-    
-    // Apply tag filtering if a tag is selected
-    if (selectedTag) {
-      filteredPosts = filteredPosts.filter(post => 
-        post.tags.includes(selectedTag)
-      );
     }
     
     // Apply sorting
@@ -86,7 +65,6 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
       case 'newest':
         return sortedPosts.sort((a, b) => {
           // Converting timestamp strings to comparable values
-          // Assuming timestamps are in format like "2 hours ago", "1 day ago"
           const aTime = getTimestampValue(a.timestamp);
           const bTime = getTimestampValue(b.timestamp);
           return bTime - aTime;
@@ -124,6 +102,30 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
     return 0;
   };
   
+  if (isLoading) {
+    // Show skeleton loading UI
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((_, index) => (
+          <div key={index} className="border rounded-lg p-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-10 h-10 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </div>
+            <Skeleton className="h-20 w-full" />
+            <div className="flex gap-1">
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -177,6 +179,11 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
               Clear filter
             </button>
           )}
+          {activeTab === 'my-feed' && (
+            <p className="mt-2 text-muted-foreground">
+              Create your first post to see it here!
+            </p>
+          )}
         </div>
       ) : (
         displayPosts.map((post, index) => (
@@ -202,6 +209,7 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
         isOpen={!!selectedPost} 
         onClose={() => setSelectedPost(null)} 
         onTagClick={(tag) => onTagSelect && onTagSelect(tag)}
+        selectedTag={selectedTag}
       />
     </div>
   );

@@ -4,10 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { X, Image, Loader2 } from 'lucide-react';
-import { Post } from './CommunityFeed';
 
 interface CreatePostFormProps {
-  onSuccess: (post: Post) => void;
+  onSuccess: (content: string, tags: string[], imageFile?: File | null) => void;
   onCancel: () => void;
 }
 
@@ -16,6 +15,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess, onCancel }) 
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleAddTag = () => {
@@ -39,8 +39,9 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess, onCancel }) 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // In a real app, you would upload this to a server
-    // For now, just create a preview
+    setImageFile(file);
+    
+    // Create a preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
@@ -49,6 +50,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess, onCancel }) 
   };
 
   const handleRemoveImage = () => {
+    setImageFile(null);
     setImagePreview(null);
   };
 
@@ -58,34 +60,20 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess, onCancel }) 
 
     setIsSubmitting(true);
     
-    // Create a new post object
-    const newPost: Post = {
-      id: Math.random().toString(), // In a real app, this would be generated on the server
-      author: {
-        name: "Current User",
-        avatar: "/photo-1581091226825-a6a2a5aee158", // Default avatar for the current user
-      },
-      content: content,
-      image: imagePreview || undefined,
-      tags: tags.length > 0 ? tags : ['general'],
-      likes: 0,
-      comments: 0,
-      timestamp: "Just now",
-      isUserPost: true,
-    };
-    
-    // Simulate API call delay
-    setTimeout(() => {
+    try {
+      await onSuccess(content, tags.length > 0 ? tags : ['general'], imageFile);
+    } catch (error) {
+      console.error('Error creating post:', error);
+    } finally {
       setIsSubmitting(false);
-      onSuccess(newPost);
-    }, 1000);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Create Post</h3>
-        <Button variant="ghost" size="sm" onClick={onCancel}>
+        <Button variant="ghost" size="sm" onClick={onCancel} type="button">
           <X size={18} />
         </Button>
       </div>
