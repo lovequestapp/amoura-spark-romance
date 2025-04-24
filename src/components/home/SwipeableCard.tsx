@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { motion, useAnimation, PanInfo } from 'framer-motion';
 import EnhancedProfileCard from './EnhancedProfileCard';
+import { useNavigate } from 'react-router-dom';
 
 export interface Profile {
   id: number;
@@ -47,6 +47,12 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
   onDragStart,
   onDragEnd
 }) => {
+  const navigate = useNavigate();
+
+  const handleProfileClick = () => {
+    navigate(`/profile/${profile.id}`);
+  };
+  
   const cardVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { 
@@ -78,6 +84,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
       onDragEnd={onDragEnd}
       style={{ originX: 0.5 }}
       className="relative"
+      onClick={handleProfileClick}
     >
       <EnhancedProfileCard profile={profile} onSwipe={() => {}} />
     </motion.div>

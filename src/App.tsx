@@ -21,6 +21,8 @@ import Messages from "@/pages/Messages";
 import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
+import ProfileDetail from "@/pages/ProfileDetail";
+import DetailedProfileView from "@/components/profile/DetailedProfileView";
 
 // Create a new query client instance
 const queryClient = new QueryClient();
@@ -49,6 +51,7 @@ const App = () => {
                     <Route path="/messages" element={<Messages />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/settings" element={<Settings />} />
+                    <Route path="/profile/:id" element={<ProfileDetail />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </AnimatePresence>
