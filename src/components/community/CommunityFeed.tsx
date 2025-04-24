@@ -9,32 +9,32 @@ interface CommunityFeedProps {
   activeTab: 'latest' | 'trending' | 'following';
 }
 
-// Enhanced mock data with more realistic content and images
+// Enhanced mock data with new images
 const posts = [
   {
     id: '1',
     author: {
-      name: 'Emma Wilson',
+      name: 'Party Planner Pro',
       avatar: '/photo-1649972904349-6e44c42644a7',
     },
-    content: "Just had an amazing first date at the new rooftop restaurant downtown! The views were incredible and conversation flowed easily. Anyone else have good first date spots to recommend?\n\nHere are some things that made it special:\n- Ambient lighting\n- Great music selection\n- Attentive but not intrusive service\n- Perfect weather for outdoor dining",
-    image: '/photo-1486312338219-ce68d2c6f44d',
-    tags: ['dating', 'firstdate', 'advice'],
-    likes: 42,
-    comments: 12,
+    content: "Just hosted the most epic singles mixer event! The energy was incredible and we saw so many connections being made. Here are my top tips for organizing a successful social gathering:\n\n1. Choose a unique venue\n2. Create interactive activities\n3. Have great music\n4. Plan ice-breaker games\n\nSwipe to see the amazing moments we captured!",
+    image: '/lovable-uploads/a587d90b-bc43-4d5f-8a28-253bf2ef3eba.png',
+    tags: ['singles', 'events', 'networking', 'dating'],
+    likes: 156,
+    comments: 47,
     timestamp: '2 hours ago'
   },
   {
     id: '2',
     author: {
-      name: 'Marcus Chen',
+      name: 'Adventure Seeker',
       avatar: '/photo-1581092795360-fd1ca04f0952',
     },
-    content: 'After 2 years of dating, I finally proposed yesterday! She said yes! Here are some tips that helped me plan the perfect proposal:\n\n1. Choose a meaningful location\n2. Have a photographer ready\n3. Keep it intimate but special\n4. Make sure to capture the moment',
-    image: '/photo-1506744038136-46273834b3fb',
-    tags: ['proposal', 'success', 'relationships'],
-    likes: 156,
-    comments: 47,
+    content: "Just returned from an incredible hiking date in the mountains! If you're looking for a unique date idea that combines adventure and romance, this is it. The views were breathtaking and it's a perfect way to have meaningful conversations while staying active.\n\nPro tip: Pack a surprise picnic for the summit - it's the perfect romantic gesture!",
+    image: '/lovable-uploads/dec017df-5117-4384-b5ee-21f5a6ca0e9b.png',
+    tags: ['outdoors', 'dating', 'adventure', 'hiking'],
+    likes: 89,
+    comments: 23,
     timestamp: '6 hours ago'
   },
   {
