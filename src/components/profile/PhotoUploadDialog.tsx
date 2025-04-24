@@ -3,17 +3,18 @@ import React, { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ImagePlus, Loader2 } from 'lucide-react';
-import { uploadProfilePhoto } from '@/services/profile';
+import { uploadProfilePhoto, updateProfilePhotos } from '@/services/profile';
 import { useToast } from '@/hooks/use-toast';
 
 interface PhotoUploadDialogProps {
   open: boolean;
   onClose: () => void;
   onPhotoUploaded: (url: string) => void;
+  currentPhotos: string[];
   currentPhotosCount: number;
 }
 
-const PhotoUploadDialog = ({ open, onClose, onPhotoUploaded, currentPhotosCount }: PhotoUploadDialogProps) => {
+const PhotoUploadDialog = ({ open, onClose, onPhotoUploaded, currentPhotos, currentPhotosCount }: PhotoUploadDialogProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -33,12 +34,32 @@ const PhotoUploadDialog = ({ open, onClose, onPhotoUploaded, currentPhotosCount 
 
     setIsUploading(true);
     const url = await uploadProfilePhoto(file);
-    setIsUploading(false);
-
+    
     if (url) {
-      onPhotoUploaded(url);
-      onClose();
+      // Add the new photo to the current photos array
+      const updatedPhotos = [...currentPhotos, url];
+      
+      // Save the updated photos to Supabase
+      const success = await updateProfilePhotos(updatedPhotos);
+      
+      setIsUploading(false);
+      
+      if (success) {
+        onPhotoUploaded(url);
+        toast({
+          title: "Photo uploaded",
+          description: "Your photo has been successfully uploaded and saved.",
+        });
+        onClose();
+      } else {
+        toast({
+          title: "Upload failed",
+          description: "There was an error saving your photo. Please try again.",
+          variant: "destructive"
+        });
+      }
     } else {
+      setIsUploading(false);
       toast({
         title: "Upload failed",
         description: "There was an error uploading your photo. Please try again.",

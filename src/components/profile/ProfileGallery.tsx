@@ -1,20 +1,26 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { updateProfilePhotos } from '@/services/profile';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProfileGalleryProps {
   photos: string[];
   editable?: boolean;
   onAddPhoto?: () => void;
+  onPhotosChanged?: (newPhotos: string[]) => void;
 }
 
 const ProfileGallery: React.FC<ProfileGalleryProps> = ({ 
   photos, 
   editable = false,
-  onAddPhoto 
+  onAddPhoto,
+  onPhotosChanged
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
   
   const nextPhoto = () => {
     if (currentIndex < photos.length - 1) {
@@ -25,6 +31,51 @@ const ProfileGallery: React.FC<ProfileGalleryProps> = ({
   const prevPhoto = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const handleDeletePhoto = async () => {
+    if (photos.length <= 1) {
+      toast({
+        title: "Cannot delete",
+        description: "You must have at least one photo on your profile.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+    
+    // Remove the current photo
+    const updatedPhotos = [...photos];
+    updatedPhotos.splice(currentIndex, 1);
+    
+    // Update on Supabase
+    const success = await updateProfilePhotos(updatedPhotos);
+    
+    setIsDeleting(false);
+    
+    if (success) {
+      // Adjust the current index if needed
+      if (currentIndex >= updatedPhotos.length) {
+        setCurrentIndex(Math.max(0, updatedPhotos.length - 1));
+      }
+      
+      // Update local state through the parent component
+      if (onPhotosChanged) {
+        onPhotosChanged(updatedPhotos);
+      }
+      
+      toast({
+        title: "Photo deleted",
+        description: "Your photo has been successfully deleted.",
+      });
+    } else {
+      toast({
+        title: "Delete failed",
+        description: "There was an error deleting your photo. Please try again.",
+        variant: "destructive"
+      });
     }
   };
   
@@ -90,13 +141,24 @@ const ProfileGallery: React.FC<ProfileGalleryProps> = ({
       </div>
       
       {editable && (
-        <button 
-          onClick={onAddPhoto}
-          className="absolute bottom-4 right-4 z-20 h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-md"
-          aria-label="Add photo"
-        >
-          <Plus size={20} className="text-amoura-deep-pink" />
-        </button>
+        <div className="absolute bottom-4 right-4 z-20 flex gap-2">
+          <button 
+            onClick={handleDeletePhoto}
+            disabled={isDeleting}
+            className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-md hover:bg-red-50"
+            aria-label="Delete photo"
+          >
+            <Trash2 size={20} className="text-red-500" />
+          </button>
+          
+          <button 
+            onClick={onAddPhoto}
+            className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-md hover:bg-amoura-soft-pink"
+            aria-label="Add photo"
+          >
+            <Plus size={20} className="text-amoura-deep-pink" />
+          </button>
+        </div>
       )}
     </div>
   );

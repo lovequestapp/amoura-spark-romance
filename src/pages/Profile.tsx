@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
@@ -14,13 +15,11 @@ import PremiumModal from '@/components/subscription/PremiumModal';
 import PhotoUploadDialog from '@/components/profile/PhotoUploadDialog';
 import BioEditDialog from '@/components/profile/BioEditDialog';
 import PromptsEditDialog from '@/components/profile/PromptsEditDialog';
-import { supabase } from '@/integrations/supabase/client';
-import { type ProfilePrompt } from '@/services/profile';
-import { type Json } from '@/integrations/supabase/types';
+import { fetchProfileData, updateProfileBio, updateProfilePrompts, type ProfilePrompt } from '@/services/profile';
 
 const Profile = () => {
   const { user } = useAuth();
-  const { tier, isSubscribed, openUpgradeModal } = useSubscription();
+  const { tier, isSubscribed } = useSubscription();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -37,58 +36,73 @@ const Profile = () => {
     bio: "",
     prompts: []
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfileData = async () => {
+    const loadProfileData = async () => {
       if (!user) return;
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('photos, bio, prompts')
-        .eq('id', user.id)
-        .single();
+      setIsLoading(true);
       
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
+      try {
+        const data = await fetchProfileData();
+        setProfileData(data);
+      } catch (error) {
+        console.error('Error loading profile data:', error);
+        toast({
+          title: "Error loading profile",
+          description: "There was a problem loading your profile data. Please try again later.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
       }
-
-      // Convert the Json[] to ProfilePrompt[] safely
-      const typedPrompts: ProfilePrompt[] = (data.prompts as Json[] || [])
-        .map(prompt => {
-          if (typeof prompt === 'object' && prompt !== null) {
-            const promptObj = prompt as Record<string, unknown>;
-            return {
-              question: promptObj.question ? String(promptObj.question) : '',
-              answer: promptObj.answer ? String(promptObj.answer) : '',
-              category: promptObj.category ? String(promptObj.category) : undefined
-            };
-          }
-          return { question: '', answer: '' };
-        })
-        .filter(prompt => prompt.question && prompt.answer);
-
-      setProfileData({
-        photos: data.photos || [],
-        bio: data.bio || "",
-        prompts: typedPrompts
-      });
     };
 
-    fetchProfileData();
-  }, [user]);
+    loadProfileData();
+  }, [user, toast]);
 
   const handlePhotoUploaded = (url: string) => {
     const newPhotos = [...profileData.photos, url];
     setProfileData(prev => ({ ...prev, photos: newPhotos }));
   };
 
-  const handleBioUpdated = (newBio: string) => {
-    setProfileData(prev => ({ ...prev, bio: newBio }));
+  const handlePhotosChanged = (newPhotos: string[]) => {
+    setProfileData(prev => ({ ...prev, photos: newPhotos }));
   };
 
-  const handlePromptsUpdated = (newPrompts: ProfilePrompt[]) => {
-    setProfileData(prev => ({ ...prev, prompts: newPrompts }));
+  const handleBioUpdated = async (newBio: string) => {
+    const success = await updateProfileBio(newBio);
+    if (success) {
+      setProfileData(prev => ({ ...prev, bio: newBio }));
+      toast({
+        title: "Bio updated",
+        description: "Your bio has been updated successfully."
+      });
+    } else {
+      toast({
+        title: "Update failed",
+        description: "There was an error updating your bio. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handlePromptsUpdated = async (newPrompts: ProfilePrompt[]) => {
+    const success = await updateProfilePrompts(newPrompts);
+    if (success) {
+      setProfileData(prev => ({ ...prev, prompts: newPrompts }));
+      toast({
+        title: "Prompts updated",
+        description: "Your prompts have been updated successfully."
+      });
+    } else {
+      toast({
+        title: "Update failed",
+        description: "There was an error updating your prompts. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const getUserInitials = () => {
@@ -97,6 +111,18 @@ const Profile = () => {
     }
     return "U";
   };
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="p-4 max-w-3xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-pulse text-gray-500">Loading profile...</div>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -127,6 +153,7 @@ const Profile = () => {
             photos={profileData.photos} 
             editable={true} 
             onAddPhoto={() => setShowPhotoUpload(true)} 
+            onPhotosChanged={handlePhotosChanged}
           />
           <Button 
             variant="outline" 
@@ -209,6 +236,7 @@ const Profile = () => {
           open={showPhotoUpload}
           onClose={() => setShowPhotoUpload(false)}
           onPhotoUploaded={handlePhotoUploaded}
+          currentPhotos={profileData.photos}
           currentPhotosCount={profileData.photos.length}
         />
         

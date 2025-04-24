@@ -37,6 +37,8 @@ export const updateProfilePhotos = async (photos: string[]): Promise<boolean> =>
     const user = await supabase.auth.getUser();
     
     if (!user.data.user) throw new Error("User not authenticated");
+    
+    console.log("Updating profile photos:", photos);
 
     const { error } = await supabase
       .from('profiles')
@@ -103,5 +105,48 @@ export const updateProfilePrompts = async (prompts: ProfilePrompt[]): Promise<bo
   } catch (error) {
     console.error('Error updating prompts:', error);
     return false;
+  }
+};
+
+export const fetchProfileData = async () => {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error("User not authenticated");
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('photos, bio, prompts')
+      .eq('id', userData.user.id)
+      .single();
+    
+    if (error) throw error;
+    
+    // Convert the Json[] to ProfilePrompt[] safely
+    const typedPrompts: ProfilePrompt[] = (data.prompts as Json[] || [])
+      .map(prompt => {
+        if (typeof prompt === 'object' && prompt !== null) {
+          const promptObj = prompt as Record<string, unknown>;
+          return {
+            question: promptObj.question ? String(promptObj.question) : '',
+            answer: promptObj.answer ? String(promptObj.answer) : '',
+            category: promptObj.category ? String(promptObj.category) : undefined
+          };
+        }
+        return { question: '', answer: '' };
+      })
+      .filter(prompt => prompt.question && prompt.answer);
+    
+    return {
+      photos: data.photos || [],
+      bio: data.bio || "",
+      prompts: typedPrompts
+    };
+  } catch (error) {
+    console.error('Error fetching profile data:', error);
+    return {
+      photos: [],
+      bio: "",
+      prompts: []
+    };
   }
 };
