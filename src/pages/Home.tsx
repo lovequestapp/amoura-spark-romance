@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -11,6 +12,7 @@ import MatchFilters, { FilterOptions } from '@/components/home/MatchFilters';
 import FeaturedMatch from '@/components/home/FeaturedMatch';
 import { useToast } from '@/components/ui/use-toast';
 
+// Define the profiles array
 const enhancedProfiles: Profile[] = [
   {
     id: 1,
@@ -131,15 +133,16 @@ const Home = () => {
     // In a real app, you would navigate to a detailed profile view
   };
   
-  // Find the featured profile and ensure it's a complete Profile object
-  const featuredProfile = enhancedProfiles.find(profile => profile.featured === true);
+  // Find the featured profile
+  const featuredProfile: Profile | undefined = enhancedProfiles.find(
+    (profile): profile is Profile => profile.featured === true
+  );
   
   return (
     <AppLayout>
       <div className="flex-1 flex flex-col p-4">
         <DateIdea />
         
-        {/* Only render FeaturedMatch if featuredProfile exists and has all required properties */}
         {featuredProfile && (
           <FeaturedMatch 
             profile={featuredProfile} 
