@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Heart, Compass } from 'lucide-react';
+import { Eye, Heart, Compass, Star } from 'lucide-react';
 
 interface ProfileStatsProps {
   profileViews?: number;
@@ -58,7 +58,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({
         
         {verified && (
           <div className="flex items-center">
-            <StarIcon size={16} className="text-amoura-gold mr-1" />
+            <Star size={16} className="text-amoura-gold mr-1" />
             <span className="text-xs font-medium">Verified</span>
           </div>
         )}
@@ -68,4 +68,3 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({
 };
 
 export default ProfileStats;
-
