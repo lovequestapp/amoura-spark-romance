@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -49,37 +48,6 @@ const PromptsEditDialog = ({
     }
   };
 
-  const handleRemovePrompt = (index: number) => {
-    setPrompts(prompts.filter((_, i) => i !== index));
-  };
-
-  const handleUpdateAnswer = (index: number, answer: string) => {
-    const newPrompts = [...prompts];
-    newPrompts[index].answer = answer;
-    setPrompts(newPrompts);
-  };
-
-  const handleSave = async () => {
-    setIsLoading(true);
-    const success = await updateProfilePrompts(prompts);
-    setIsLoading(false);
-
-    if (success) {
-      onPromptsUpdated(prompts);
-      onClose();
-      toast({
-        title: "Prompts updated",
-        description: "Your prompts have been successfully updated.",
-      });
-    } else {
-      toast({
-        title: "Update failed",
-        description: "There was an error updating your prompts. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
@@ -94,11 +62,13 @@ const PromptsEditDialog = ({
                   <SelectValue placeholder="Select a prompt" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availablePrompts.map((prompt) => (
-                    <SelectItem key={prompt.id} value={prompt.question}>
-                      {prompt.question}
-                    </SelectItem>
-                  ))}
+                  {availablePrompts
+                    .filter(prompt => !prompts.some(p => p.question === prompt.question))
+                    .map((prompt) => (
+                      <SelectItem key={prompt.id} value={prompt.question}>
+                        {prompt.question}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
               <Button onClick={handleAddPrompt} disabled={!selectedPrompt}>

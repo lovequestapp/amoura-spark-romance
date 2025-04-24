@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
@@ -162,7 +161,7 @@ const Profile = () => {
           ))}
           <Button 
             variant="outline" 
-            className="w-full mt-3"
+            className="w-full mt-3 mb-8"
             onClick={() => setShowPromptsEdit(true)}
           >
             Edit Prompts
