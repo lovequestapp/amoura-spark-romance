@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Image, Send, Mic } from 'lucide-react';
@@ -28,6 +27,18 @@ interface Message {
   seen?: boolean;
   message_type?: 'text' | 'voice' | 'image';
 }
+
+const getDemoUUID = (demoId: string) => {
+  if (!isNaN(Number(demoId))) {
+    switch (demoId) {
+      case "1": return "00000000-0000-0000-0000-000000000001";
+      case "2": return "00000000-0000-0000-0000-000000000002";
+      case "3": return "00000000-0000-0000-0000-000000000003";
+      default: return `00000000-0000-0000-0000-${demoId.padStart(12, '0')}`;
+    }
+  }
+  return demoId;
+};
 
 const matchProfiles: Record<string, MatchProfile> = {
   '1': {
@@ -60,15 +71,12 @@ const Messages = () => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Get match profile based on route parameter
   const match = id && matchProfiles[id] ? matchProfiles[id] : null;
 
-  // Scroll to bottom of messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Load messages when conversation ID changes
   useEffect(() => {
     const loadMessages = async () => {
       if (!user?.id || !id || !match) return;
@@ -76,30 +84,30 @@ const Messages = () => {
       try {
         setLoading(true);
         
-        // Get or create conversation
-        const conversation = await getOrCreateConversation(user.id, id);
+        const userId = user.id || getDemoUUID('current-user');
+        const matchId = getDemoUUID(id);
+        
+        console.log(`Loading conversation for user ${userId} with match ${matchId}`);
+        
+        const conversation = await getOrCreateConversation(userId, matchId);
         setConversationId(conversation.id);
         
-        // Get messages
         const dbMessages = await getMessages(conversation.id);
         
-        // Transform to UI format
         const formattedMessages = dbMessages.map((msg): Message => ({
           id: msg.id,
           text: msg.content,
           voice_url: msg.voice_url,
-          sender: msg.sender_id === user.id ? 'user' : 'match',
+          sender: msg.sender_id === userId ? 'user' : 'match',
           time: msg.created_at,
           seen: !!msg.seen_at,
-          message_type: msg.message_type as 'text' | 'voice' | 'image'  // Fixed: explicitly cast to allowed values
+          message_type: msg.message_type as 'text' | 'voice' | 'image'
         }));
         
         setMessages(formattedMessages);
         
-        // Mark messages as seen
-        await markMessagesAsSeen(conversation.id, user.id);
+        await markMessagesAsSeen(conversation.id, userId);
         
-        // Set up subscription for real-time updates
         const subscription = supabase
           .channel('messages_channel')
           .on('postgres_changes', 
@@ -108,8 +116,7 @@ const Messages = () => {
               if (payload.eventType === 'INSERT') {
                 const newMsg = payload.new;
                 
-                // Only add message if not from current user
-                if (newMsg.sender_id !== user.id) {
+                if (newMsg.sender_id !== userId) {
                   const formattedMsg: Message = {
                     id: newMsg.id,
                     text: newMsg.content,
@@ -117,16 +124,14 @@ const Messages = () => {
                     sender: 'match',
                     time: newMsg.created_at,
                     seen: false,
-                    message_type: newMsg.message_type as 'text' | 'voice' | 'image'  // Fixed: explicitly cast to allowed values
+                    message_type: newMsg.message_type as 'text' | 'voice' | 'image'
                   };
                   
                   setMessages(prev => [...prev, formattedMsg]);
                   
-                  // Mark as seen
-                  await markMessagesAsSeen(conversation.id, user.id);
+                  await markMessagesAsSeen(conversation.id, userId);
                 }
               } else if (payload.eventType === 'UPDATE') {
-                // Handle message updates (e.g., marking as seen)
                 if (payload.new.seen_at && payload.old.seen_at === null) {
                   setMessages(prev => prev.map(msg => 
                     msg.id === payload.new.id ? {...msg, seen: true} : msg
@@ -154,29 +159,27 @@ const Messages = () => {
     loadMessages();
   }, [user, id, match]);
   
-  // Scroll to bottom on messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
   
-  // Handle sending text message
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!newMessage.trim() || !user?.id || !conversationId) return;
     
     try {
-      // Send to database
-      const sentMessage = await sendTextMessage(conversationId, user.id, newMessage.trim());
+      const userId = user.id || getDemoUUID('current-user');
       
-      // Add to UI
+      const sentMessage = await sendTextMessage(conversationId, userId, newMessage.trim());
+      
       const formattedMsg: Message = {
         id: sentMessage.id,
         text: sentMessage.content,
         sender: 'user',
         time: sentMessage.created_at,
         seen: false,
-        message_type: 'text'  // Fixed: use literal value instead of string variable
+        message_type: 'text'
       };
       
       setMessages(prev => [...prev, formattedMsg]);
@@ -186,22 +189,21 @@ const Messages = () => {
     }
   };
   
-  // Handle sending voice message
   const handleSendVoice = async (audioBlob: Blob) => {
     if (!user?.id || !conversationId) return;
     
     try {
-      // Send to database
-      const sentMessage = await sendVoiceMessage(conversationId, user.id, audioBlob);
+      const userId = user.id || getDemoUUID('current-user');
       
-      // Add to UI
+      const sentMessage = await sendVoiceMessage(conversationId, userId, audioBlob);
+      
       const formattedMsg: Message = {
         id: sentMessage.id,
         voice_url: sentMessage.voice_url,
         sender: 'user',
         time: sentMessage.created_at,
         seen: false,
-        message_type: 'voice'  // Fixed: use literal value instead of string variable
+        message_type: 'voice'
       };
       
       setMessages(prev => [...prev, formattedMsg]);
@@ -211,17 +213,14 @@ const Messages = () => {
     }
   };
   
-  // Handle adding emoji to message
   const handleEmojiSelect = (emoji: string) => {
     setNewMessage(prev => prev + emoji);
   };
   
-  // Handle ice breaker selection
   const useIceBreaker = (text: string) => {
     setNewMessage(text);
   };
   
-  // Fallback when no match is selected
   if (!id || !match) {
     return (
       <AppLayout>
@@ -239,7 +238,6 @@ const Messages = () => {
   return (
     <AppLayout hideNavigation>
       <div className="flex flex-col h-full">
-        {/* Header */}
         <div className="p-4 border-b flex items-center">
           <ArrowLeft size={20} className="mr-3" onClick={() => navigate('/matches')} />
           <div className="flex items-center">
@@ -255,7 +253,6 @@ const Messages = () => {
           </div>
         </div>
         
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {loading ? (
             <div className="flex justify-center p-4">
@@ -283,7 +280,6 @@ const Messages = () => {
           <div ref={messagesEndRef} />
         </div>
         
-        {/* Input Area */}
         {showVoiceRecorder ? (
           <div className="p-3 border-t">
             <VoiceRecorder 
@@ -328,7 +324,6 @@ const Messages = () => {
           </form>
         )}
         
-        {/* Ice Breaker positioned below message input */}
         {(messages.length === 0 || messages.length < 3) && !showVoiceRecorder && (
           <div className="p-3 mt-2">
             <IceBreaker onUse={useIceBreaker} />
