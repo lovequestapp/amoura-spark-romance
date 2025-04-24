@@ -1,6 +1,5 @@
 
 import React, { ReactNode } from 'react';
-import { BrowserRouter } from 'react-router-dom';
 import AppNavigation from './AppNavigation';
 
 interface AppLayoutProps {
