@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './AuthContext';
@@ -131,12 +132,13 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
           
         if (subscriberError) throw subscriberError;
         
-        if (subscriberData) {
-          setRemainingRewinds(subscriberData.remaining_rewinds || 0);
-          setRemainingSuperLikes(subscriberData.remaining_super_likes || 0);
+        if (subscriberData && subscriberData.length > 0) {
+          const userData = subscriberData[0];
+          setRemainingRewinds(userData.remaining_rewinds || 0);
+          setRemainingSuperLikes(userData.remaining_super_likes || 0);
           
-          if (subscriberData.boost_until) {
-            const boostEndTime = new Date(subscriberData.boost_until);
+          if (userData.boost_until) {
+            const boostEndTime = new Date(userData.boost_until);
             const isActive = boostEndTime > new Date();
             setBoostActive(isActive);
             setBoostUntil(isActive ? boostEndTime : null);
