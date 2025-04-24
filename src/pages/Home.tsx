@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -134,9 +133,7 @@ const Home = () => {
   };
   
   // Find the featured profile
-  const featuredProfile: Profile | undefined = enhancedProfiles.find(
-    (profile): profile is Profile => profile.featured === true
-  );
+  const featuredProfile = enhancedProfiles.find(profile => profile.featured === true);
   
   return (
     <AppLayout>
@@ -145,7 +142,7 @@ const Home = () => {
         
         {featuredProfile && (
           <FeaturedMatch 
-            profile={featuredProfile} 
+            profile={featuredProfile as Profile} 
             onViewProfile={handleViewFeaturedProfile} 
           />
         )}
