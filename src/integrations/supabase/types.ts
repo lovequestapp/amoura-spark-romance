@@ -126,6 +126,27 @@ export type Database = {
           },
         ]
       }
+      profile_prompts: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          question: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          question: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          question?: string
+        }
+        Relationships: []
+      }
       profile_views: {
         Row: {
           id: string
@@ -154,6 +175,8 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          photos: string[] | null
+          prompts: Json[] | null
           updated_at: string
           username: string | null
         }
@@ -163,6 +186,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          photos?: string[] | null
+          prompts?: Json[] | null
           updated_at?: string
           username?: string | null
         }
@@ -172,6 +197,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          photos?: string[] | null
+          prompts?: Json[] | null
           updated_at?: string
           username?: string | null
         }

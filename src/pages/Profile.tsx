@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,6 +11,11 @@ import ProfileAnalytics from '@/components/profile/ProfileAnalytics';
 import PremiumFeatures from '@/components/subscription/PremiumFeatures';
 import { useToast } from '@/hooks/use-toast';
 import PremiumModal from '@/components/subscription/PremiumModal';
+import PhotoUploadDialog from '@/components/profile/PhotoUploadDialog';
+import BioEditDialog from '@/components/profile/BioEditDialog';
+import PromptsEditDialog from '@/components/profile/PromptsEditDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { type ProfilePrompt } from '@/services/profile';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -19,37 +23,58 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
+  const [showBioEdit, setShowBioEdit] = useState(false);
+  const [showPromptsEdit, setShowPromptsEdit] = useState(false);
+  const [profileData, setProfileData] = useState<{
+    photos: string[];
+    bio: string;
+    prompts: ProfilePrompt[];
+  }>({
+    photos: [],
+    bio: "",
+    prompts: []
+  });
 
-  // Sample user profile data - in a real app, this would come from an API
-  const profile = {
-    photos: ['/assets/profile-1a.jpg', '/assets/profile-1b.jpg', '/assets/profile-1c.jpg'],
-    bio: "Lover of travel, good food, and interesting conversations. Looking for someone who shares my passion for adventure and trying new things.",
-    interests: ["Hiking", "Photography", "Cooking", "Reading"],
-    prompts: [
-      {
-        question: "My simple pleasures",
-        answer: "Morning coffee with a good book, sunset walks on the beach, and finding hidden cafés in new cities."
-      },
-      {
-        question: "A perfect first date",
-        answer: "Something active but relaxed - maybe a walk in a park followed by coffee or drinks, where we can actually talk and get to know each other."
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('photos, bio, prompts')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
       }
-    ]
+
+      setProfileData({
+        photos: data.photos || [],
+        bio: data.bio || "",
+        prompts: data.prompts || []
+      });
+    };
+
+    fetchProfileData();
+  }, [user]);
+
+  const handlePhotoUploaded = (url: string) => {
+    const newPhotos = [...profileData.photos, url];
+    setProfileData(prev => ({ ...prev, photos: newPhotos }));
   };
 
-  const handleEditPhotos = () => {
-    navigate('/profile/photos');
+  const handleBioUpdated = (newBio: string) => {
+    setProfileData(prev => ({ ...prev, bio: newBio }));
   };
 
-  const handleEditBio = () => {
-    navigate('/profile/bio');
+  const handlePromptsUpdated = (newPrompts: ProfilePrompt[]) => {
+    setProfileData(prev => ({ ...prev, prompts: newPrompts }));
   };
 
-  const handleEditPrompts = () => {
-    navigate('/profile/prompts');
-  };
-
-  // Get user initials for avatar fallback
   const getUserInitials = () => {
     if (user?.email) {
       return user.email[0].toUpperCase();
@@ -60,10 +85,9 @@ const Profile = () => {
   return (
     <AppLayout>
       <div className="p-4 max-w-3xl mx-auto">
-        {/* Profile header */}
         <div className="flex items-center gap-4 mb-6">
           <Avatar className="h-20 w-20 border-2 border-amoura-deep-pink">
-            <AvatarImage src={profile.photos[0]} />
+            <AvatarImage src={profileData.photos[0]} />
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
           <div>
@@ -72,7 +96,6 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Profile stats - now first */}
         <div className="mb-6">
           <ProfileStats 
             profileViews={124}
@@ -82,38 +105,39 @@ const Profile = () => {
           />
         </div>
 
-        {/* Profile gallery */}
         <div className="mt-6">
           <h2 className="font-medium text-lg mb-2">Your Photos</h2>
-          <ProfileGallery photos={profile.photos} editable={true} onAddPhoto={handleEditPhotos} />
+          <ProfileGallery 
+            photos={profileData.photos} 
+            editable={true} 
+            onAddPhoto={() => setShowPhotoUpload(true)} 
+          />
           <Button 
             variant="outline" 
             className="w-full mt-3"
-            onClick={handleEditPhotos}
+            onClick={() => setShowPhotoUpload(true)}
           >
             Edit Photos
           </Button>
         </div>
         
-        {/* Bio section */}
         <div className="mt-6">
           <h2 className="font-medium text-lg mb-2">About You</h2>
           <div className="bg-white p-4 rounded-lg border">
-            <p>{profile.bio}</p>
+            <p>{profileData.bio || "Add a bio to tell people about yourself..."}</p>
           </div>
           <Button 
             variant="outline" 
             className="w-full mt-3"
-            onClick={handleEditBio}
+            onClick={() => setShowBioEdit(true)}
           >
             Edit Bio
           </Button>
         </div>
         
-        {/* Prompts */}
         <div className="mt-6">
           <h2 className="font-medium text-lg mb-2">Your Prompts</h2>
-          {profile.prompts.map((prompt, index) => (
+          {profileData.prompts.map((prompt, index) => (
             <div key={index} className="bg-white p-4 rounded-lg border mb-3">
               <h3 className="font-medium text-amoura-deep-pink">{prompt.question}</h3>
               <p className="mt-1">{prompt.answer}</p>
@@ -122,39 +146,34 @@ const Profile = () => {
           <Button 
             variant="outline" 
             className="w-full mt-3"
-            onClick={handleEditPrompts}
+            onClick={() => setShowPromptsEdit(true)}
           >
             Edit Prompts
           </Button>
         </div>
 
-        {/* Premium features */}
-        <div className="mt-8">
-          {!isSubscribed && (
-            <div className="bg-gradient-to-r from-amoura-deep-pink to-amoura-gold p-4 rounded-lg mb-4 text-white flex justify-between items-center">
-              <div>
-                <h2 className="font-bold">Upgrade to Premium</h2>
-                <p className="text-sm">Get more visibility and premium features</p>
-              </div>
-              <Button 
-                onClick={() => setShowPremiumModal(true)}
-                size="sm"
-                variant="secondary"
-                className="bg-white text-amoura-deep-pink hover:bg-gray-100"
-              >
-                View Plans
-              </Button>
+        {!isSubscribed && (
+          <div className="bg-gradient-to-r from-amoura-deep-pink to-amoura-gold p-4 rounded-lg mb-4 text-white flex justify-between items-center">
+            <div>
+              <h2 className="font-bold">Upgrade to Premium</h2>
+              <p className="text-sm">Get more visibility and premium features</p>
             </div>
-          )}
-          <PremiumFeatures />
-        </div>
+            <Button 
+              onClick={() => setShowPremiumModal(true)}
+              size="sm"
+              variant="secondary"
+              className="bg-white text-amoura-deep-pink hover:bg-gray-100"
+            >
+              View Plans
+            </Button>
+          </div>
+        )}
+        <PremiumFeatures />
 
-        {/* Profile analytics */}
         <div className="mt-6">
           <ProfileAnalytics />
         </div>
         
-        {/* Account settings */}
         <div className="mt-8 flex justify-center gap-4 mb-20">
           <Button 
             variant="outline" 
@@ -169,13 +188,33 @@ const Profile = () => {
             Edit Profile
           </Button>
         </div>
-      </div>
 
-      {/* Premium Modal */}
-      <PremiumModal 
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
+        <PhotoUploadDialog
+          open={showPhotoUpload}
+          onClose={() => setShowPhotoUpload(false)}
+          onPhotoUploaded={handlePhotoUploaded}
+          currentPhotosCount={profileData.photos.length}
+        />
+        
+        <BioEditDialog
+          open={showBioEdit}
+          onClose={() => setShowBioEdit(false)}
+          currentBio={profileData.bio}
+          onBioUpdated={handleBioUpdated}
+        />
+        
+        <PromptsEditDialog
+          open={showPromptsEdit}
+          onClose={() => setShowPromptsEdit(false)}
+          currentPrompts={profileData.prompts}
+          onPromptsUpdated={handlePromptsUpdated}
+        />
+
+        <PremiumModal 
+          isOpen={showPremiumModal}
+          onClose={() => setShowPremiumModal(false)}
+        />
+      </div>
     </AppLayout>
   );
 };
