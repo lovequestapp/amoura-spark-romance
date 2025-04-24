@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -175,7 +174,7 @@ const Index = () => {
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-[30px] bg-amoura-black rounded-b-[14px]"></div>
                 <div className="w-full h-full rounded-[32px] overflow-hidden border-[8px] border-amoura-black">
                   <img 
-                    src="https://source.unsplash.com/photo-1581091226825-a6a2a5aee158" 
+                    src="/lovable-uploads/47129695-da2d-45c2-af99-edd3aa1c1244.png" 
                     alt="App Preview" 
                     className="w-full h-full object-cover"
                   />
