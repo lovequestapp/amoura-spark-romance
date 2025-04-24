@@ -53,14 +53,22 @@ const Profile = () => {
     });
   };
 
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return "U";
+  };
+
   return (
     <AppLayout>
       <div className="p-4 max-w-3xl mx-auto">
         {/* Profile header */}
         <div className="flex items-center gap-4 mb-6">
           <Avatar className="h-20 w-20 border-2 border-amoura-deep-pink">
-            <AvatarImage src={user?.avatar_url || '/assets/profile-1a.jpg'} />
-            <AvatarFallback>{user?.email?.[0]?.toUpperCase()}</AvatarFallback>
+            <AvatarImage src={profile.photos[0]} />
+            <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
           <div>
             <h1 className="text-2xl font-bold">Your Profile</h1>
