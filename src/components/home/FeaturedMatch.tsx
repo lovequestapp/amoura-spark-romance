@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Star, CheckCircle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
-import { Profile } from '@/types/profile';
+import { Profile } from './SwipeableCard';
 import PersonalityBadges from './PersonalityBadges';
 
 interface FeaturedMatchProps {

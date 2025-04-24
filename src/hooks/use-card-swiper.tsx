@@ -1,6 +1,7 @@
+
 import { useState, useRef } from 'react';
 import { useAnimation, PanInfo } from 'framer-motion';
-import { Profile } from '@/types/profile';
+import { Profile } from '@/components/home/SwipeableCard';
 
 export const useCardSwiper = (
   profiles: Profile[], 

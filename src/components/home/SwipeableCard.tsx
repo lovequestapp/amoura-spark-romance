@@ -1,9 +1,36 @@
-
 import React from 'react';
 import { motion, useAnimation, PanInfo } from 'framer-motion';
 import EnhancedProfileCard from './EnhancedProfileCard';
 import { useNavigate } from 'react-router-dom';
-import { Profile } from '@/types/profile';
+
+export interface Profile {
+  id: number;
+  name: string;
+  age: number;
+  distance: string;
+  occupation: string;
+  photos: string[];
+  bio: string;
+  premium?: boolean;
+  verified?: boolean;
+  featured?: boolean;
+  personalityMatch?: number;
+  video?: {
+    url: string;
+    thumbnail: string;
+    duration: number;
+  };
+  prompts: {
+    question: string;
+    answer: string;
+  }[];
+  traits?: Array<{
+    name: string;
+    score: number;
+  }>;
+  relationshipIntention?: string;
+  personalityBadges?: string[];
+}
 
 interface SwipeableCardProps {
   profile: Profile;
@@ -27,20 +54,20 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
   };
   
   const cardVariants = {
-    hidden: { opacity: 0, scale: 0.95 },
+    hidden: { opacity: 0, y: 50 },
     visible: { 
       opacity: 1, 
-      scale: 1,
+      y: 0,
       transition: {
         type: "spring",
-        stiffness: 300,
-        damping: 30
+        stiffness: 100,
+        damping: 20
       }
     },
     exit: {
-      scale: 0.95,
+      x: window.innerWidth,
       opacity: 0,
-      transition: { duration: 0.2 }
+      transition: { duration: 0.3 }
     }
   };
   
@@ -52,11 +79,11 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
       exit="exit"
       drag
       dragConstraints={dragConstraints}
-      dragElastic={0.7}
+      dragElastic={0.8}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       style={{ originX: 0.5 }}
-      className="relative max-w-sm mx-auto w-full touch-none"
+      className="relative"
       onClick={handleProfileClick}
     >
       <EnhancedProfileCard profile={profile} onSwipe={() => {}} />
