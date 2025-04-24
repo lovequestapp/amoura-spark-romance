@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import PostCard from './PostCard';
+import PostDetail from './PostDetail';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CommunityFeedProps {
@@ -16,7 +17,7 @@ const posts = [
       name: 'Emma Wilson',
       avatar: '/photo-1649972904349-6e44c42644a7',
     },
-    content: 'Just had an amazing first date at the new rooftop restaurant downtown! The views were incredible and conversation flowed easily. Anyone else have good first date spots to recommend?',
+    content: "Just had an amazing first date at the new rooftop restaurant downtown! The views were incredible and conversation flowed easily. Anyone else have good first date spots to recommend?\n\nHere are some things that made it special:\n- Ambient lighting\n- Great music selection\n- Attentive but not intrusive service\n- Perfect weather for outdoor dining",
     image: '/photo-1486312338219-ce68d2c6f44d',
     tags: ['dating', 'firstdate', 'advice'],
     likes: 42,
@@ -64,9 +65,19 @@ const posts = [
 
 const CommunityFeed: React.FC<CommunityFeedProps> = ({ activeTab }) => {
   const isMobile = useIsMobile();
+  const [selectedPost, setSelectedPost] = useState<typeof posts[0] | null>(null);
   
-  // In a real app, we would filter posts based on the activeTab
-  const displayPosts = posts;
+  // Filter posts based on activeTab
+  const displayPosts = posts.filter(post => {
+    switch(activeTab) {
+      case 'trending':
+        return post.likes > 30; // Show posts with more than 30 likes
+      case 'following':
+        return Math.random() > 0.5; // Randomly filter for demo
+      default:
+        return true;
+    }
+  });
   
   return (
     <div className="space-y-4">
@@ -81,11 +92,18 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({ activeTab }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
+            onClick={() => setSelectedPost(post)}
           >
             <PostCard post={post} isMobile={isMobile} />
           </motion.div>
         ))
       )}
+      
+      <PostDetail 
+        post={selectedPost} 
+        isOpen={!!selectedPost} 
+        onClose={() => setSelectedPost(null)} 
+      />
     </div>
   );
 };
