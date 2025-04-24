@@ -12,16 +12,16 @@ import {
 } from "@/components/ui/carousel";
 import PhoneMockup from '@/components/ui/phone-mockup';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Heart, MessageCircle } from 'lucide-react';
+import { Heart, Filter, MessageCircle } from 'lucide-react';
 
 const AppMockup = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   
   const phoneScreens = [
-    '/lovable-uploads/c3b91871-0b81-4711-a02d-6771b41f44ed.png',
-    '/lovable-uploads/d96b24ef-01b0-41a0-afdf-564574149a3c.png',
-    '/lovable-uploads/955e854b-03c9-4efe-91de-ea62233f88eb.png'
+    '/lovable-uploads/0a19be1a-0123-4949-92e4-fd7fa4be628f.png',
+    '/lovable-uploads/62c3271e-892e-45c4-85c7-43ca53fbc69d.png',
+    '/lovable-uploads/5688ae5d-c127-49b9-9dcd-4c51b8b235c9.png'
   ];
   
   const featureScreens = [
@@ -47,7 +47,6 @@ const AppMockup = () => {
 
   const handleCardClick = (path: string) => {
     if (!user) {
-      // If user is not logged in, redirect to auth page instead
       return "/auth";
     }
     return path;
@@ -78,31 +77,6 @@ const AppMockup = () => {
                         alt={`App Screen ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
-                      {/* App UI overlay elements */}
-                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
-                        <div className="flex justify-between items-center">
-                          <div className="text-white">
-                            <h3 className="font-bold text-lg">Sophia, 28</h3>
-                            <p className="text-xs opacity-80">2 miles away</p>
-                          </div>
-                          <div className="flex space-x-2">
-                            <motion.button 
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.95 }}
-                              className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
-                            >
-                              <MessageCircle className="w-5 h-5 text-white" />
-                            </motion.button>
-                            <motion.button 
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.95 }}
-                              className="w-10 h-10 bg-amoura-deep-pink rounded-full flex items-center justify-center"
-                            >
-                              <Heart className="w-5 h-5 text-white" />
-                            </motion.button>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </CarouselItem>
                 ))}
@@ -120,6 +94,7 @@ const AppMockup = () => {
           </PhoneMockup>
         </div>
         
+        {/* Feature Cards Section */}
         <motion.h3
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -129,7 +104,7 @@ const AppMockup = () => {
           Everything you need to find your match
         </motion.h3>
         
-        {/* Feature Cards */}
+        {/* Feature Cards Grid/Carousel */}
         <div className="hidden md:block">
           <div className="flex space-x-8 justify-center">
             {featureScreens.map((screen, index) => (
@@ -169,7 +144,7 @@ const AppMockup = () => {
         <div className="md:hidden">
           <Carousel>
             <CarouselContent>
-              {featureScreens.map((screen, index) => (
+              {featureScreens.map((screen) => (
                 <CarouselItem key={screen.title} className="pl-4 md:basis-1/2">
                   <Link to={handleCardClick(screen.path)} className="block">
                     <motion.div
@@ -209,3 +184,4 @@ const AppMockup = () => {
 };
 
 export default AppMockup;
+
