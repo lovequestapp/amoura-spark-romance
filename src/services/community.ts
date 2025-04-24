@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
 import { Post, Comment } from "@/types/community";
-import { useAuth } from "@/contexts/AuthContext";
 import { Database } from "@/integrations/supabase/types";
 
 // Utility function to format timestamp to relative time
@@ -27,140 +26,182 @@ export const formatPost = async (
   dbPost: Database["public"]["Tables"]["community_posts"]["Row"],
   userId?: string | null
 ): Promise<Post> => {
-  // Get user profile information
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name, avatar_url, id')
-    .eq('id', dbPost.user_id)
-    .single();
-  
-  // Get tags
-  const { data: tags } = await supabase
-    .from('post_tags')
-    .select('tag')
-    .eq('post_id', dbPost.id);
+  try {
+    // Get user profile information
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, avatar_url, id')
+      .eq('id', dbPost.user_id)
+      .single();
+    
+    // Get tags
+    const { data: tags } = await supabase
+      .from('post_tags')
+      .select('tag')
+      .eq('post_id', dbPost.id);
 
-  // Check if the current user has liked the post
-  let isLiked = false;
-  if (userId) {
-    const { data: hasLiked } = await supabase.rpc('has_liked_post', { 
-      post_id_param: dbPost.id 
-    });
-    isLiked = !!hasLiked;
+    // Check if the current user has liked the post
+    let isLiked = false;
+    if (userId) {
+      const { data: hasLiked } = await supabase.rpc('has_liked_post', { 
+        post_id_param: dbPost.id 
+      });
+      isLiked = !!hasLiked;
+    }
+
+    // Default avatar if none exists
+    const avatarPath = profile?.avatar_url || '/photo-1581091226825-a6a2a5aee158';
+
+    return {
+      id: dbPost.id,
+      author: {
+        id: dbPost.user_id || '',
+        name: profile?.full_name || 'Anonymous User',
+        avatar: avatarPath
+      },
+      content: dbPost.content,
+      image: dbPost.image_url,
+      tags: tags?.map(t => t.tag) || ['general'],
+      likes: dbPost.likes || 0,
+      comments: dbPost.comments || 0,
+      timestamp: formatRelativeTime(dbPost.created_at || new Date()),
+      isUserPost: dbPost.user_id === userId,
+      isLiked
+    };
+  } catch (error) {
+    console.error("Error formatting post:", error);
+    
+    // Return a minimal valid post object in case of error
+    return {
+      id: dbPost.id,
+      author: {
+        id: dbPost.user_id || '',
+        name: 'Unknown User',
+        avatar: '/photo-1581091226825-a6a2a5aee158'
+      },
+      content: dbPost.content || '',
+      image: null,
+      tags: ['general'],
+      likes: 0,
+      comments: 0,
+      timestamp: formatRelativeTime(new Date()),
+      isUserPost: false,
+      isLiked: false
+    };
   }
-
-  // Default avatar if none exists
-  const avatarPath = profile?.avatar_url || '/photo-1581091226825-a6a2a5aee158';
-
-  return {
-    id: dbPost.id,
-    author: {
-      id: dbPost.user_id || '',
-      name: profile?.full_name || 'Anonymous User',
-      avatar: avatarPath
-    },
-    content: dbPost.content,
-    image: dbPost.image_url,
-    tags: tags?.map(t => t.tag) || ['general'],
-    likes: dbPost.likes || 0,
-    comments: dbPost.comments || 0,
-    timestamp: formatRelativeTime(dbPost.created_at || new Date()),
-    isUserPost: dbPost.user_id === userId,
-    isLiked
-  };
 };
 
 // Function to fetch posts
 export const fetchPosts = async (userId?: string | null): Promise<Post[]> => {
-  const { data: posts, error } = await supabase
-    .from('community_posts')
-    .select('*')
-    .order('created_at', { ascending: false });
+  try {
+    const { data: posts, error } = await supabase
+      .from('community_posts')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error("Error fetching posts:", error);
+    if (error) {
+      console.error("Error fetching posts:", error);
+      return [];
+    }
+
+    const formattedPosts = await Promise.all(
+      posts.map(post => formatPost(post, userId))
+    );
+
+    return formattedPosts;
+  } catch (error) {
+    console.error("Unexpected error in fetchPosts:", error);
     return [];
   }
-
-  const formattedPosts = await Promise.all(
-    posts.map(post => formatPost(post, userId))
-  );
-
-  return formattedPosts;
 };
 
 // Function to fetch a user's posts
 export const fetchUserPosts = async (userId: string | null): Promise<Post[]> => {
   if (!userId) return [];
 
-  const { data: posts, error } = await supabase
-    .from('community_posts')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+  try {
+    const { data: posts, error } = await supabase
+      .from('community_posts')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error("Error fetching user posts:", error);
+    if (error) {
+      console.error("Error fetching user posts:", error);
+      return [];
+    }
+
+    const formattedPosts = await Promise.all(
+      posts.map(post => formatPost(post, userId))
+    );
+
+    return formattedPosts;
+  } catch (error) {
+    console.error("Unexpected error in fetchUserPosts:", error);
     return [];
   }
-
-  const formattedPosts = await Promise.all(
-    posts.map(post => formatPost(post, userId))
-  );
-
-  return formattedPosts;
 };
 
 // Function to fetch trending posts
 export const fetchTrendingPosts = async (userId?: string | null): Promise<Post[]> => {
-  const { data: posts, error } = await supabase
-    .from('community_posts')
-    .select('*')
-    .order('likes', { ascending: false })
-    .limit(10);
+  try {
+    const { data: posts, error } = await supabase
+      .from('community_posts')
+      .select('*')
+      .order('likes', { ascending: false })
+      .limit(10);
 
-  if (error) {
-    console.error("Error fetching trending posts:", error);
+    if (error) {
+      console.error("Error fetching trending posts:", error);
+      return [];
+    }
+
+    const formattedPosts = await Promise.all(
+      posts.map(post => formatPost(post, userId))
+    );
+
+    return formattedPosts;
+  } catch (error) {
+    console.error("Unexpected error in fetchTrendingPosts:", error);
     return [];
   }
-
-  const formattedPosts = await Promise.all(
-    posts.map(post => formatPost(post, userId))
-  );
-
-  return formattedPosts;
 };
 
 // Function to fetch posts by tag
 export const fetchPostsByTag = async (tag: string, userId?: string | null): Promise<Post[]> => {
-  const { data: tagResults, error: tagError } = await supabase
-    .from('post_tags')
-    .select('post_id')
-    .eq('tag', tag);
+  try {
+    const { data: tagResults, error: tagError } = await supabase
+      .from('post_tags')
+      .select('post_id')
+      .eq('tag', tag);
 
-  if (tagError || !tagResults.length) {
-    console.error("Error fetching posts by tag:", tagError);
+    if (tagError || !tagResults?.length) {
+      console.error("Error fetching posts by tag:", tagError);
+      return [];
+    }
+
+    const postIds = tagResults.map(result => result.post_id);
+
+    const { data: posts, error: postsError } = await supabase
+      .from('community_posts')
+      .select('*')
+      .in('id', postIds)
+      .order('created_at', { ascending: false });
+
+    if (postsError) {
+      console.error("Error fetching posts by IDs:", postsError);
+      return [];
+    }
+
+    const formattedPosts = await Promise.all(
+      posts.map(post => formatPost(post, userId))
+    );
+
+    return formattedPosts;
+  } catch (error) {
+    console.error("Unexpected error in fetchPostsByTag:", error);
     return [];
   }
-
-  const postIds = tagResults.map(result => result.post_id);
-
-  const { data: posts, error: postsError } = await supabase
-    .from('community_posts')
-    .select('*')
-    .in('id', postIds)
-    .order('created_at', { ascending: false });
-
-  if (postsError) {
-    console.error("Error fetching posts by IDs:", postsError);
-    return [];
-  }
-
-  const formattedPosts = await Promise.all(
-    posts.map(post => formatPost(post, userId))
-  );
-
-  return formattedPosts;
 };
 
 // Function to create a new post
