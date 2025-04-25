@@ -12,19 +12,19 @@ const AppMockup = () => {
   
   const featureScreens = [
     {
-      image: "/lovable-uploads/woman-laptop-1.jpg",
+      image: "/lovable-uploads/563b3aaf-34dd-4f18-b63b-7c65acc45c6f.png",
       title: "Discover",
       description: "Find people who share your interests",
       path: "/home"
     },
     {
-      image: "/lovable-uploads/woman-laptop-2.jpg",
+      image: "/lovable-uploads/91665203-1812-49ac-bb88-15c1b973ed89.png",
       title: "Connect",
       description: "Start meaningful conversations",
       path: "/matches"
     },
     {
-      image: "/lovable-uploads/man-laptop.jpg",
+      image: "/lovable-uploads/60e06493-4ad6-4a88-89a9-51d45b269702.png",
       title: "Community",
       description: "Join our vibrant dating community",
       path: "/community"
