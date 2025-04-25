@@ -27,30 +27,57 @@ export const formatPost = async (
   userId?: string | null
 ): Promise<Post> => {
   try {
+    console.log("Formatting post:", dbPost.id);
+    
     // Get user profile information
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('full_name, avatar_url, id')
       .eq('id', dbPost.user_id)
       .single();
     
+    if (profileError) {
+      console.error("Error fetching profile:", profileError);
+    }
+    
     // Get tags
-    const { data: tags } = await supabase
+    const { data: tags, error: tagsError } = await supabase
       .from('post_tags')
       .select('tag')
       .eq('post_id', dbPost.id);
+      
+    if (tagsError) {
+      console.error("Error fetching tags:", tagsError);
+    }
 
     // Check if the current user has liked the post
     let isLiked = false;
     if (userId) {
-      const { data: hasLiked } = await supabase.rpc('has_liked_post', { 
-        post_id_param: dbPost.id 
-      });
-      isLiked = !!hasLiked;
+      const { data: likeData, error: likeError } = await supabase
+        .from('post_likes')
+        .select('id')
+        .eq('post_id', dbPost.id)
+        .eq('user_id', userId)
+        .maybeSingle();
+        
+      if (likeError) {
+        console.error("Error checking if post is liked:", likeError);
+      } else {
+        isLiked = !!likeData;
+      }
     }
 
     // Default avatar if none exists
     const avatarPath = profile?.avatar_url || '/photo-1581091226825-a6a2a5aee158';
+
+    console.log(`Post ${dbPost.id} formatted successfully:`, { 
+      author: { 
+        name: profile?.full_name || 'Anonymous User',
+        id: dbPost.user_id 
+      },
+      tags: tags?.map(t => t.tag) || ['general'],
+      isLiked
+    });
 
     return {
       id: dbPost.id,
@@ -94,6 +121,7 @@ export const formatPost = async (
 // Function to fetch posts
 export const fetchPosts = async (userId?: string | null): Promise<Post[]> => {
   try {
+    console.log("Fetching all posts, user ID:", userId);
     const { data: posts, error } = await supabase
       .from('community_posts')
       .select('*')
@@ -101,17 +129,20 @@ export const fetchPosts = async (userId?: string | null): Promise<Post[]> => {
 
     if (error) {
       console.error("Error fetching posts:", error);
-      return [];
+      throw error;
     }
+
+    console.log("Fetched raw posts:", posts?.length);
 
     const formattedPosts = await Promise.all(
       posts.map(post => formatPost(post, userId))
     );
 
+    console.log("Formatted posts:", formattedPosts?.length);
     return formattedPosts;
   } catch (error) {
     console.error("Unexpected error in fetchPosts:", error);
-    return [];
+    throw error;
   }
 };
 

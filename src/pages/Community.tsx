@@ -28,54 +28,93 @@ const Community = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
-  // Query for fetching posts
-  const { data: allPosts = [], isLoading: loadingAllPosts } = useQuery({
+  // Query for fetching posts with improved error handling
+  const { data: allPosts = [], isLoading: loadingAllPosts, error: allPostsError } = useQuery({
     queryKey: ['posts', selectedTag],
     queryFn: async () => {
+      console.log("Fetching posts, selected tag:", selectedTag);
       try {
         if (selectedTag) {
-          return await fetchPostsByTag(selectedTag, user?.id);
+          const posts = await fetchPostsByTag(selectedTag, user?.id);
+          console.log("Fetched posts by tag:", posts);
+          return posts;
         }
-        return await fetchPosts(user?.id);
+        const posts = await fetchPosts(user?.id);
+        console.log("Fetched all posts:", posts);
+        return posts;
       } catch (error) {
         console.error("Error fetching posts:", error);
-        return [];
+        throw error;
       }
     },
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    retry: 1
   });
   
-  // Query for trending posts
-  const { data: trendingPosts = [], isLoading: loadingTrendingPosts } = useQuery({
+  // Query for trending posts with improved error handling
+  const { data: trendingPosts = [], isLoading: loadingTrendingPosts, error: trendingPostsError } = useQuery({
     queryKey: ['trending-posts'],
     queryFn: async () => {
+      console.log("Fetching trending posts");
       try {
-        return await fetchTrendingPosts(user?.id);
+        const posts = await fetchTrendingPosts(user?.id);
+        console.log("Fetched trending posts:", posts);
+        return posts;
       } catch (error) {
         console.error("Error fetching trending posts:", error);
-        return [];
+        throw error;
       }
     },
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    retry: 1
   });
   
-  // Query for user posts
-  const { data: userPosts = [], isLoading: loadingUserPosts } = useQuery({
+  // Query for user posts with improved error handling
+  const { data: userPosts = [], isLoading: loadingUserPosts, error: userPostsError } = useQuery({
     queryKey: ['user-posts', user?.id],
     queryFn: async () => {
+      console.log("Fetching user posts, user id:", user?.id);
       try {
         if (user?.id) {
-          return await fetchUserPosts(user?.id);
+          const posts = await fetchUserPosts(user?.id);
+          console.log("Fetched user posts:", posts);
+          return posts;
         }
         return [];
       } catch (error) {
         console.error("Error fetching user posts:", error);
-        return [];
+        throw error;
       }
     },
     refetchOnWindowFocus: false,
+    retry: 1,
     enabled: !!user
   });
+  
+  // Handle errors from queries
+  useEffect(() => {
+    if (allPostsError) {
+      toast({
+        title: "Error loading posts",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    }
+    if (trendingPostsError) {
+      toast({
+        title: "Error loading trending posts",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    }
+    if (userPostsError && user) {
+      toast({
+        title: "Error loading your posts",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    }
+  }, [allPostsError, trendingPostsError, userPostsError, toast, user]);
   
   const handleTabChange = (tab: 'latest' | 'trending' | 'my-feed') => {
     setActiveTab(tab);
@@ -120,6 +159,7 @@ const Community = () => {
         });
       }
     } catch (error) {
+      console.error("Error creating post:", error);
       toast({
         title: "Error",
         description: "Failed to create your post. Please try again.",
@@ -131,11 +171,15 @@ const Community = () => {
   // Debug logs
   useEffect(() => {
     console.log("Current tab:", activeTab);
-    console.log("All posts:", allPosts);
-    console.log("Trending posts:", trendingPosts);
-    console.log("User posts:", userPosts);
+    console.log("Selected tag:", selectedTag);
+    console.log("User logged in:", !!user);
+    console.log("User ID:", user?.id);
+    console.log("All posts count:", allPosts?.length);
+    console.log("Trending posts count:", trendingPosts?.length);
+    console.log("User posts count:", userPosts?.length);
     console.log("Loading states:", { loadingAllPosts, loadingTrendingPosts, loadingUserPosts });
-  }, [activeTab, allPosts, trendingPosts, userPosts, loadingAllPosts, loadingTrendingPosts, loadingUserPosts]);
+  }, [activeTab, selectedTag, allPosts, trendingPosts, userPosts, loadingAllPosts, 
+      loadingTrendingPosts, loadingUserPosts, user]);
 
   return (
     <AppLayout>

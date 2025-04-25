@@ -62,12 +62,12 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
         break;
     }
     
-    console.log("Filtered posts before sorting:", filteredPosts);
+    console.log("Filtered posts before sorting:", filteredPosts?.length);
     
     // Apply sorting
     filteredPosts = sortPosts(filteredPosts, sortBy);
     
-    console.log("Display posts after sorting:", filteredPosts);
+    console.log("Display posts after sorting:", filteredPosts?.length);
     setDisplayPosts(filteredPosts);
   }, [activeTab, selectedTag, sortBy, userPosts, allPosts]);
   
