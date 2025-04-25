@@ -26,6 +26,10 @@ import DetailedProfileView from "@/components/profile/DetailedProfileView";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 
+//New imports
+import ContactSettings from "@/pages/settings/ContactSettings";
+import Help from "@/pages/help/Help";
+
 // Create a new query client instance
 const queryClient = new QueryClient();
 
@@ -55,6 +59,12 @@ const App = () => {
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/profile/:id" element={<ProfileDetail />} />
                     <Route path="*" element={<NotFound />} />
+                    
+                    {/* New routes */}
+                    <Route path="/settings/contact" element={<ContactSettings />} />
+                    <Route path="/help" element={<Help />} />
+                    <Route path="/privacy-policy" element={<Help />} />
+                    <Route path="/terms" element={<Help />} />
                     
                     {/* Admin routes */}
                     <Route path="/admin" element={<AdminLayout />}>
