@@ -32,25 +32,47 @@ const Community = () => {
   const { data: allPosts = [], isLoading: loadingAllPosts } = useQuery({
     queryKey: ['posts', selectedTag],
     queryFn: async () => {
-      if (selectedTag) {
-        return fetchPostsByTag(selectedTag, user?.id);
+      try {
+        if (selectedTag) {
+          return await fetchPostsByTag(selectedTag, user?.id);
+        }
+        return await fetchPosts(user?.id);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+        return [];
       }
-      return fetchPosts(user?.id);
     },
     refetchOnWindowFocus: false
   });
   
   // Query for trending posts
-  const { data: trendingPosts = [] } = useQuery({
+  const { data: trendingPosts = [], isLoading: loadingTrendingPosts } = useQuery({
     queryKey: ['trending-posts'],
-    queryFn: () => fetchTrendingPosts(user?.id),
+    queryFn: async () => {
+      try {
+        return await fetchTrendingPosts(user?.id);
+      } catch (error) {
+        console.error("Error fetching trending posts:", error);
+        return [];
+      }
+    },
     refetchOnWindowFocus: false
   });
   
   // Query for user posts
   const { data: userPosts = [], isLoading: loadingUserPosts } = useQuery({
     queryKey: ['user-posts', user?.id],
-    queryFn: () => fetchUserPosts(user?.id),
+    queryFn: async () => {
+      try {
+        if (user?.id) {
+          return await fetchUserPosts(user?.id);
+        }
+        return [];
+      } catch (error) {
+        console.error("Error fetching user posts:", error);
+        return [];
+      }
+    },
     refetchOnWindowFocus: false,
     enabled: !!user
   });
@@ -90,6 +112,7 @@ const Community = () => {
         // Invalidate queries to refetch data
         queryClient.invalidateQueries({ queryKey: ['posts'] });
         queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+        queryClient.invalidateQueries({ queryKey: ['trending-posts'] });
         
         toast({
           title: "Post created",
@@ -104,6 +127,15 @@ const Community = () => {
       });
     }
   };
+
+  // Debug logs
+  useEffect(() => {
+    console.log("Current tab:", activeTab);
+    console.log("All posts:", allPosts);
+    console.log("Trending posts:", trendingPosts);
+    console.log("User posts:", userPosts);
+    console.log("Loading states:", { loadingAllPosts, loadingTrendingPosts, loadingUserPosts });
+  }, [activeTab, allPosts, trendingPosts, userPosts, loadingAllPosts, loadingTrendingPosts, loadingUserPosts]);
 
   return (
     <AppLayout>
@@ -139,7 +171,7 @@ const Community = () => {
                 selectedTag={selectedTag}
                 userPosts={userPosts}
                 allPosts={activeTab === 'trending' ? trendingPosts : allPosts}
-                isLoading={activeTab === 'my-feed' ? loadingUserPosts : loadingAllPosts}
+                isLoading={activeTab === 'trending' ? loadingTrendingPosts : activeTab === 'my-feed' ? loadingUserPosts : loadingAllPosts}
               />
             </div>
             

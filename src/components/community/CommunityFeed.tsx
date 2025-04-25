@@ -35,30 +35,48 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [displayPosts, setDisplayPosts] = useState<Post[]>([]);
   
+  // Debug the props received
+  useEffect(() => {
+    console.log("CommunityFeed props:", { 
+      activeTab, 
+      selectedTag, 
+      userPostsCount: userPosts?.length || 0, 
+      allPostsCount: allPosts?.length || 0,
+      isLoading
+    });
+  }, [activeTab, selectedTag, userPosts, allPosts, isLoading]);
+  
   useEffect(() => {
     // Filter and sort posts based on activeTab, selectedTag, and sortBy
     let filteredPosts: Post[] = [];
     
     switch(activeTab) {
       case 'trending':
-        filteredPosts = [...allPosts];
+        filteredPosts = Array.isArray(allPosts) ? [...allPosts] : [];
         break;
       case 'my-feed':
-        filteredPosts = [...userPosts];
+        filteredPosts = Array.isArray(userPosts) ? [...userPosts] : [];
         break;
       default: // latest
-        filteredPosts = [...allPosts];
+        filteredPosts = Array.isArray(allPosts) ? [...allPosts] : [];
         break;
     }
+    
+    console.log("Filtered posts before sorting:", filteredPosts);
     
     // Apply sorting
     filteredPosts = sortPosts(filteredPosts, sortBy);
     
+    console.log("Display posts after sorting:", filteredPosts);
     setDisplayPosts(filteredPosts);
   }, [activeTab, selectedTag, sortBy, userPosts, allPosts]);
   
   // Function to sort posts based on selected sort option
   const sortPosts = (posts: Post[], sortOption: SortOption): Post[] => {
+    if (!Array.isArray(posts) || posts.length === 0) {
+      return [];
+    }
+    
     const sortedPosts = [...posts];
     
     switch(sortOption) {
@@ -101,6 +119,15 @@ const CommunityFeed: React.FC<CommunityFeedProps> = ({
     }
     return 0;
   };
+
+  // Debug output when loading or with no posts
+  useEffect(() => {
+    if (isLoading) {
+      console.log("Loading posts...");
+    } else if (displayPosts.length === 0) {
+      console.log("No posts to display");
+    }
+  }, [isLoading, displayPosts]);
   
   if (isLoading) {
     // Show skeleton loading UI
