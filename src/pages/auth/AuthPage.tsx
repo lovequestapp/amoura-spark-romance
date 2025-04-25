@@ -12,13 +12,19 @@ const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    
     try {
+      console.log("Attempting authentication:", isSignUp ? "signup" : "login");
+      
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
@@ -37,6 +43,7 @@ const AuthPage = () => {
           description: "Please check your email to verify your account.",
         });
       } else {
+        console.log("Logging in with:", email);
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -44,14 +51,18 @@ const AuthPage = () => {
         
         if (error) throw error;
         
+        console.log("Login successful, navigating to /home");
         navigate('/home');
       }
     } catch (error: any) {
+      console.error("Authentication error:", error.message);
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -123,8 +134,9 @@ const AuthPage = () => {
         <Button
           type="submit"
           className="w-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 font-medium"
+          disabled={isSubmitting}
         >
-          {isSignUp ? "Create account" : "Log in"}
+          {isSubmitting ? "Processing..." : (isSignUp ? "Create account" : "Log in")}
         </Button>
       </form>
       
