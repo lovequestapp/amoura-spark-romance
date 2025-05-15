@@ -12,6 +12,7 @@ import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 // Import all page components
 import Index from "@/pages/Index";
 import AuthPage from "@/pages/auth/AuthPage";
+import PasswordReset from "@/pages/auth/PasswordReset";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Onboarding from "@/pages/Onboarding";
@@ -27,7 +28,7 @@ import DetailedProfileView from "@/components/profile/DetailedProfileView";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 
-//New imports
+// Additional imports
 import ContactSettings from "@/pages/settings/ContactSettings";
 import Help from "@/pages/help/Help";
 
@@ -48,6 +49,7 @@ const App = () => {
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/auth/password-reset" element={<PasswordReset />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/onboarding" element={<Onboarding />} />
@@ -61,8 +63,10 @@ const App = () => {
                     <Route path="/profile/:id" element={<ProfileDetail />} />
                     <Route path="*" element={<NotFound />} />
                     
-                    {/* New routes */}
+                    {/* Settings routes */}
                     <Route path="/settings/contact" element={<ContactSettings />} />
+                    
+                    {/* Help and legal pages */}
                     <Route path="/help" element={<Help />} />
                     <Route path="/privacy-policy" element={<Help />} />
                     <Route path="/terms" element={<Help />} />

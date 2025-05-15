@@ -2,12 +2,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { cleanupAuthState } from '@/utils/auth';
 
 type AuthContextType = {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
   isAdmin: boolean;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -15,6 +17,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   isLoading: true,
   isAdmin: false,
+  signOut: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -23,23 +26,49 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Handle sign out with proper cleanup
+  const signOut = async () => {
+    try {
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Force page reload for a clean state
+      window.location.href = '/auth';
+    } catch (error) {
+      console.error('Error signing out:', error);
+      window.location.href = '/auth';
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth event:', event);
         setSession(session);
         setUser(session?.user ?? null);
         
+        // Use setTimeout to prevent potential deadlocks with Supabase client
         if (session?.user) {
-          const { data, error } = await supabase.rpc('is_admin');
-          if (!error && data) {
-            setIsAdmin(data);
-          }
+          setTimeout(async () => {
+            try {
+              const { data, error } = await supabase.rpc('is_admin');
+              if (!error && data) {
+                setIsAdmin(data);
+              }
+            } catch (error) {
+              console.error('Error checking admin status:', error);
+            } finally {
+              setIsLoading(false);
+            }
+          }, 0);
         } else {
           setIsAdmin(false);
+          setIsLoading(false);
         }
-        
-        setIsLoading(false);
       }
     );
 
@@ -49,9 +78,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        const { data, error } = await supabase.rpc('is_admin');
-        if (!error && data) {
-          setIsAdmin(data);
+        try {
+          const { data, error } = await supabase.rpc('is_admin');
+          if (!error && data) {
+            setIsAdmin(data);
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error);
         }
       }
       
@@ -62,7 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, isAdmin }}>
+    <AuthContext.Provider value={{ user, session, isLoading, isAdmin, signOut }}>
       {children}
     </AuthContext.Provider>
   );
