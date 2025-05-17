@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
 import type { Json } from "@/integrations/supabase/types";
@@ -225,5 +224,22 @@ export const fetchProfileData = async (): Promise<{
       prompts: [],
       error: error instanceof Error ? error.message : "Failed to fetch profile data"
     };
+  }
+};
+
+// Add the missing fetchPrompts function
+export const fetchPrompts = async (): Promise<Array<{ id: string; question: string; category: string }>> => {
+  try {
+    const { data, error } = await supabase
+      .from('profile_prompts')
+      .select('id, question, category')
+      .order('category');
+    
+    if (error) throw new Error("Database error: " + error.message);
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching prompts:', error);
+    return [];
   }
 };

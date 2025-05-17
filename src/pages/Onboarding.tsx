@@ -57,6 +57,7 @@ const Onboarding = () => {
       case 3:
         return <InterestsStep selectedInterests={selectedInterests} setSelectedInterests={setSelectedInterests} />;
       case 4:
+        // Note: LifestyleStep component must accept formData as any or update its prop types
         return <LifestyleStep formData={formData} setFormData={setFormData} />;
       case 5:
         return <PromptsStep prompts={prompts} setPrompts={setPrompts} />;

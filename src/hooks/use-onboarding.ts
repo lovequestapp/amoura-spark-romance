@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useError } from '@/contexts/ErrorContext';
 import { ProfilePrompt, updateProfilePhotos } from '@/services/profile';
 import { toast } from '@/hooks/use-toast';
+import type { Json } from '@/integrations/supabase/types';
 
 interface FormData {
   name: string;
@@ -20,6 +21,12 @@ interface FormData {
   smoking?: string;
   exercise?: string;
   [key: string]: any;
+}
+
+interface OnboardingData {
+  formData?: FormData;
+  selectedInterests?: string[];
+  prompts?: ProfilePrompt[];
 }
 
 const initialFormData: FormData = {
@@ -56,7 +63,7 @@ export const useOnboarding = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('onboarding_data, photos')
+          .select('last_onboarding_step, photos')
           .eq('id', user.id)
           .single();
         
@@ -64,32 +71,44 @@ export const useOnboarding = () => {
           console.error('Error fetching onboarding data:', error);
           return;
         }
-        
-        if (data && data.onboarding_data) {
-          const onboardingData = data.onboarding_data;
-          
-          // Restore previously saved data
-          if (onboardingData.formData) {
-            setFormData(onboardingData.formData);
-          }
-          
-          if (onboardingData.selectedInterests) {
-            setSelectedInterests(onboardingData.selectedInterests);
-          }
-          
-          if (onboardingData.prompts) {
-            setPrompts(onboardingData.prompts);
-          }
+
+        // Restore last onboarding step if available
+        if (data && data.last_onboarding_step) {
+          setCurrentStep(data.last_onboarding_step);
         }
         
-        if (data && data.photos && data.photos.length > 0) {
-          // Create placeholder File objects for existing photos
-          const restoredPhotos = data.photos.map((url: string) => ({
-            file: new File([''], 'restored-photo.jpg', { type: 'image/jpeg' }),
-            url
-          }));
+        // Fetch additional profile data if needed
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('bio, photos, prompts')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching profile data:', profileError);
+          return;
+        }
+        
+        if (profileData) {
+          // Restore prompts if available
+          if (profileData.prompts && profileData.prompts.length > 0) {
+            setPrompts(profileData.prompts as unknown as ProfilePrompt[]);
+          }
           
-          setPhotos(restoredPhotos);
+          // Restore bio if available
+          if (profileData.bio) {
+            setFormData(prev => ({...prev, bio: profileData.bio}));
+          }
+          
+          // Restore photos if available
+          if (profileData.photos && profileData.photos.length > 0) {
+            const restoredPhotos = profileData.photos.map((url: string) => ({
+              file: new File([''], 'restored-photo.jpg', { type: 'image/jpeg' }),
+              url
+            }));
+            
+            setPhotos(restoredPhotos);
+          }
         }
       } catch (err) {
         console.error('Error restoring onboarding data:', err);
@@ -154,16 +173,9 @@ export const useOnboarding = () => {
     if (!user) return;
     
     try {
-      const onboardingData = {
-        formData,
-        selectedInterests,
-        prompts
-      };
-      
       await supabase
         .from('profiles')
         .update({ 
-          onboarding_data: onboardingData,
           last_onboarding_step: currentStep
         })
         .eq('id', user.id);
@@ -171,7 +183,7 @@ export const useOnboarding = () => {
       console.error('Error saving onboarding progress:', err);
       // Don't block the user flow for save progress errors
     }
-  }, [user, formData, selectedInterests, prompts, currentStep]);
+  }, [user, currentStep]);
 
   const handleNextStep = useCallback(async () => {
     // Validate current step
@@ -214,13 +226,22 @@ export const useOnboarding = () => {
       // Extract urls from photos objects
       const photoUrls = photos.map(photo => photo.url);
       
+      // TypeScript safe gender casting
+      let genderValue: "woman" | "man" | "nonbinary" | "other" | null = null;
+      if (["woman", "man", "nonbinary", "other"].includes(formData.gender)) {
+        genderValue = formData.gender as "woman" | "man" | "nonbinary" | "other";
+      }
+      
+      // Convert prompts for database storage
+      const jsonPrompts = JSON.parse(JSON.stringify(prompts)) as Json[];
+      
       // Update the user's profile
       const { error } = await supabase
         .from('profiles')
         .update({
           full_name: formData.name,
           age: formData.age,
-          gender: formData.gender,
+          gender: genderValue,
           location: formData.location,
           occupation: formData.occupation,
           education: formData.education,
@@ -232,10 +253,10 @@ export const useOnboarding = () => {
           smoking: formData.smoking,
           exercise: formData.exercise,
           interests: selectedInterests,
-          prompts: prompts,
+          prompts: jsonPrompts,
           photos: photoUrls,
           onboarding_completed: true,
-          updated_at: new Date()
+          updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
       

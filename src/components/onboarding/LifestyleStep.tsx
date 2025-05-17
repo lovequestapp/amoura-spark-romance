@@ -10,60 +10,65 @@ import {
 import { Label } from "@/components/ui/label";
 
 interface LifestyleStepProps {
-  formData: {
-    height: string;
-    drinking: string;
-    education: string;
-    relationshipType: string;
-  };
-  setFormData: React.Dispatch<React.SetStateAction<any>>;
+  formData: any;
+  setFormData: (data: any) => void;
 }
 
 const LifestyleStep: React.FC<LifestyleStepProps> = ({ formData, setFormData }) => {
-  const handleSelectChange = (id: string, value: string) => {
-    setFormData((prev: any) => ({ ...prev, [id]: value }));
+  const handleChange = (field: string, value: string) => {
+    setFormData({
+      ...formData,
+      [field]: value
+    });
   };
-
+  
   return (
     <div className="animate-fade-in">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Lifestyle questions</h2>
-      <p className="text-gray-500 mb-8">Help potential matches get to know you better</p>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Lifestyle preferences</h2>
+      <p className="text-gray-500 mb-8">Tell others about your lifestyle</p>
       
-      <div className="space-y-6 mb-6">
+      <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="relationshipType">Relationship type</Label>
+          <Label htmlFor="height">Height</Label>
           <Select
-            value={formData.relationshipType}
-            onValueChange={(value) => handleSelectChange('relationshipType', value)}
+            value={formData.height?.toString() || ""}
+            onValueChange={(value) => handleChange('height', value)}
           >
-            <SelectTrigger className="w-full p-4 rounded-xl border border-gray-200">
-              <SelectValue placeholder="What are you looking for?" />
+            <SelectTrigger id="height">
+              <SelectValue placeholder="Select your height" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="longterm">Long-term relationship</SelectItem>
-              <SelectItem value="shortterm">Short-term relationship</SelectItem>
-              <SelectItem value="casual">Casual dating</SelectItem>
-              <SelectItem value="friends">New friends</SelectItem>
-              <SelectItem value="stillFiguring">Still figuring it out</SelectItem>
+              {Array.from({ length: 60 }, (_, i) => i + 150).map((cm) => (
+                <SelectItem key={cm} value={cm.toString()}>
+                  {cm} cm ({Math.floor(cm/30.48)}'
+                  {Math.round((cm/2.54) % 12)}")
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="education">Education</Label>
+          <Label htmlFor="religion">Religion</Label>
           <Select
-            value={formData.education}
-            onValueChange={(value) => handleSelectChange('education', value)}
+            value={formData.religion || ""}
+            onValueChange={(value) => handleChange('religion', value)}
           >
-            <SelectTrigger className="w-full p-4 rounded-xl border border-gray-200">
-              <SelectValue placeholder="Your highest level of education" />
+            <SelectTrigger id="religion">
+              <SelectValue placeholder="Select your religion" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="highschool">High School</SelectItem>
-              <SelectItem value="associate">Associate degree</SelectItem>
-              <SelectItem value="bachelor">Bachelor's degree</SelectItem>
-              <SelectItem value="master">Master's degree</SelectItem>
-              <SelectItem value="doctorate">Doctorate</SelectItem>
+              <SelectItem value="agnostic">Agnostic</SelectItem>
+              <SelectItem value="atheist">Atheist</SelectItem>
+              <SelectItem value="buddhist">Buddhist</SelectItem>
+              <SelectItem value="christian">Christian</SelectItem>
+              <SelectItem value="hindu">Hindu</SelectItem>
+              <SelectItem value="jewish">Jewish</SelectItem>
+              <SelectItem value="muslim">Muslim</SelectItem>
+              <SelectItem value="sikh">Sikh</SelectItem>
+              <SelectItem value="spiritual">Spiritual</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+              <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -71,40 +76,55 @@ const LifestyleStep: React.FC<LifestyleStepProps> = ({ formData, setFormData }) 
         <div className="space-y-2">
           <Label htmlFor="drinking">Drinking</Label>
           <Select
-            value={formData.drinking}
-            onValueChange={(value) => handleSelectChange('drinking', value)}
+            value={formData.drinking || ""}
+            onValueChange={(value) => handleChange('drinking', value)}
           >
-            <SelectTrigger className="w-full p-4 rounded-xl border border-gray-200">
-              <SelectValue placeholder="How often do you drink?" />
+            <SelectTrigger id="drinking">
+              <SelectValue placeholder="Select your drinking habits" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="never">Never</SelectItem>
               <SelectItem value="rarely">Rarely</SelectItem>
               <SelectItem value="socially">Socially</SelectItem>
               <SelectItem value="regularly">Regularly</SelectItem>
+              <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="height">Height</Label>
+          <Label htmlFor="smoking">Smoking</Label>
           <Select
-            value={formData.height}
-            onValueChange={(value) => handleSelectChange('height', value)}
+            value={formData.smoking || ""}
+            onValueChange={(value) => handleChange('smoking', value)}
           >
-            <SelectTrigger className="w-full p-4 rounded-xl border border-gray-200">
-              <SelectValue placeholder="Your height" />
+            <SelectTrigger id="smoking">
+              <SelectValue placeholder="Select your smoking habits" />
             </SelectTrigger>
             <SelectContent>
-              {Array.from({ length: 36 }).map((_, i) => {
-                const feet = Math.floor((i + 48) / 12);
-                const inches = (i + 48) % 12;
-                return (
-                  <SelectItem key={i} value={`${i + 48}`}>
-                    {feet}'{inches}"
-                  </SelectItem>
-                )
-              })}
+              <SelectItem value="never">Never</SelectItem>
+              <SelectItem value="occasionally">Occasionally</SelectItem>
+              <SelectItem value="regularly">Regularly</SelectItem>
+              <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="exercise">Exercise</Label>
+          <Select
+            value={formData.exercise || ""}
+            onValueChange={(value) => handleChange('exercise', value)}
+          >
+            <SelectTrigger id="exercise">
+              <SelectValue placeholder="Select your exercise habits" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="never">Never</SelectItem>
+              <SelectItem value="sometimes">Sometimes</SelectItem>
+              <SelectItem value="regularly">Regularly</SelectItem>
+              <SelectItem value="daily">Daily</SelectItem>
+              <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
             </SelectContent>
           </Select>
         </div>

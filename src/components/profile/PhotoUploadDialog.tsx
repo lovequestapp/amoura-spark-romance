@@ -33,11 +33,11 @@ const PhotoUploadDialog = ({ open, onClose, onPhotoUploaded, currentPhotos, curr
     }
 
     setIsUploading(true);
-    const url = await uploadProfilePhoto(file);
+    const result = await uploadProfilePhoto(file);
     
-    if (url) {
+    if (result.url) {
       // Add the new photo to the current photos array
-      const updatedPhotos = [...currentPhotos, url];
+      const updatedPhotos = [...currentPhotos, result.url];
       
       // Save the updated photos to Supabase
       const success = await updateProfilePhotos(updatedPhotos);
@@ -45,7 +45,7 @@ const PhotoUploadDialog = ({ open, onClose, onPhotoUploaded, currentPhotos, curr
       setIsUploading(false);
       
       if (success) {
-        onPhotoUploaded(url);
+        onPhotoUploaded(result.url);
         toast({
           title: "Photo uploaded",
           description: "Your photo has been successfully uploaded and saved.",
@@ -62,7 +62,7 @@ const PhotoUploadDialog = ({ open, onClose, onPhotoUploaded, currentPhotos, curr
       setIsUploading(false);
       toast({
         title: "Upload failed",
-        description: "There was an error uploading your photo. Please try again.",
+        description: result.error || "There was an error uploading your photo. Please try again.",
         variant: "destructive"
       });
     }
