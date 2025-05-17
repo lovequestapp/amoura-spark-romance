@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { motion, useAnimation, PanInfo } from 'framer-motion';
 import EnhancedProfileCard from './EnhancedProfileCard';
 import { useNavigate } from 'react-router-dom';
 
 export interface Profile {
-  id: number;
+  id: number | string;
   name: string;
   age: number;
   distance: string;
@@ -30,6 +31,11 @@ export interface Profile {
   }>;
   relationshipIntention?: string;
   personalityBadges?: string[];
+  matchScore?: number;
+  interestsScore?: number;
+  personalityScore?: number;
+  intentionScore?: number;
+  locationScore?: number;
 }
 
 interface SwipeableCardProps {

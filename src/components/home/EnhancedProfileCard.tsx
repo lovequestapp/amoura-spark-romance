@@ -13,6 +13,7 @@ import ProfileHeader from './card/ProfileHeader';
 import MatchInfo from './card/MatchInfo';
 import CardActions from './card/CardActions';
 import { Profile } from './SwipeableCard';
+import { Badge } from '@/components/ui/badge';
 
 interface EnhancedProfileCardProps {
   profile: Profile;
@@ -45,6 +46,10 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
     e.stopPropagation();
     setPromptIndex((promptIndex + 1) % profile.prompts.length);
   };
+  
+  // Check for match score to display compatibility indicators
+  const hasMatchScore = 'matchScore' in profile;
+  const matchScore = hasMatchScore ? (profile as any).matchScore : profile.personalityMatch;
   
   return (
     <motion.div 
@@ -79,10 +84,18 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
           </div>
         )}
         
+        {hasMatchScore && (
+          <div className="mb-3">
+            <Badge className="bg-gradient-to-r from-amoura-deep-pink to-pink-500 hover:from-amoura-deep-pink hover:to-pink-600 text-white font-semibold">
+              {matchScore}% Match
+            </Badge>
+          </div>
+        )}
+        
         {!expanded ? (
           <>
             <MatchInfo 
-              personalityMatch={profile.personalityMatch}
+              personalityMatch={profile.personalityMatch || matchScore}
               onClick={() => setShowPersonality(true)}
             />
             
@@ -107,9 +120,35 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                   className="mb-4"
                 >
                   <PersonalityMatch 
-                    matchPercentage={profile.personalityMatch || 0} 
+                    matchPercentage={profile.personalityMatch || matchScore || 0} 
                     traits={profile.traits}
                   />
+                  
+                  {/* Show detailed match metrics if available */}
+                  {hasMatchScore && (profile as any).interestsScore && (
+                    <div className="mt-3 space-y-2">
+                      <h4 className="text-sm font-medium">Compatibility Details:</h4>
+                      <div className="space-y-1.5 text-xs text-gray-600">
+                        <div className="flex justify-between">
+                          <span>Interests Match:</span>
+                          <span>{(profile as any).interestsScore}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Personality Match:</span>
+                          <span>{(profile as any).personalityScore}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Intention Match:</span>
+                          <span>{(profile as any).intentionScore}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Location Match:</span>
+                          <span>{(profile as any).locationScore}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   <Button 
                     onClick={() => setShowPersonality(false)}
                     variant="ghost"
@@ -127,7 +166,21 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                 >
                   <p className="text-gray-700 mb-4">{profile.bio}</p>
                   
-                  {profile.personalityMatch && !showPersonality && (
+                  {/* Display interests if available */}
+                  {(profile as any).interests && (profile as any).interests.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium mb-2">Interests</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(profile as any).interests.map((interest: string) => (
+                          <Badge key={interest} variant="outline" className="bg-amoura-soft-pink/30 text-amoura-deep-pink border-amoura-deep-pink/20">
+                            {interest}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {(profile.personalityMatch || matchScore) && !showPersonality && (
                     <Button 
                       onClick={() => setShowPersonality(true)}
                       variant="outline"
@@ -135,7 +188,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                       size="sm"
                     >
                       <Info size={14} className="mr-2" />
-                      Show Personality Match
+                      Show Compatibility Details
                     </Button>
                   )}
                   

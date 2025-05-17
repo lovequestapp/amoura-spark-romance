@@ -1,11 +1,19 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, Sparkles, HeartHandshake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface MatchFiltersProps {
   onApplyFilters: (filters: FilterOptions) => void;
@@ -17,6 +25,13 @@ export interface FilterOptions {
   showVerifiedOnly: boolean;
   interests: string[];
   relationshipIntention: string | null;
+  personalityPriorities?: {
+    creative?: number;
+    analytical?: number;
+    adventurous?: number;
+    social?: number;
+  };
+  matchAlgorithm?: 'balanced' | 'personality' | 'interests' | 'location';
 }
 
 const defaultFilters: FilterOptions = {
@@ -25,16 +40,54 @@ const defaultFilters: FilterOptions = {
   showVerifiedOnly: false,
   interests: [],
   relationshipIntention: null,
+  personalityPriorities: {
+    creative: 25,
+    analytical: 25,
+    adventurous: 25,
+    social: 25
+  },
+  matchAlgorithm: 'balanced'
 };
 
 const interests = ["Travel", "Music", "Fitness", "Food", "Art", "Movies", "Reading", "Gaming", "Outdoors", "Photography"];
 const intentions = ["Casual", "Dating", "Relationship", "Marriage"];
+const algorithmOptions = [
+  { value: 'balanced', label: 'Balanced', description: 'Equal weight to all factors' },
+  { value: 'personality', label: 'Personality First', description: 'Prioritize personality compatibility' },
+  { value: 'interests', label: 'Common Interests', description: 'Find people with similar interests' },
+  { value: 'location', label: 'Nearby', description: 'Prioritize people closer to you' }
+];
 
 const MatchFilters: React.FC<MatchFiltersProps> = ({ onApplyFilters }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>(defaultFilters);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedIntention, setSelectedIntention] = useState<string | null>(null);
+  const [dbInterests, setDbInterests] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'basic' | 'advanced'>('basic');
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('balanced');
+
+  // Fetch interests from database
+  useEffect(() => {
+    const fetchInterests = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('interests')
+          .select('name')
+          .order('name');
+          
+        if (error) throw error;
+        
+        if (data && data.length) {
+          setDbInterests(data.map(i => i.name));
+        }
+      } catch (error) {
+        console.error('Error fetching interests:', error);
+      }
+    };
+    
+    fetchInterests();
+  }, []);
 
   const toggleFilter = () => {
     setIsOpen(!isOpen);
@@ -76,12 +129,27 @@ const MatchFilters: React.FC<MatchFiltersProps> = ({ onApplyFilters }) => {
       setSelectedIntention(intention);
     }
   };
+  
+  const handleAlgorithmChange = (value: string) => {
+    setSelectedAlgorithm(value);
+  };
+  
+  const handlePersonalityPriorityChange = (trait: string, values: number[]) => {
+    setFilters(prev => ({
+      ...prev,
+      personalityPriorities: {
+        ...prev.personalityPriorities,
+        [trait]: values[0]
+      }
+    }));
+  };
 
   const handleApply = () => {
     const updatedFilters: FilterOptions = {
       ...filters,
       interests: selectedInterests,
-      relationshipIntention: selectedIntention
+      relationshipIntention: selectedIntention,
+      matchAlgorithm: selectedAlgorithm as 'balanced' | 'personality' | 'interests' | 'location'
     };
     onApplyFilters(updatedFilters);
     setIsOpen(false);
@@ -91,6 +159,7 @@ const MatchFilters: React.FC<MatchFiltersProps> = ({ onApplyFilters }) => {
     setFilters(defaultFilters);
     setSelectedInterests([]);
     setSelectedIntention(null);
+    setSelectedAlgorithm('balanced');
   };
 
   return (
@@ -128,98 +197,221 @@ const MatchFilters: React.FC<MatchFiltersProps> = ({ onApplyFilters }) => {
                 </Button>
               </div>
               
-              <div className="space-y-6">
-                {/* Age Range Filter */}
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <label className="text-sm font-medium">Age Range</label>
-                    <span className="text-xs text-gray-500">{filters.ageRange[0]} - {filters.ageRange[1]}</span>
-                  </div>
-                  <Slider
-                    defaultValue={filters.ageRange}
-                    min={18}
-                    max={65}
-                    step={1}
-                    onValueChange={handleAgeRangeChange}
-                  />
-                </div>
-                
-                {/* Distance Filter */}
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <label className="text-sm font-medium">Distance</label>
-                    <span className="text-xs text-gray-500">Up to {filters.distance} miles</span>
-                  </div>
-                  <Slider
-                    defaultValue={[filters.distance]}
-                    min={1}
-                    max={100}
-                    step={1}
-                    onValueChange={handleDistanceChange}
-                  />
-                </div>
-                
-                {/* Verified Only Switch */}
-                <div className="flex items-center justify-between">
+              <div className="flex border-b mb-4">
+                <button
+                  className={`flex-1 py-2 text-center font-medium ${activeTab === 'basic' ? 'border-b-2 border-amoura-deep-pink text-amoura-deep-pink' : 'text-gray-500'}`}
+                  onClick={() => setActiveTab('basic')}
+                >
+                  Basic Filters
+                </button>
+                <button
+                  className={`flex-1 py-2 text-center font-medium ${activeTab === 'advanced' ? 'border-b-2 border-amoura-deep-pink text-amoura-deep-pink' : 'text-gray-500'}`}
+                  onClick={() => setActiveTab('advanced')}
+                >
+                  Advanced Matching
+                </button>
+              </div>
+              
+              {activeTab === 'basic' ? (
+                <div className="space-y-6">
+                  {/* Age Range Filter */}
                   <div>
-                    <p className="text-sm font-medium">Verified Profiles Only</p>
-                    <p className="text-xs text-gray-500">Only show profiles that have been verified</p>
+                    <div className="flex justify-between mb-2">
+                      <label className="text-sm font-medium">Age Range</label>
+                      <span className="text-xs text-gray-500">{filters.ageRange[0]} - {filters.ageRange[1]}</span>
+                    </div>
+                    <Slider
+                      defaultValue={filters.ageRange}
+                      min={18}
+                      max={65}
+                      step={1}
+                      onValueChange={handleAgeRangeChange}
+                    />
                   </div>
-                  <Switch
-                    checked={filters.showVerifiedOnly}
-                    onCheckedChange={toggleVerified}
-                  />
-                </div>
-                
-                {/* Interests */}
-                <div>
-                  <label className="text-sm font-medium block mb-2">Interests</label>
-                  <div className="flex flex-wrap gap-2">
-                    {interests.map(interest => (
-                      <Badge 
-                        key={interest}
-                        variant={selectedInterests.includes(interest) ? "default" : "outline"}
-                        className={`cursor-pointer ${selectedInterests.includes(interest) ? 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90' : ''}`}
-                        onClick={() => toggleInterest(interest)}
-                      >
-                        {interest}
-                      </Badge>
-                    ))}
+                  
+                  {/* Distance Filter */}
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <label className="text-sm font-medium">Distance</label>
+                      <span className="text-xs text-gray-500">Up to {filters.distance} miles</span>
+                    </div>
+                    <Slider
+                      defaultValue={[filters.distance]}
+                      min={1}
+                      max={100}
+                      step={1}
+                      onValueChange={handleDistanceChange}
+                    />
+                  </div>
+                  
+                  {/* Verified Only Switch */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Verified Profiles Only</p>
+                      <p className="text-xs text-gray-500">Only show profiles that have been verified</p>
+                    </div>
+                    <Switch
+                      checked={filters.showVerifiedOnly}
+                      onCheckedChange={toggleVerified}
+                    />
+                  </div>
+                  
+                  {/* Interests */}
+                  <div>
+                    <label className="text-sm font-medium block mb-2">Interests</label>
+                    <div className="flex flex-wrap gap-2">
+                      {(dbInterests.length > 0 ? dbInterests : interests).map(interest => (
+                        <Badge 
+                          key={interest}
+                          variant={selectedInterests.includes(interest) ? "default" : "outline"}
+                          className={`cursor-pointer ${selectedInterests.includes(interest) ? 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90' : ''}`}
+                          onClick={() => toggleInterest(interest)}
+                        >
+                          {interest}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Relationship Intention */}
+                  <div>
+                    <label className="text-sm font-medium block mb-2">Looking for</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {intentions.map(intention => (
+                        <Button
+                          key={intention}
+                          variant={selectedIntention === intention ? "default" : "outline"}
+                          className={`w-full ${selectedIntention === intention ? 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90' : ''}`}
+                          onClick={() => selectIntention(intention)}
+                        >
+                          {intention}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                
-                {/* Relationship Intention */}
-                <div>
-                  <label className="text-sm font-medium block mb-2">Looking for</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {intentions.map(intention => (
-                      <Button
-                        key={intention}
-                        variant={selectedIntention === intention ? "default" : "outline"}
-                        className={`w-full ${selectedIntention === intention ? 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90' : ''}`}
-                        onClick={() => selectIntention(intention)}
-                      >
-                        {intention}
-                      </Button>
-                    ))}
+              ) : (
+                <div className="space-y-6">
+                  {/* Match Algorithm Selector */}
+                  <div>
+                    <label className="text-sm font-medium block mb-2">Matching Algorithm</label>
+                    <Select 
+                      value={selectedAlgorithm} 
+                      onValueChange={handleAlgorithmChange}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select matching algorithm" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {algorithmOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex items-center">
+                              <Sparkles size={16} className="mr-2 text-amoura-deep-pink" />
+                              <div>
+                                <p>{option.label}</p>
+                                <p className="text-xs text-gray-500">{option.description}</p>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Personality Trait Priorities */}
+                  <div>
+                    <div className="flex items-center mb-2">
+                      <HeartHandshake size={18} className="mr-2 text-amoura-deep-pink" />
+                      <label className="text-sm font-medium">Personality Trait Importance</label>
+                    </div>
+                    
+                    <div className="space-y-4 mt-3">
+                      {/* Creative */}
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs">Creative</span>
+                          <span className="text-xs text-gray-500">
+                            {filters.personalityPriorities?.creative || 25}%
+                          </span>
+                        </div>
+                        <Slider
+                          defaultValue={[filters.personalityPriorities?.creative || 25]}
+                          min={0}
+                          max={100}
+                          step={5}
+                          onValueChange={(values) => handlePersonalityPriorityChange('creative', values)}
+                        />
+                      </div>
+                      
+                      {/* Analytical */}
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs">Analytical</span>
+                          <span className="text-xs text-gray-500">
+                            {filters.personalityPriorities?.analytical || 25}%
+                          </span>
+                        </div>
+                        <Slider
+                          defaultValue={[filters.personalityPriorities?.analytical || 25]}
+                          min={0}
+                          max={100}
+                          step={5}
+                          onValueChange={(values) => handlePersonalityPriorityChange('analytical', values)}
+                        />
+                      </div>
+                      
+                      {/* Adventurous */}
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs">Adventurous</span>
+                          <span className="text-xs text-gray-500">
+                            {filters.personalityPriorities?.adventurous || 25}%
+                          </span>
+                        </div>
+                        <Slider
+                          defaultValue={[filters.personalityPriorities?.adventurous || 25]}
+                          min={0}
+                          max={100}
+                          step={5}
+                          onValueChange={(values) => handlePersonalityPriorityChange('adventurous', values)}
+                        />
+                      </div>
+                      
+                      {/* Social */}
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs">Social</span>
+                          <span className="text-xs text-gray-500">
+                            {filters.personalityPriorities?.social || 25}%
+                          </span>
+                        </div>
+                        <Slider
+                          defaultValue={[filters.personalityPriorities?.social || 25]}
+                          min={0}
+                          max={100}
+                          step={5}
+                          onValueChange={(values) => handlePersonalityPriorityChange('social', values)}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="flex gap-3 pt-2">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={handleReset}
-                  >
-                    Reset
-                  </Button>
-                  <Button 
-                    className="flex-1 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
-                    onClick={handleApply}
-                  >
-                    Apply
-                  </Button>
-                </div>
+              )}
+              
+              <div className="flex gap-3 pt-6">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={handleReset}
+                >
+                  Reset
+                </Button>
+                <Button 
+                  className="flex-1 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
+                  onClick={handleApply}
+                >
+                  Apply
+                </Button>
               </div>
             </motion.div>
           </motion.div>

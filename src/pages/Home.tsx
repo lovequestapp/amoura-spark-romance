@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import DateIdea from '@/components/profile/DateIdea';
 import { Button } from "@/components/ui/button";
@@ -14,103 +15,26 @@ import PremiumFeatures from '@/components/subscription/PremiumFeatures';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { getPersonalizedMatches, getFeaturedMatch, WeightedMatch } from '@/services/matching';
 
-export const enhancedProfiles = [
-  {
-    id: 1,
-    name: "Emma",
-    age: 28,
-    distance: "3 miles away",
-    occupation: "Graphic Designer",
-    photos: [
-      "/lovable-uploads/955e854b-03c9-4efe-91de-ea62233f88eb.png",
-      "/lovable-uploads/d96b24ef-01b0-41a0-afdf-564574149a3c.png",
-      "/lovable-uploads/c3b91871-0b81-4711-a02d-6771b41f44ed.png"
-    ],
-    video: {
-      url: "https://example.com/sample-video.mp4",
-      thumbnail: "/assets/profile-1-video-thumb.jpg",
-      duration: 45
-    },
-    bio: "Coffee addict, design enthusiast, and weekend hiker. Looking for someone to share laughs and adventures with.",
-    personalityMatch: 85,
-    verified: true,
-    featured: true,
-    traits: [
-      { name: "Creative", score: 90 },
-      { name: "Adventurous", score: 75 },
-      { name: "Intellectual", score: 82 },
-    ],
-    prompts: [
-      {
-        question: "Two truths and a lie...",
-        answer: "I've climbed Mt. Kilimanjaro, I speak three languages, I've never had a pet."
-      },
-      {
-        question: "My simple pleasures...",
-        answer: "Morning coffee with a good book, sunset beach walks, and finding hidden cafés in new cities."
-      }
-    ],
-    relationshipIntention: "Dating",
-    personalityBadges: ["Adventurous", "Creative", "Thoughtful"]
-  },
-  {
-    id: 2,
-    name: "Alex",
-    age: 30,
-    distance: "5 miles away",
-    occupation: "Software Engineer",
-    photos: ["/assets/profile-2a.jpg", "/assets/profile-2b.jpg"],
-    bio: "Tech geek with a passion for hiking and craft beer. Looking for someone to explore new trails and breweries with.",
-    premium: true,
-    personalityMatch: 72,
-    verified: false,
-    traits: [
-      { name: "Analytical", score: 95 },
-      { name: "Introverted", score: 65 },
-      { name: "Adventurous", score: 80 },
-    ],
-    prompts: [
-      {
-        question: "A perfect date would be...",
-        answer: "A morning hike followed by brunch at a local spot, then exploring a neighborhood we haven't been to before."
-      }
-    ],
-    relationshipIntention: "Relationship",
-    personalityBadges: ["Analytical", "Outdoor-lover", "Thoughtful"]
-  },
-  {
-    id: 3,
-    name: "Sofia",
-    age: 26,
-    distance: "2 miles away",
-    occupation: "Event Planner",
-    photos: ["/assets/profile-3a.jpg", "/assets/profile-3b.jpg", "/assets/profile-3c.jpg"],
-    bio: "Foodie, music lover, and avid traveler. Let's plan our next adventure together!",
-    personalityMatch: 91,
-    verified: true,
-    traits: [
-      { name: "Extroverted", score: 88 },
-      { name: "Creative", score: 75 },
-      { name: "Spontaneous", score: 92 },
-    ],
-    prompts: [
-      {
-        question: "We'll get along if...",
-        answer: "You like trying new restaurants as much as I do, and you're up for spontaneous weekend trips."
-      }
-    ],
-    relationshipIntention: "Casual",
-    personalityBadges: ["Social", "Spontaneous", "Foodie"]
-  }
-] satisfies Profile[];
-
-const swipedProfiles: Array<{ profile: Profile; direction: string }> = [];
+// Placeholder profiles for development/testing are still available
+import { enhancedProfiles } from '@/utils/placeholderData';
 
 const Home = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { tier } = useSubscription();
+
+  const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>(enhancedProfiles);
+  const [filters, setFilters] = useState<FilterOptions>({
+    ageRange: [18, 65],
+    distance: 25,
+    showVerifiedOnly: false,
+    interests: [],
+    relationshipIntention: null,
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [featuredProfile, setFeaturedProfile] = useState<Profile | null>(null);
   
   const {
     currentIndex,
@@ -120,26 +44,92 @@ const Home = () => {
     handleSwipe,
     handleDragEnd,
     setDragging,
-    setCurrentIndex
-  } = useCardSwiper(enhancedProfiles, (profile, direction) => {
-    swipedProfiles.push({ profile, direction });
-    
+    setCurrentIndex,
+    setProfiles
+  } = useCardSwiper(filteredProfiles, (profile, direction) => {
     // Record profile view when swiping
     if (user && profile.id) {
       recordProfileView(profile.id);
     }
   });
   
-  const [filters, setFilters] = useState<FilterOptions>({
-    ageRange: [18, 65],
-    distance: 25,
-    showVerifiedOnly: false,
-    interests: [],
-    relationshipIntention: null,
-  });
+  // Store swiped profiles to support rewind feature
+  const [swipedProfiles, setSwipedProfiles] = useState<Array<{ profile: Profile; direction: string }>>([]);
   
+  // Fetch personalized matches when user or filters change
   useEffect(() => {
-    // Record a profile view when first viewing a profile
+    const fetchMatches = async () => {
+      if (!user) return;
+      
+      setIsLoading(true);
+      
+      try {
+        // For development/demo, use placeholder data
+        if (process.env.NODE_ENV === 'development' && enhancedProfiles.length) {
+          setTimeout(() => {
+            // Apply basic filtering to sample data to simulate API call
+            let filtered = [...enhancedProfiles];
+            
+            if (filters.showVerifiedOnly) {
+              filtered = filtered.filter(p => p.verified);
+            }
+            
+            if (filters.relationshipIntention) {
+              filtered = filtered.filter(p => 
+                !p.relationshipIntention || 
+                p.relationshipIntention === filters.relationshipIntention
+              );
+            }
+            
+            // Add match scores to simulated data
+            const withScores = filtered.map(p => ({
+              ...p,
+              matchScore: Math.round(Math.random() * 40) + 60, // Random score between 60-100
+              interestsScore: Math.round(Math.random() * 100),
+              personalityScore: Math.round(Math.random() * 100),
+              intentionScore: Math.round(Math.random() * 100),
+              locationScore: Math.round(Math.random() * 100),
+            }));
+            
+            // Sort by match score
+            withScores.sort((a, b) => b.matchScore - a.matchScore);
+            
+            setFilteredProfiles(withScores);
+            setFeaturedProfile(getFeaturedMatch(withScores as WeightedMatch[]));
+            setIsLoading(false);
+            return;
+          }, 500);
+          return;
+        }
+        
+        // Production code - use real data
+        const matches = await getPersonalizedMatches({
+          userId: user.id,
+          ageRange: filters.ageRange,
+          distance: filters.distance,
+          relationshipIntention: filters.relationshipIntention,
+          interests: filters.interests,
+        });
+        
+        setFilteredProfiles(matches);
+        setFeaturedProfile(getFeaturedMatch(matches));
+      } catch (error) {
+        console.error("Error fetching matches:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load matches. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchMatches();
+  }, [user, filters, toast]);
+
+  // Record profile view 
+  useEffect(() => {
     if (user && currentProfile?.id) {
       recordProfileView(currentProfile.id);
     }
@@ -149,7 +139,6 @@ const Home = () => {
     if (!user) return;
     
     try {
-      // Call our record-profile-view function
       await supabase.functions.invoke('record-profile-view', {
         body: {
           viewerId: user.id,
@@ -174,13 +163,18 @@ const Home = () => {
     // In a real app, you would navigate to a detailed profile view
   };
   
-  const featuredProfile = enhancedProfiles.find(profile => profile.featured === true);
-  
   const handleRewind = () => {
     if (swipedProfiles.length > 0) {
-      const lastSwiped = swipedProfiles.pop();
+      const lastSwiped = swipedProfiles[swipedProfiles.length - 1];
       if (lastSwiped) {
+        setSwipedProfiles(swipedProfiles.slice(0, -1));
         setCurrentIndex(currentIndex - 1); // Go back one profile
+        
+        // Re-insert the profile at the current index
+        const updatedProfiles = [...filteredProfiles];
+        updatedProfiles.splice(currentIndex, 0, lastSwiped.profile);
+        setProfiles(updatedProfiles);
+        
         toast({
           title: "Rewinded!",
           description: `You've gone back to ${lastSwiped.profile.name}'s profile.`,
@@ -197,6 +191,10 @@ const Home = () => {
   const handleSuperLike = () => {
     if (currentProfile) {
       handleSwipe("superLike");
+      
+      // Save this swipe in history
+      setSwipedProfiles([...swipedProfiles, { profile: currentProfile, direction: "superLike" }]);
+      
       toast({
         title: "Super Like Sent!",
         description: `${currentProfile.name} will be notified that you super liked them!`,
@@ -210,6 +208,14 @@ const Home = () => {
       title: "Profile Boosted!",
       description: "Your profile will receive increased visibility for the next hour.",
     });
+  };
+  
+  // Enhanced swipe handlers that maintain swipe history
+  const handleSwipeWithHistory = (direction: string) => {
+    if (currentProfile) {
+      setSwipedProfiles([...swipedProfiles, { profile: currentProfile, direction }]);
+      handleSwipe(direction);
+    }
   };
   
   return (
@@ -233,30 +239,37 @@ const Home = () => {
         <MatchFilters onApplyFilters={handleApplyFilters} />
         
         <div className="flex-1 flex items-center justify-center relative">
-          <div 
-            ref={dragConstraints}
-            className="w-full max-w-sm"
-          >
-            <AnimatePresence mode="wait">
-              {currentIndex >= 0 ? (
-                <SwipeableCard
-                  profile={currentProfile}
-                  controls={controls}
-                  dragConstraints={dragConstraints}
-                  onDragStart={() => setDragging(true)}
-                  onDragEnd={(event, info) => handleDragEnd(event, info)}
-                />
-              ) : (
-                <NoMoreProfiles onRefresh={() => currentIndex === -1 && setCurrentIndex(0)} />
-              )}
-            </AnimatePresence>
-          </div>
+          {isLoading ? (
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-3"></div>
+              <p className="text-gray-600">Finding your best matches...</p>
+            </div>
+          ) : (
+            <div 
+              ref={dragConstraints}
+              className="w-full max-w-sm"
+            >
+              <AnimatePresence mode="wait">
+                {currentIndex >= 0 ? (
+                  <SwipeableCard
+                    profile={currentProfile}
+                    controls={controls}
+                    dragConstraints={dragConstraints}
+                    onDragStart={() => setDragging(true)}
+                    onDragEnd={(event, info) => handleDragEnd(event, info)}
+                  />
+                ) : (
+                  <NoMoreProfiles onRefresh={() => currentIndex === -1 && setCurrentIndex(0)} />
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </div>
         
-        {currentIndex >= 0 && (
+        {currentIndex >= 0 && !isLoading && (
           <div className="flex justify-center gap-4 py-6">
             <Button
-              onClick={() => handleSwipe("left")}
+              onClick={() => handleSwipeWithHistory("left")}
               size="lg"
               className="h-16 w-16 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 shadow-sm transform transition-transform active:scale-95"
             >
@@ -264,7 +277,7 @@ const Home = () => {
             </Button>
             
             <Button
-              onClick={() => handleSwipe("right")}
+              onClick={() => handleSwipeWithHistory("right")}
               size="lg"
               className="h-16 w-16 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-md transform transition-transform active:scale-95"
             >
