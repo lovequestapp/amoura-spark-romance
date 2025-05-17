@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -63,7 +64,7 @@ export const useOnboarding = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('last_onboarding_step, photos')
+          .select('onboarding_step, photos')
           .eq('id', user.id)
           .single();
         
@@ -73,8 +74,8 @@ export const useOnboarding = () => {
         }
 
         // Restore last onboarding step if available
-        if (data && data.last_onboarding_step) {
-          setCurrentStep(data.last_onboarding_step);
+        if (data && data.onboarding_step) {
+          setCurrentStep(data.onboarding_step);
         }
         
         // Fetch additional profile data if needed
@@ -176,7 +177,7 @@ export const useOnboarding = () => {
       await supabase
         .from('profiles')
         .update({ 
-          last_onboarding_step: currentStep
+          onboarding_step: currentStep
         })
         .eq('id', user.id);
     } catch (err) {
