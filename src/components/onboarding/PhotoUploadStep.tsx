@@ -5,6 +5,8 @@ import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { uploadProfilePhoto } from '@/services/profile';
+import { Loader2 } from 'lucide-react';
 
 interface PhotoUploadStepProps {
   photos: { file: File; url: string }[];
@@ -14,6 +16,8 @@ interface PhotoUploadStepProps {
 const PhotoUploadStep: React.FC<PhotoUploadStepProps> = ({ photos, setPhotos }) => {
   const [isValid, setIsValid] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   
   // Validate photos whenever they change
   useEffect(() => {
@@ -26,12 +30,41 @@ const PhotoUploadStep: React.FC<PhotoUploadStepProps> = ({ photos, setPhotos }) 
     }
   }, [photos]);
 
-  const handleAddSamplePhotos = () => {
-    // This is just for demo purposes - in a real app, you'd want users to upload their own photos
-    toast({
-      title: "Demo mode",
-      description: "In a real app, users would upload their own photos."
-    });
+  const handleAddSamplePhotos = async () => {
+    setIsUploading(true);
+    setUploadError(null);
+    
+    try {
+      // For demo purposes - using sample images
+      const sampleImages = [
+        '/lovable-uploads/4388b48e-0a4b-4870-9e6b-55b46b986162.png',
+        '/lovable-uploads/47129695-da2d-45c2-af99-edd3aa1c1244.png',
+        '/lovable-uploads/563b3aaf-34dd-4f18-b63b-7c65acc45c6f.png'
+      ];
+      
+      // Create fake File objects with the sample images
+      const samplePhotos = sampleImages.slice(0, 3).map((url, index) => {
+        // Create a simple placeholder File object with sample data
+        const dummyFile = new File([''], `sample-${index}.png`, { type: 'image/png' });
+        return { file: dummyFile, url: url };
+      });
+      
+      setPhotos(samplePhotos);
+      toast({
+        title: "Sample photos added",
+        description: "Sample photos have been added to your profile for demonstration purposes."
+      });
+    } catch (error) {
+      console.error('Error adding sample photos:', error);
+      setUploadError("Failed to add sample photos. Please try again or upload your own photos.");
+      toast({
+        title: "Error",
+        description: "Failed to add sample photos. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -46,10 +79,25 @@ const PhotoUploadStep: React.FC<PhotoUploadStepProps> = ({ photos, setPhotos }) 
         </Alert>
       )}
       
+      {uploadError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{uploadError}</AlertDescription>
+        </Alert>
+      )}
+      
       <PhotoUploader 
         photos={photos}
         onPhotosChange={setPhotos}
         maxPhotos={6}
+        onError={(error) => {
+          setUploadError(error);
+          toast({
+            title: "Upload failed",
+            description: error,
+            variant: "destructive"
+          });
+        }}
       />
       
       <div className="mt-4 space-y-4">
@@ -63,8 +111,16 @@ const PhotoUploadStep: React.FC<PhotoUploadStepProps> = ({ photos, setPhotos }) 
             size="sm"
             onClick={handleAddSamplePhotos}
             className="w-full"
+            disabled={isUploading}
           >
-            Use sample photos (Demo)
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading samples...
+              </>
+            ) : (
+              "Use sample photos (Demo)"
+            )}
           </Button>
         )}
         
