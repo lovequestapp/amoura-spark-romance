@@ -12,7 +12,30 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchAutoHide: false,
+      backgroundColor: "#FFFFFF",
+      showSpinner: true,
+      spinnerColor: "#FF6B81", // Using amoura-deep-pink color
+      androidSpinnerStyle: "large"
+    },
+    Keyboard: {
+      resize: "body",
+      resizeOnFullScreen: true
+    },
+    StatusBar: {
+      style: "dark",
+      backgroundColor: "#FFFFFF",
+      overlaysWebView: false
     }
+  },
+  android: {
+    backgroundColor: "#FFFFFF"
+  },
+  ios: {
+    backgroundColor: "#FFFFFF",
+    contentInset: "always",
+    allowsLinkPreview: true,
+    scrollEnabled: true,
+    usesFocusEngine: true
   }
 };
 
