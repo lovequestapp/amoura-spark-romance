@@ -128,28 +128,28 @@ const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
         {/* Quick Action Bar */}
         <div className="px-6 -mt-6 relative z-10">
           <div className="bg-white rounded-2xl shadow-xl p-4">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="outline"
                 onClick={handlePaidMessage}
-                className="border-gray-200 hover:bg-gray-50 h-auto py-2"
+                className="border-gray-200 hover:bg-gray-50 py-3 flex-1"
               >
-                <DollarSign className="w-4 h-4 mr-1 text-amoura-deep-pink" />
-                <span className="text-xs sm:text-sm">Paid Message</span>
+                <DollarSign className="w-4 h-4 mr-2 text-amoura-deep-pink" />
+                <span>Message</span>
               </Button>
               <Button
                 onClick={handleLike}
-                className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 h-auto py-2"
+                className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 py-3 flex-1"
               >
-                <Heart className="w-4 h-4 mr-1" />
-                <span className="text-xs sm:text-sm">Like</span>
+                <Heart className="w-4 h-4 mr-2" />
+                <span>Like</span>
               </Button>
               <Button
                 onClick={handleSuperLike}
-                className="bg-amoura-gold text-black hover:bg-amoura-gold/90 h-auto py-2"
+                className="bg-amoura-gold text-black hover:bg-amoura-gold/90 py-3 flex-1"
               >
-                <Star className="w-4 h-4 mr-1" />
-                <span className="text-xs sm:text-sm">Super Like</span>
+                <Star className="w-4 h-4 mr-2" />
+                <span>Super Like</span>
               </Button>
             </div>
           </div>
