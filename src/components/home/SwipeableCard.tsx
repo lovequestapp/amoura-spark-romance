@@ -31,6 +31,7 @@ export interface Profile {
   }>;
   relationshipIntention?: string;
   personalityBadges?: string[];
+  interests?: string[];
   matchScore?: number;
   interestsScore?: number;
   personalityScore?: number;

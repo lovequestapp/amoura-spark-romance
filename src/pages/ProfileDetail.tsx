@@ -2,12 +2,12 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import DetailedProfileView from '@/components/profile/DetailedProfileView';
-import { enhancedProfiles } from '@/pages/Home';
+import { enhancedProfiles } from '@/utils/placeholderData';
 
 const ProfileDetail = () => {
   const { id } = useParams();
   
-  // For now, we'll use the mock data from Home page
+  // For now, we'll use the mock data from placeholderData
   // In a real app, you would fetch this data from your backend
   const profile = enhancedProfiles.find(p => p.id === Number(id));
   
