@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -9,13 +8,14 @@ import { useCardSwiper } from '@/hooks/use-card-swiper';
 import SwipeableCard, { Profile } from '@/components/home/SwipeableCard';
 import NoMoreProfiles from '@/components/home/NoMoreProfiles';
 import MatchFilters, { FilterOptions } from '@/components/home/MatchFilters';
-import FeaturedMatch from '@/components/home/FeaturedMatch';
+import RecentMatches from '@/components/home/FeaturedMatch';
 import { useToast } from '@/components/ui/use-toast';
 import PremiumFeatures from '@/components/subscription/PremiumFeatures';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { getPersonalizedMatches, getFeaturedMatch, WeightedMatch } from '@/services/matching';
+import { useNavigate } from 'react-router-dom';
 
 // Placeholder profiles for development/testing are still available
 import { enhancedProfiles } from '@/utils/placeholderData';
@@ -24,6 +24,7 @@ const Home = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { tier } = useSubscription();
+  const navigate = useNavigate();
 
   const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>(enhancedProfiles);
   const [filters, setFilters] = useState<FilterOptions>({
@@ -34,7 +35,7 @@ const Home = () => {
     relationshipIntention: null,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [featuredProfile, setFeaturedProfile] = useState<Profile | null>(null);
+  const [recentMatches, setRecentMatches] = useState<Profile[]>([]);
   
   const {
     currentIndex,
@@ -95,7 +96,11 @@ const Home = () => {
             withScores.sort((a, b) => b.matchScore - a.matchScore);
             
             setFilteredProfiles(withScores);
-            setFeaturedProfile(getFeaturedMatch(withScores as WeightedMatch[]));
+            
+            // Simulate recent matches (just take first 3 profiles)
+            const simulatedMatches = withScores.slice(0, 3);
+            setRecentMatches(simulatedMatches);
+            
             setIsLoading(false);
             return;
           }, 500);
@@ -112,7 +117,11 @@ const Home = () => {
         });
         
         setFilteredProfiles(matches);
-        setFeaturedProfile(getFeaturedMatch(matches));
+        
+        // In production, you would fetch actual matches from your API
+        // This is a placeholder for demonstration
+        const actualMatches = matches.slice(0, 3);
+        setRecentMatches(actualMatches);
       } catch (error) {
         console.error("Error fetching matches:", error);
         toast({
@@ -155,6 +164,10 @@ const Home = () => {
     console.log("Filters applied:", newFilters);
   };
 
+  const handleViewProfile = (profileId: number | string) => {
+    navigate(`/profile/${profileId}`);
+  };
+  
   const handleViewFeaturedProfile = () => {
     toast({
       title: "Featured Profile",
@@ -223,10 +236,10 @@ const Home = () => {
       <div className="flex-1 flex flex-col p-4">
         <DateIdea />
         
-        {featuredProfile && (
-          <FeaturedMatch 
-            profile={featuredProfile} 
-            onViewProfile={handleViewFeaturedProfile} 
+        {recentMatches.length > 0 && (
+          <RecentMatches 
+            profiles={recentMatches} 
+            onViewProfile={handleViewProfile} 
           />
         )}
         
