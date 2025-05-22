@@ -1,35 +1,25 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Star, MessageCircle, Users, Award } from 'lucide-react';
+import { Heart, MessageCircle, Award } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 
 const FeaturesSection = () => {
   const features = [
     {
-      icon: <Heart className="w-10 h-10 text-amoura-deep-pink" />,
-      title: "Smart Matches",
-      description: "Our AI-powered algorithm learns your preferences and behavior patterns to find truly compatible matches that resonate with your emotional needs"
+      icon: <Heart className="w-12 h-12 text-amoura-deep-pink" />,
+      title: "AI-Powered Smart Matches",
+      description: "Our advanced algorithm learns your preferences and behavior patterns to find truly compatible partners with up to 90% higher match quality than traditional dating apps"
     },
     {
-      icon: <MessageCircle className="w-10 h-10 text-amoura-deep-pink" />,
-      title: "Meaningful Connections",
-      description: "Start conversations with personalized ice-breakers based on psychological compatibility factors that foster authentic emotional bonds"
+      icon: <MessageCircle className="w-12 h-12 text-amoura-deep-pink" />,
+      title: "Meaningful Conversations",
+      description: "Break the ice effortlessly with personalized conversation starters based on shared interests and compatibility factors, leading to 3x more meaningful connections"
     },
     {
-      icon: <Users className="w-10 h-10 text-amoura-deep-pink" />,
-      title: "Community Events",
-      description: "Join exclusive social gatherings and activities designed to create natural environments where romantic connections can flourish organically"
-    },
-    {
-      icon: <Award className="w-10 h-10 text-amoura-gold" />,
-      title: "Premium Experience",
-      description: "Unlock our science-backed relationship insights and increase your visibility to potential matches who share your deepest values and goals"
-    },
-    {
-      icon: <Star className="w-10 h-10 text-amoura-gold" />,
-      title: "Verified Profiles",
-      description: "Connect with confidence through our multi-step verification process that ensures authentic interactions and emotional safety"
+      icon: <Award className="w-12 h-12 text-amoura-gold" />,
+      title: "Science-Backed Compatibility",
+      description: "Experience our research-validated personality matching system that analyzes 29 compatibility dimensions to connect you with partners who truly complement your unique traits"
     }
   ];
 
@@ -48,17 +38,17 @@ const FeaturesSection = () => {
             transition={{ duration: 0.4 }}
             className="text-amoura-deep-pink font-medium mb-2 inline-block"
           >
-            DESIGNED FOR GENUINE CONNECTION
+            THE AMOURA DIFFERENCE
           </motion.span>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-amoura-black">
             Why Thousands Choose <span className="text-amoura-deep-pink">Amoura</span>
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Our science-based approach to dating combines cutting-edge technology with deep psychological insights to create meaningful connections that last
+            Our science-based approach to dating combines cutting-edge technology with psychological insights to create meaningful connections that last
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
@@ -68,14 +58,14 @@ const FeaturesSection = () => {
               className="h-full"
             >
               <Card className="h-full border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="mb-4 flex items-center gap-4">
-                    <div className="p-3 bg-amoura-soft-pink rounded-xl">
+                <CardContent className="p-8">
+                  <div className="mb-5 flex flex-col items-center">
+                    <div className="p-4 bg-amoura-soft-pink rounded-xl mb-4">
                       {feature.icon}
                     </div>
-                    <h3 className="text-xl font-semibold text-amoura-black">{feature.title}</h3>
+                    <h3 className="text-xl font-semibold text-amoura-black text-center">{feature.title}</h3>
                   </div>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <p className="text-gray-600 leading-relaxed text-center">{feature.description}</p>
                 </CardContent>
               </Card>
             </motion.div>
