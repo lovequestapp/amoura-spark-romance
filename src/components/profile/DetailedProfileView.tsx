@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Heart, MessageCircle, DollarSign, MapPin, Verified } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, DollarSign, MapPin, Verified, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -41,6 +41,14 @@ const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
     toast({
       title: "Profile Liked!",
       description: `You've liked ${profile.name}'s profile. They'll be notified!`,
+      variant: "default",
+    });
+  };
+
+  const handleSuperLike = () => {
+    toast({
+      title: "Super Like Sent!",
+      description: `You've super liked ${profile.name}! They'll be notified immediately!`,
       variant: "default",
     });
   };
@@ -120,21 +128,28 @@ const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
         {/* Quick Action Bar */}
         <div className="px-6 -mt-6 relative z-10">
           <div className="bg-white rounded-2xl shadow-xl p-4">
-            <div className="flex gap-4">
+            <div className="grid grid-cols-3 gap-2">
               <Button
                 variant="outline"
                 onClick={handlePaidMessage}
-                className="flex-1 border-gray-200 hover:bg-gray-50"
+                className="border-gray-200 hover:bg-gray-50 h-auto py-2"
               >
-                <DollarSign className="w-4 h-4 mr-2 text-amoura-deep-pink" />
-                Send Paid Message
+                <DollarSign className="w-4 h-4 mr-1 text-amoura-deep-pink" />
+                <span className="text-xs sm:text-sm">Paid Message</span>
               </Button>
               <Button
                 onClick={handleLike}
-                className="flex-1 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
+                className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 h-auto py-2"
               >
-                <Heart className="w-4 h-4 mr-2" />
-                Like Profile
+                <Heart className="w-4 h-4 mr-1" />
+                <span className="text-xs sm:text-sm">Like</span>
+              </Button>
+              <Button
+                onClick={handleSuperLike}
+                className="bg-amoura-gold text-black hover:bg-amoura-gold/90 h-auto py-2"
+              >
+                <Star className="w-4 h-4 mr-1" />
+                <span className="text-xs sm:text-sm">Super Like</span>
               </Button>
             </div>
           </div>
