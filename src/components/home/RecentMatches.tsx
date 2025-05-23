@@ -31,7 +31,7 @@ const RecentMatches: React.FC<RecentMatchesProps> = ({ profiles, onViewProfile }
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
-          className="bg-white rounded-xl shadow-md overflow-hidden mb-4 border border-amoura-soft-pink"
+          className="bg-white rounded-xl shadow-md overflow-hidden border border-amoura-soft-pink"
         >
           <div className="p-4 bg-gradient-to-r from-amoura-soft-pink to-white">
             <div className="flex items-center justify-between mb-2">

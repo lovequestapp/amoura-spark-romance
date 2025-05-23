@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -236,13 +237,6 @@ const Home = () => {
       <div className="flex-1 flex flex-col p-4">
         <DateIdea />
         
-        {recentMatches.length > 0 && (
-          <RecentMatches 
-            profiles={recentMatches} 
-            onViewProfile={handleViewProfile} 
-          />
-        )}
-        
         <PremiumFeatures 
           onRewind={handleRewind}
           onSuperLike={handleSuperLike}
@@ -296,6 +290,15 @@ const Home = () => {
             >
               <Heart size={24} className="text-white" />
             </Button>
+          </div>
+        )}
+        
+        {recentMatches.length > 0 && (
+          <div className="sticky bottom-0 pb-4 z-10">
+            <RecentMatches 
+              profiles={recentMatches} 
+              onViewProfile={handleViewProfile} 
+            />
           </div>
         )}
       </div>
