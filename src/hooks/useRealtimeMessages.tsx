@@ -119,7 +119,7 @@ export const useRealtimeMessages = (conversationId: string | null, userId: strin
   }, [conversationId, userId]);
 
   // Helper functions
-  const getMessages = async (conversationId: string) => {
+  const getMessages = async (conversationId: string): Promise<Message[]> => {
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -128,7 +128,10 @@ export const useRealtimeMessages = (conversationId: string | null, userId: strin
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return data || [];
+      return (data || []).map(msg => ({
+        ...msg,
+        message_type: msg.message_type as 'text' | 'voice' | 'image'
+      }));
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({

@@ -194,7 +194,10 @@ export const getMessages = async (conversationId: string) => {
       throw error;
     }
 
-    return data || [];
+    return (data || []).map(msg => ({
+      ...msg,
+      message_type: msg.message_type as 'text' | 'voice' | 'image'
+    }));
   } catch (error) {
     console.error('Error fetching messages:', error);
     toast({
