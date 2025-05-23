@@ -20,6 +20,7 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
+      console.log('User already logged in, redirecting to /home');
       navigate('/home', { replace: true });
     }
   }, [user, navigate]);
@@ -30,6 +31,7 @@ const Login = () => {
     
     setIsLoading(true);
     try {
+      console.log('Attempting login with:', email);
       // Clean up auth state before attempting authentication
       cleanupAuthState();
       
@@ -47,6 +49,7 @@ const Login = () => {
       
       if (error) throw error;
       
+      console.log("Login successful, redirecting to home");
       toast({
         title: "Login successful",
         description: "Welcome back!",

@@ -18,12 +18,18 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
   useEffect(() => {
     // Wait until auth state is loaded
     if (!isLoading) {
+      console.log('AuthGuard check:', { user, requireAdmin, isAdmin });
       if (!user) {
         // No user - redirect to auth page
+        console.log('No user, redirecting to /auth');
         navigate('/auth', { replace: true });
       } else if (requireAdmin && !isAdmin) {
         // User is not an admin but trying to access admin page
+        console.log('Not admin, redirecting to /');
         navigate('/', { replace: true });
+      } else {
+        // User is authenticated and authorized, do nothing
+        console.log('User authenticated and authorized');
       }
     }
   }, [user, isAdmin, isLoading, navigate, requireAdmin]);

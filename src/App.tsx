@@ -24,21 +24,26 @@ import { ErrorProvider } from './contexts/ErrorContext';
 // Create React Context to track loading state
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './App.css';
-import { useEffect } from 'react';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   
-  // Show nothing while checking authentication
+  // Show loading indicator while checking authentication
   if (isLoading) {
-    return <div className="w-full h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink"></div>
+      </div>
+    );
   }
   
   if (!user) {
+    console.log('No user found in ProtectedRoute, redirecting to /auth');
     return <Navigate to="/auth" replace />;
   }
   
+  console.log('User authenticated in ProtectedRoute, rendering children');
   return <>{children}</>;
 };
 
@@ -46,15 +51,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAdmin, isLoading } = useAuth();
   
-  // Show nothing while checking authentication
+  // Show loading indicator while checking authentication
   if (isLoading) {
-    return <div className="w-full h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink"></div>
+      </div>
+    );
   }
   
   if (!isAdmin) {
+    console.log('User not admin in AdminRoute, redirecting to /');
     return <Navigate to="/" replace />;
   }
   
+  console.log('User is admin in AdminRoute, rendering children');
   return <>{children}</>;
 };
 

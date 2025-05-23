@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -46,13 +45,20 @@ const Testimonial = ({ quote, name, age, location, stars, delay = 0 }) => (
 );
 
 const Index = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
   
   const handleGetStarted = () => {
+    if (isLoading) {
+      // Show loading state if auth is still being checked
+      return;
+    }
+    
     if (user) {
+      console.log('User is logged in, navigating to /home');
       navigate('/home');
     } else {
+      console.log('User is not logged in, navigating to /auth');
       navigate('/auth');
     }
   };
@@ -144,7 +150,7 @@ const Index = () => {
                   className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                   onClick={handleGetStarted}
                 >
-                  {user ? "Go to Home" : "Get Started"}
+                  {isLoading ? "Loading..." : (user ? "Go to Home" : "Get Started")}
                 </Button>
               </motion.div>
               

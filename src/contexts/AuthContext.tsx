@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Refresh the session - useful for when user's role changes
   const refreshSession = useCallback(async () => {
     try {
+      console.log('Refreshing session...');
       const { data, error } = await supabase.auth.refreshSession();
       if (error) throw error;
       
@@ -59,6 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Handle sign out with proper cleanup
   const signOut = useCallback(async () => {
     try {
+      console.log('Signing out...');
       // Clean up auth state first
       cleanupAuthState();
       
@@ -119,6 +121,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Then check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('Initial session check:', session ? 'Session found' : 'No session');
       setSession(session);
       setUser(session?.user ?? null);
       
