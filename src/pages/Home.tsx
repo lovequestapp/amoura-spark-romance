@@ -8,7 +8,7 @@ import { useCardSwiper } from '@/hooks/use-card-swiper';
 import SwipeableCard, { Profile } from '@/components/home/SwipeableCard';
 import NoMoreProfiles from '@/components/home/NoMoreProfiles';
 import MatchFilters, { FilterOptions } from '@/components/home/MatchFilters';
-import RecentMatches from '@/components/home/FeaturedMatch';
+import RecentMatches from '@/components/home/RecentMatches';
 import { useToast } from '@/components/ui/use-toast';
 import PremiumFeatures from '@/components/subscription/PremiumFeatures';
 import { useSubscription } from '@/contexts/SubscriptionContext';
