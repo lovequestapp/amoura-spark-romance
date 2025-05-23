@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Info } from 'lucide-react';
+import { AlertTriangle, Info, Shield } from 'lucide-react';
 import ProfilePhotos from '@/components/profile/ProfilePhotos';
 import ProfilePrompt from '@/components/profile/ProfilePrompt';
 import PersonalityMatch from './PersonalityMatch';
@@ -51,6 +51,9 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
   const hasMatchScore = 'matchScore' in profile;
   const matchScore = hasMatchScore ? (profile as any).matchScore : profile.personalityMatch;
   
+  // Check for dealbreakers
+  const hasDealbreakers = profile.dealbreakers && profile.dealbreakers.length > 0;
+  
   return (
     <motion.div 
       layout
@@ -85,10 +88,22 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
         )}
         
         {hasMatchScore && (
-          <div className="mb-3">
-            <Badge className="bg-gradient-to-r from-amoura-deep-pink to-pink-500 hover:from-amoura-deep-pink hover:to-pink-600 text-white font-semibold">
+          <div className="mb-3 flex flex-wrap gap-2 items-center">
+            <Badge className={`bg-gradient-to-r ${matchScore > 80 
+              ? 'from-amoura-deep-pink to-pink-500 hover:from-amoura-deep-pink hover:to-pink-600' 
+              : matchScore > 65
+                ? 'from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600'
+                : 'from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600'
+              } text-white font-semibold`}>
               {matchScore}% Match
             </Badge>
+            
+            {hasDealbreakers && (
+              <Badge variant="outline" className="bg-red-50 text-red-500 border-red-200 flex items-center gap-1">
+                <AlertTriangle size={12} />
+                <span>Dealbreaker</span>
+              </Badge>
+            )}
           </div>
         )}
         
@@ -145,7 +160,34 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                           <span>Location Match:</span>
                           <span>{(profile as any).locationScore}%</span>
                         </div>
+                        
+                        {/* Show lifestyle match if available */}
+                        {(profile as any).lifestyleScore !== undefined && (
+                          <div className="flex justify-between">
+                            <span>Lifestyle Match:</span>
+                            <span>{(profile as any).lifestyleScore}%</span>
+                          </div>
+                        )}
                       </div>
+                      
+                      {/* Display dealbreakers if present */}
+                      {hasDealbreakers && (
+                        <div className="mt-2 pt-2 border-t border-red-100">
+                          <div className="flex items-center gap-1 text-red-500 text-xs mb-1">
+                            <AlertTriangle size={12} />
+                            <span className="font-medium">Potential Dealbreakers:</span>
+                          </div>
+                          <ul className="text-xs text-red-500">
+                            {profile.dealbreakers?.map((dealbreaker, idx) => (
+                              <li key={idx} className="flex items-center gap-1 ml-4">
+                                • {dealbreaker === 'smoking' ? 'Smoking habits' : 
+                                   dealbreaker === 'kids-views' ? 'Different views on children' : 
+                                   dealbreaker}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -175,6 +217,21 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                           <Badge key={interest} variant="outline" className="bg-amoura-soft-pink/30 text-amoura-deep-pink border-amoura-deep-pink/20">
                             {interest}
                           </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Display lifestyle information if available */}
+                  {profile.lifestyle && Object.keys(profile.lifestyle).length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium mb-2">Lifestyle</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {Object.entries(profile.lifestyle).map(([key, value]) => (
+                          <div key={key} className="flex items-center gap-1.5">
+                            <span className="text-gray-500 capitalize">{key}:</span>
+                            <span className="font-medium">{String(value)}</span>
+                          </div>
                         ))}
                       </div>
                     </div>

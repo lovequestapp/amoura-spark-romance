@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -69,7 +68,7 @@ const Home = () => {
         // For development/demo, use placeholder data
         if (process.env.NODE_ENV === 'development' && enhancedProfiles.length) {
           setTimeout(() => {
-            // Apply basic filtering to sample data to simulate API call
+            // Apply enhanced filtering to sample data to simulate API call
             let filtered = [...enhancedProfiles];
             
             if (filters.showVerifiedOnly) {
@@ -77,20 +76,38 @@ const Home = () => {
             }
             
             if (filters.relationshipIntention) {
-              filtered = filtered.filter(p => 
-                !p.relationshipIntention || 
-                p.relationshipIntention === filters.relationshipIntention
-              );
+              // Apply more nuanced relationship intention matching
+              const intensityMap: Record<string, number> = {
+                'casual': 1,
+                'dating': 2,
+                'relationship': 3,
+                'serious': 4,
+                'marriage': 5
+              };
+              
+              const userIntensity = intensityMap[filters.relationshipIntention] || 3;
+              
+              filtered = filtered.filter(p => {
+                if (!p.relationshipIntention) return true;
+                const matchIntensity = intensityMap[p.relationshipIntention] || 3;
+                // More flexible matching - allow within +/- 1 level
+                return Math.abs(userIntensity - matchIntensity) <= 1;
+              });
             }
             
-            // Add match scores to simulated data
+            // Add match scores to simulated data with more realistic distribution
             const withScores = filtered.map(p => ({
               ...p,
-              matchScore: Math.round(Math.random() * 40) + 60, // Random score between 60-100
-              interestsScore: Math.round(Math.random() * 100),
-              personalityScore: Math.round(Math.random() * 100),
-              intentionScore: Math.round(Math.random() * 100),
-              locationScore: Math.round(Math.random() * 100),
+              // More realistic score distribution
+              matchScore: Math.floor(Math.random() * 30) + 55 + (p.verified ? 10 : 0) + 
+                          (filters.interests.some(i => p.interests?.includes(i)) ? 15 : 0),
+              interestsScore: Math.floor(Math.random() * 70) + 30,
+              personalityScore: Math.floor(Math.random() * 60) + 40,
+              intentionScore: Math.floor(Math.random() * 80) + 20,
+              locationScore: Math.floor(Math.random() * 90) + 10,
+              lifestyleScore: Math.floor(Math.random() * 75) + 25,
+              // Occasionally add dealbreakers for UI testing
+              dealbreakers: Math.random() > 0.8 ? ['smoking'] : undefined
             }));
             
             // Sort by match score
@@ -98,8 +115,10 @@ const Home = () => {
             
             setFilteredProfiles(withScores);
             
-            // Simulate recent matches (just take first 3 profiles)
-            const simulatedMatches = withScores.slice(0, 3);
+            // Simulate recent matches with better selection logic
+            const simulatedMatches = withScores
+              .filter(p => p.matchScore > 75) // High quality matches only
+              .slice(0, 3);
             setRecentMatches(simulatedMatches);
             
             setIsLoading(false);
@@ -108,21 +127,26 @@ const Home = () => {
           return;
         }
         
-        // Production code - use real data
+        // Production code - use enhanced matching algorithm
         const matches = await getPersonalizedMatches({
           userId: user.id,
           ageRange: filters.ageRange,
           distance: filters.distance,
           relationshipIntention: filters.relationshipIntention,
           interests: filters.interests,
+          personalityTraits: user.personality_traits,
+          dealbreakers: user.dealbreakers,
+          lifestylePreferences: user.lifestyle_preferences
         });
         
         setFilteredProfiles(matches);
         
-        // In production, you would fetch actual matches from your API
-        // This is a placeholder for demonstration
-        const actualMatches = matches.slice(0, 3);
-        setRecentMatches(actualMatches);
+        // Get recent matches with highest compatibility
+        const highQualityMatches = matches
+          .filter(match => match.matchScore > 80)
+          .slice(0, 3);
+        
+        setRecentMatches(highQualityMatches);
       } catch (error) {
         console.error("Error fetching matches:", error);
         toast({
@@ -170,11 +194,19 @@ const Home = () => {
   };
   
   const handleViewFeaturedProfile = () => {
-    toast({
-      title: "Featured Profile",
-      description: "View the full featured profile to learn more about this match.",
-    });
-    // In a real app, you would navigate to a detailed profile view
+    if (!currentProfile) return;
+    
+    // Enhanced featured profile logic
+    const featured = getFeaturedMatch(filteredProfiles as WeightedMatch[]);
+    
+    if (featured) {
+      navigate(`/profile/${featured.id}`);
+      
+      toast({
+        title: "Featured Match",
+        description: `${featured.name} has been selected as your featured match based on exceptional compatibility!`,
+      });
+    }
   };
   
   const handleRewind = () => {

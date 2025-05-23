@@ -37,6 +37,9 @@ export interface Profile {
   personalityScore?: number;
   intentionScore?: number;
   locationScore?: number;
+  lifestyleScore?: number;
+  dealbreakers?: string[];
+  lifestyle?: Record<string, string | boolean>;
 }
 
 interface SwipeableCardProps {
