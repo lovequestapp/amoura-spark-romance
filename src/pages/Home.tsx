@@ -20,6 +20,21 @@ import { useNavigate } from 'react-router-dom';
 // Placeholder profiles for development/testing are still available
 import { enhancedProfiles } from '@/utils/placeholderData';
 
+// Update the MatchingParams interface
+interface MatchingParams {
+  userId: string;
+  ageRange: [number, number];
+  distance: number;
+  relationshipIntention: string | null;
+  interests: string[];
+  personalityTraits?: PersonalityTrait[];
+  dealbreakers?: string[];
+  lifestylePreferences?: Record<string, string | boolean>;
+}
+
+// Import the types we created
+import { User, PersonalityTrait, LifestylePreference } from '@/types/profiles';
+
 const Home = () => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -134,9 +149,9 @@ const Home = () => {
           distance: filters.distance,
           relationshipIntention: filters.relationshipIntention,
           interests: filters.interests,
-          personalityTraits: user.personality_traits,
-          dealbreakers: user.dealbreakers,
-          lifestylePreferences: user.lifestyle_preferences
+          personalityTraits: user.personality_traits as PersonalityTrait[],
+          dealbreakers: user.dealbreakers || [],
+          lifestylePreferences: user.lifestyle_preferences as Record<string, string | boolean>
         });
         
         setFilteredProfiles(matches);

@@ -108,6 +108,48 @@ export type Database = {
         }
         Relationships: []
       }
+      lifestyle_preferences: {
+        Row: {
+          created_at: string | null
+          diet: string | null
+          drinking: string | null
+          exercise: string | null
+          has_children: boolean | null
+          id: string
+          pets: string | null
+          smoking: string | null
+          updated_at: string | null
+          user_id: string
+          wants_children: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          diet?: string | null
+          drinking?: string | null
+          exercise?: string | null
+          has_children?: boolean | null
+          id?: string
+          pets?: string | null
+          smoking?: string | null
+          updated_at?: string | null
+          user_id: string
+          wants_children?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          diet?: string | null
+          drinking?: string | null
+          exercise?: string | null
+          has_children?: boolean | null
+          id?: string
+          pets?: string | null
+          smoking?: string | null
+          updated_at?: string | null
+          user_id?: string
+          wants_children?: boolean | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string | null
@@ -148,6 +190,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      personality_traits: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: []
       }
       post_comments: {
         Row: {
@@ -284,6 +350,7 @@ export type Database = {
           bio: string | null
           birth_date: string | null
           created_at: string
+          dealbreakers: string[] | null
           drinking: string | null
           education: string | null
           full_name: string | null
@@ -291,6 +358,8 @@ export type Database = {
           height: number | null
           id: string
           is_admin_account: boolean | null
+          latitude: number | null
+          longitude: number | null
           onboarding_completed: boolean | null
           onboarding_step: number | null
           photos: string[] | null
@@ -305,6 +374,7 @@ export type Database = {
           bio?: string | null
           birth_date?: string | null
           created_at?: string
+          dealbreakers?: string[] | null
           drinking?: string | null
           education?: string | null
           full_name?: string | null
@@ -312,6 +382,8 @@ export type Database = {
           height?: number | null
           id: string
           is_admin_account?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
           photos?: string[] | null
@@ -326,6 +398,7 @@ export type Database = {
           bio?: string | null
           birth_date?: string | null
           created_at?: string
+          dealbreakers?: string[] | null
           drinking?: string | null
           education?: string | null
           full_name?: string | null
@@ -333,6 +406,8 @@ export type Database = {
           height?: number | null
           id?: string
           is_admin_account?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
           photos?: string[] | null

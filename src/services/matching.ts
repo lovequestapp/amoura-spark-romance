@@ -1,17 +1,16 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/components/home/SwipeableCard";
+import { UserProfile, PersonalityTrait, LifestylePreference } from '@/types/profiles';
 
+// Update the MatchingParams to match the Home.tsx interface
 interface MatchingParams {
   userId: string;
   ageRange: [number, number];
   distance: number;
   relationshipIntention: string | null;
   interests: string[];
-  personalityTraits?: {
-    name: string;
-    value: number;
-  }[];
+  personalityTraits?: PersonalityTrait[];
   dealbreakers?: string[];
   lifestylePreferences?: Record<string, string | boolean>;
 }
@@ -332,7 +331,7 @@ export const getPersonalizedMatches = async (
     }
     
     // Apply distance filtering if coordinates available
-    if (params.distance > 0 && userProfile.latitude && userProfile.longitude) {
+    if (params.distance > 0 && userProfile && userProfile.latitude && userProfile.longitude) {
       filteredMatches = filteredMatches.filter(match => {
         // Skip if no coordinates available
         if (!match.latitude || !match.longitude) return true;
@@ -352,14 +351,17 @@ export const getPersonalizedMatches = async (
     // Apply dealbreaker filtering if specified
     if (params.dealbreakers && params.dealbreakers.length > 0) {
       filteredMatches = filteredMatches.filter(match => {
+        // Type guard for lifestyle_preferences
+        const lifestyle = match.lifestyle_preferences as LifestylePreference | undefined;
+        
         // Example implementation for a few common dealbreakers
         if (params.dealbreakers?.includes('no-smoking') && 
-            match.lifestyle_preferences?.smoking !== 'never') {
+            lifestyle?.smoking && lifestyle.smoking !== 'never') {
           return false;
         }
         
         if (params.dealbreakers?.includes('no-kids') && 
-            match.lifestyle_preferences?.has_children === true) {
+            lifestyle?.has_children === true) {
           return false;
         }
         
