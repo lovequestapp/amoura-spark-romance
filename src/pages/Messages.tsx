@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Image, Send, Mic } from 'lucide-react';
@@ -5,11 +6,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import AppLayout from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import IceBreaker from '@/components/messages/IceBreaker';
-import { supabase } from '@/integrations/supabase/client';
-import { getOrCreateConversation, sendTextMessage, sendVoiceMessage, getMessages, markMessagesAsSeen } from '@/services/messaging';
 import MessageBubble from '@/components/messages/MessageBubble';
 import EmojiPicker from '@/components/messages/EmojiPicker';
 import VoiceRecorder from '@/components/messages/VoiceRecorder';
+import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
+import { useConversation } from '@/hooks/useConversation';
+import { useSendMessage } from '@/hooks/useSendMessage';
 import { toast } from '@/components/ui/use-toast';
 
 interface MatchProfile {
@@ -17,28 +19,6 @@ interface MatchProfile {
   name: string;
   photo: string;
 }
-
-interface Message {
-  id: string;
-  text?: string | null;
-  voice_url?: string | null;
-  sender: 'user' | 'match';
-  time: string;
-  seen?: boolean;
-  message_type?: 'text' | 'voice' | 'image';
-}
-
-const getDemoUUID = (demoId: string) => {
-  if (!isNaN(Number(demoId))) {
-    switch (demoId) {
-      case "1": return "00000000-0000-0000-0000-000000000001";
-      case "2": return "00000000-0000-0000-0000-000000000002";
-      case "3": return "00000000-0000-0000-0000-000000000003";
-      default: return `00000000-0000-0000-0000-${demoId.padStart(12, '0')}`;
-    }
-  }
-  return demoId;
-};
 
 const matchProfiles: Record<string, MatchProfile> = {
   '1': {
@@ -64,101 +44,34 @@ const Messages = () => {
   const navigate = useNavigate();
   
   const [newMessage, setNewMessage] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const match = id && matchProfiles[id] ? matchProfiles[id] : null;
+  const userId = user?.id || 'current-user';
+
+  // Use our custom hooks
+  const { conversation, loading: conversationLoading } = useConversation(
+    userId,
+    id ? id : null
+  );
+  
+  const { messages, loading: messagesLoading, addMessage } = useRealtimeMessages(
+    conversation?.id || null,
+    userId
+  );
+  
+  const { sendTextMessage, sendVoiceMessage, sending } = useSendMessage(
+    conversation?.id || null,
+    userId,
+    addMessage
+  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    const loadMessages = async () => {
-      if (!user?.id || !id || !match) return;
-      
-      try {
-        setLoading(true);
-        
-        const userId = user.id || getDemoUUID('current-user');
-        const matchId = getDemoUUID(id);
-        
-        console.log(`Loading conversation for user ${userId} with match ${matchId}`);
-        
-        const conversation = await getOrCreateConversation(userId, matchId);
-        setConversationId(conversation.id);
-        
-        const dbMessages = await getMessages(conversation.id);
-        
-        const formattedMessages = dbMessages.map((msg): Message => ({
-          id: msg.id,
-          text: msg.content,
-          voice_url: msg.voice_url,
-          sender: msg.sender_id === userId ? 'user' : 'match',
-          time: msg.created_at,
-          seen: !!msg.seen_at,
-          message_type: msg.message_type as 'text' | 'voice' | 'image'
-        }));
-        
-        setMessages(formattedMessages);
-        
-        await markMessagesAsSeen(conversation.id, userId);
-        
-        const subscription = supabase
-          .channel('messages_channel')
-          .on('postgres_changes', 
-            { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversation.id}` }, 
-            async (payload) => {
-              if (payload.eventType === 'INSERT') {
-                const newMsg = payload.new;
-                
-                if (newMsg.sender_id !== userId) {
-                  const formattedMsg: Message = {
-                    id: newMsg.id,
-                    text: newMsg.content,
-                    voice_url: newMsg.voice_url,
-                    sender: 'match',
-                    time: newMsg.created_at,
-                    seen: false,
-                    message_type: newMsg.message_type as 'text' | 'voice' | 'image'
-                  };
-                  
-                  setMessages(prev => [...prev, formattedMsg]);
-                  
-                  await markMessagesAsSeen(conversation.id, userId);
-                }
-              } else if (payload.eventType === 'UPDATE') {
-                if (payload.new.seen_at && payload.old.seen_at === null) {
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === payload.new.id ? {...msg, seen: true} : msg
-                  ));
-                }
-              }
-          })
-          .subscribe();
-        
-        return () => {
-          supabase.removeChannel(subscription);
-        };
-      } catch (error) {
-        console.error('Error loading messages:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load messages",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadMessages();
-  }, [user, id, match]);
-  
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -166,50 +79,20 @@ const Messages = () => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newMessage.trim() || !user?.id || !conversationId) return;
+    if (!newMessage.trim() || sending) return;
     
-    try {
-      const userId = user.id || getDemoUUID('current-user');
-      
-      const sentMessage = await sendTextMessage(conversationId, userId, newMessage.trim());
-      
-      const formattedMsg: Message = {
-        id: sentMessage.id,
-        text: sentMessage.content,
-        sender: 'user',
-        time: sentMessage.created_at,
-        seen: false,
-        message_type: 'text'
-      };
-      
-      setMessages(prev => [...prev, formattedMsg]);
+    const result = await sendTextMessage(newMessage.trim());
+    if (result) {
       setNewMessage('');
-    } catch (error) {
-      console.error('Failed to send message:', error);
     }
   };
   
   const handleSendVoice = async (audioBlob: Blob) => {
-    if (!user?.id || !conversationId) return;
+    if (sending) return;
     
-    try {
-      const userId = user.id || getDemoUUID('current-user');
-      
-      const sentMessage = await sendVoiceMessage(conversationId, userId, audioBlob);
-      
-      const formattedMsg: Message = {
-        id: sentMessage.id,
-        voice_url: sentMessage.voice_url,
-        sender: 'user',
-        time: sentMessage.created_at,
-        seen: false,
-        message_type: 'voice'
-      };
-      
-      setMessages(prev => [...prev, formattedMsg]);
+    const result = await sendVoiceMessage(audioBlob);
+    if (result) {
       setShowVoiceRecorder(false);
-    } catch (error) {
-      console.error('Failed to send voice message:', error);
     }
   };
   
@@ -220,6 +103,8 @@ const Messages = () => {
   const useIceBreaker = (text: string) => {
     setNewMessage(text);
   };
+  
+  const loading = conversationLoading || messagesLoading;
   
   if (!id || !match) {
     return (
@@ -239,7 +124,7 @@ const Messages = () => {
     <AppLayout hideNavigation>
       <div className="flex flex-col h-full">
         <div className="p-4 border-b flex items-center">
-          <ArrowLeft size={20} className="mr-3" onClick={() => navigate('/matches')} />
+          <ArrowLeft size={20} className="mr-3 cursor-pointer" onClick={() => navigate('/matches')} />
           <div className="flex items-center">
             <img 
               src={match.photo} 
@@ -299,6 +184,7 @@ const Messages = () => {
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type a message..."
                 className="rounded-full pr-10"
+                disabled={sending}
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2">
                 <EmojiPicker onEmojiSelect={handleEmojiSelect} />
@@ -309,14 +195,16 @@ const Messages = () => {
               <button 
                 type="submit" 
                 className="text-amoura-deep-pink bg-transparent p-2"
+                disabled={sending}
               >
-                <Send size={20} />
+                <Send size={20} className={sending ? "opacity-50" : ""} />
               </button>
             ) : (
               <button 
                 type="button" 
                 className="text-amoura-deep-pink bg-transparent p-2"
                 onClick={() => setShowVoiceRecorder(true)}
+                disabled={sending}
               >
                 <Mic size={20} />
               </button>

@@ -24,7 +24,7 @@ export interface Conversation {
 }
 
 // Helper function to convert demo IDs to UUIDs consistently
-const getDemoUUID = (demoId: string) => {
+export const getDemoUUID = (demoId: string) => {
   // Generate deterministic UUIDs for demo users
   if (!isNaN(Number(demoId))) {
     switch (demoId) {
@@ -36,6 +36,9 @@ const getDemoUUID = (demoId: string) => {
   }
   return demoId; // If it's already a UUID, return as is
 };
+
+// Note: The functions below are kept for backward compatibility
+// New code should use the hooks directly: useConversation, useSendMessage, useRealtimeMessages
 
 // Get or create conversation between two users
 export const getOrCreateConversation = async (user1Id: string, user2Id: string) => {
