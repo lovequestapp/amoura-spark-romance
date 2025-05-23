@@ -234,7 +234,7 @@ const Home = () => {
   
   return (
     <AppLayout>
-      <div className="flex-1 flex flex-col p-4">
+      <div className="flex-1 flex flex-col p-4 w-full max-w-full">
         <DateIdea />
         
         <PremiumFeatures 
@@ -245,7 +245,7 @@ const Home = () => {
         
         <MatchFilters onApplyFilters={handleApplyFilters} />
         
-        <div className="flex-1 flex items-center justify-center relative">
+        <div className="flex-1 flex items-center justify-center relative w-full">
           {isLoading ? (
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-3"></div>
@@ -294,7 +294,7 @@ const Home = () => {
         )}
         
         {recentMatches.length > 0 && (
-          <div className="sticky bottom-0 pb-4 z-10">
+          <div className="sticky bottom-0 pb-4 z-10 w-full">
             <RecentMatches 
               profiles={recentMatches} 
               onViewProfile={handleViewProfile} 

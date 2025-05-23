@@ -41,9 +41,15 @@
     @apply border-border;
   }
 
+  html, body, #root {
+    @apply w-full max-w-full overflow-x-hidden;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
     -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0;
   }
 }
 

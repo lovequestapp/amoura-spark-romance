@@ -26,13 +26,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, hideNavigation = false 
 
   return (
     <div 
-      className="min-h-screen flex flex-col bg-white"
+      className="min-h-screen flex flex-col bg-white w-full"
       style={{
         paddingTop: isNativePlatform() ? `var(--safe-area-top, 0px)` : 0,
         paddingBottom: isNativePlatform() ? `var(--safe-area-bottom, 0px)` : 0
       }}
     >
-      <main className="flex-1 overflow-auto pb-[72px]">
+      <main className="flex-1 overflow-auto pb-[72px] w-full">
         {children}
       </main>
       

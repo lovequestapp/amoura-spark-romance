@@ -23,6 +23,7 @@ import { ErrorProvider } from './contexts/ErrorContext';
 
 // Create React Context to track loading state
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import './App.css';
 
 function App() {
   const queryClient = new QueryClient({
@@ -40,25 +41,27 @@ function App() {
         <AuthProvider>
           <SubscriptionProvider>
             <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/matches" element={<Matches />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/profile/:id" element={<ProfileDetail />} />
-                <Route path="/community" element={<Community />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/auth/reset-password" element={<PasswordReset />} />
-                <Route path="/help" element={<Help />} />
-                <Route path="/admin/dashboard" element={<Dashboard />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <Toaster />
+              <div className="w-full max-w-full">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/matches" element={<Matches />} />
+                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile/:id" element={<ProfileDetail />} />
+                  <Route path="/community" element={<Community />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/auth/reset-password" element={<PasswordReset />} />
+                  <Route path="/help" element={<Help />} />
+                  <Route path="/admin/dashboard" element={<Dashboard />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Toaster />
+              </div>
             </BrowserRouter>
           </SubscriptionProvider>
         </AuthProvider>

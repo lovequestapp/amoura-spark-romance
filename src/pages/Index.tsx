@@ -48,9 +48,9 @@ const Index = () => {
   const { user } = useAuth();
   
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white w-full">
       {/* Enhanced Hero Section */}
-      <section className="pt-24 pb-16 px-6 bg-gradient-to-br from-white via-amoura-soft-pink to-white overflow-hidden relative">
+      <section className="pt-24 pb-16 px-6 bg-gradient-to-br from-white via-amoura-soft-pink to-white overflow-hidden relative w-full">
         {/* Animated background decorations */}
         <motion.div 
           animate={{
