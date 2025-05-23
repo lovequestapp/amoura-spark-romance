@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/components/ui/use-toast";
 import { cleanupAuthState } from '@/utils/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,6 +15,14 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate('/home', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,19 +52,19 @@ const Login = () => {
         description: "Welcome back!",
       });
       
-      // Force page reload for a clean state with the new session
-      window.location.href = '/home';
+      // Navigate programmatically instead of forcing page reload
+      navigate('/home', { replace: true });
     } catch (error: any) {
       console.error("Login error:", error.message);
       
       // More user-friendly error messages
       let errorMessage = error.message;
       
-      if (error.message.includes('credentials')) {
+      if (error.message?.includes('credentials')) {
         errorMessage = 'Invalid email or password. Please try again.';
-      } else if (error.message.includes('rate limited')) {
+      } else if (error.message?.includes('rate limited')) {
         errorMessage = 'Too many login attempts. Please try again later.';
-      } else if (error.message.includes('Email not confirmed')) {
+      } else if (error.message?.includes('Email not confirmed')) {
         errorMessage = 'Please verify your email address before logging in.';
       }
       
@@ -70,7 +79,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-white p-6 w-full">
       <button 
         onClick={() => navigate(-1)}
         className="mb-6 flex items-center text-gray-500"

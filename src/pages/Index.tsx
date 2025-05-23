@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart, Star, Users, MessageCircle } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,6 +47,15 @@ const Testimonial = ({ quote, name, age, location, stars, delay = 0 }) => (
 
 const Index = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/home');
+    } else {
+      navigate('/auth');
+    }
+  };
   
   return (
     <div className="min-h-screen bg-white w-full">
@@ -130,21 +140,12 @@ const Index = () => {
                 variants={heroTextVariants}
                 className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 mb-8"
               >
-                {user ? (
-                  <Button 
-                    className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                    asChild
-                  >
-                    <Link to="/home">Go to Home</Link>
-                  </Button>
-                ) : (
-                  <Button 
-                    className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                    asChild
-                  >
-                    <Link to="/auth">Get Started</Link>
-                  </Button>
-                )}
+                <Button 
+                  className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  onClick={handleGetStarted}
+                >
+                  {user ? "Go to Home" : "Get Started"}
+                </Button>
               </motion.div>
               
               <motion.div

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/components/ui/use-toast";
 import { cleanupAuthState } from '@/utils/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -15,6 +16,14 @@ const Signup = () => {
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const { user } = useAuth();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate('/home', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,19 +62,19 @@ const Signup = () => {
       
       // If auto-confirm is enabled, redirect to onboarding
       if (data.session) {
-        window.location.href = '/onboarding';
+        navigate('/onboarding', { replace: true });
       } else {
         // Otherwise, redirect to auth page
-        navigate('/auth');
+        navigate('/auth', { replace: true });
       }
     } catch (error: any) {
       console.error("Signup error:", error.message);
       
       let errorMessage = error.message;
       
-      if (error.message.includes('email')) {
+      if (error.message?.includes('email')) {
         errorMessage = 'This email is already in use. Please try another one.';
-      } else if (error.message.includes('password')) {
+      } else if (error.message?.includes('password')) {
         errorMessage = 'Password must be at least 6 characters.';
       }
       
@@ -80,7 +89,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-white p-6 w-full">
       <button 
         onClick={() => navigate(-1)}
         className="mb-6 flex items-center text-gray-500"

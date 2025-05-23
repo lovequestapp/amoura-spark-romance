@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft } from "lucide-react";
 import { cleanupAuthState } from '@/utils/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -16,9 +17,16 @@ const AuthPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate('/home', { replace: true });
+    }
+  }, [user, navigate]);
 
   // Clean up auth state when the component mounts
-  // This prevents auth limbo states
   useEffect(() => {
     // Try to clean up any potential stale auth state
     cleanupAuthState();
@@ -61,6 +69,12 @@ const AuthPage = () => {
           title: "Account created!",
           description: "Please check your email to verify your account.",
         });
+
+        // Clear form
+        setEmail('');
+        setPassword('');
+        setFullName('');
+        setIsSignUp(false);
       } else {
         console.log("Logging in with:", email);
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -70,11 +84,14 @@ const AuthPage = () => {
         
         if (error) throw error;
         
-        console.log("Login successful");
+        console.log("Login successful, redirecting to home");
+        toast({
+          title: "Login successful",
+          description: "Welcome back!",
+        });
         
-        // Force page reload for a clean state with the new session
-        window.location.href = '/home';
-        return; // Prevent further execution
+        // Navigate programmatically instead of page reload
+        navigate('/home', { replace: true });
       }
     } catch (error: any) {
       console.error("Authentication error:", error.message);
@@ -82,11 +99,11 @@ const AuthPage = () => {
       // More user-friendly error messages
       let errorMessage = error.message;
       
-      if (error.message.includes('credentials')) {
+      if (error.message?.includes('credentials')) {
         errorMessage = 'Invalid email or password. Please try again.';
-      } else if (error.message.includes('rate limited')) {
+      } else if (error.message?.includes('rate limited')) {
         errorMessage = 'Too many login attempts. Please try again later.';
-      } else if (error.message.includes('Email not confirmed')) {
+      } else if (error.message?.includes('Email not confirmed')) {
         errorMessage = 'Please verify your email address before logging in.';
       }
       
@@ -101,7 +118,7 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-white p-6 w-full">
       <button 
         onClick={() => navigate('/')}
         className="mb-6 flex items-center text-gray-500"
@@ -156,7 +173,7 @@ const AuthPage = () => {
               Password
             </label>
             {!isSignUp && (
-              <Link to="/auth/password-reset" className="text-sm text-amoura-deep-pink">
+              <Link to="/auth/reset-password" className="text-sm text-amoura-deep-pink">
                 Forgot password?
               </Link>
             )}

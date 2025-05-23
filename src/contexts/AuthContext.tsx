@@ -43,8 +43,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setTimeout(async () => {
           try {
             const { data: adminData, error: adminError } = await supabase.rpc('is_admin');
-            if (!adminError && adminData) {
-              setIsAdmin(adminData);
+            if (!adminError && adminData !== null) {
+              setIsAdmin(!!adminData);
             }
           } catch (error) {
             console.error('Error checking admin status:', error);
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: 'You have been signed out successfully',
       });
       
-      // Force page reload for a clean state
+      // Navigate to home instead of forcing a reload
       window.location.href = '/';
     } catch (error) {
       console.error('Error signing out:', error);
@@ -101,8 +101,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setTimeout(async () => {
             try {
               const { data, error } = await supabase.rpc('is_admin');
-              if (!error && data) {
-                setIsAdmin(data);
+              if (!error && data !== null) {
+                setIsAdmin(!!data);
               }
             } catch (error) {
               console.error('Error checking admin status:', error);
@@ -125,8 +125,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (session?.user) {
         try {
           const { data, error } = await supabase.rpc('is_admin');
-          if (!error && data) {
-            setIsAdmin(data);
+          if (!error && data !== null) {
+            setIsAdmin(!!data);
           }
         } catch (error) {
           console.error('Error checking admin status:', error);

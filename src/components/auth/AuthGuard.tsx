@@ -36,7 +36,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
     );
   }
 
-  // If not logged in or not admin when required, render nothing
+  // If not logged in or not admin when required, render nothing while redirecting
   if (!user || (requireAdmin && !isAdmin)) {
     return null;
   }
