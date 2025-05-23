@@ -38,7 +38,7 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
           conversation_id: conversationId,
           sender_id: safeSenderId,
           content,
-          message_type: 'text'
+          message_type: 'text' as 'text' | 'voice' | 'image'
         })
         .select()
         .single();
@@ -103,7 +103,7 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
           conversation_id: conversationId,
           sender_id: safeSenderId,
           voice_url: urlData.publicUrl,
-          message_type: 'voice'
+          message_type: 'voice' as 'text' | 'voice' | 'image'
         })
         .select()
         .single();

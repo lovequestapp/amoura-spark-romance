@@ -29,7 +29,7 @@ export const useRealtimeMessages = (conversationId: string | null, userId: strin
       sender: msg.sender_id === userId ? 'user' : 'match',
       time: msg.created_at,
       seen: !!msg.seen_at,
-      message_type: msg.message_type
+      message_type: msg.message_type as 'text' | 'voice' | 'image'
     }));
   };
 
@@ -93,7 +93,7 @@ export const useRealtimeMessages = (conversationId: string | null, userId: strin
                 sender: 'match',
                 time: newMsg.created_at,
                 seen: false,
-                message_type: newMsg.message_type
+                message_type: newMsg.message_type as 'text' | 'voice' | 'image'
               };
               
               setMessages(prev => [...prev, formattedMsg]);
