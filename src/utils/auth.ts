@@ -65,3 +65,18 @@ export const getUserDisplayName = (user: any, profile?: any) => {
   
   return 'User';
 };
+
+/**
+ * Check if the current token needs refreshing
+ * @returns boolean true if token should be refreshed
+ */
+export const shouldRefreshToken = (session: any): boolean => {
+  if (!session || !session.expires_at) return false;
+  
+  const expiresAt = new Date(session.expires_at * 1000);
+  const now = new Date();
+  
+  // Refresh if less than 5 minutes until expiration
+  const fiveMinutes = 5 * 60 * 1000;
+  return expiresAt.getTime() - now.getTime() < fiveMinutes;
+};

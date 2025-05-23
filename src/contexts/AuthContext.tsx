@@ -1,8 +1,9 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { cleanupAuthState } from '@/utils/auth';
+import { useToast } from '@/components/ui/use-toast';
 
 type AuthContextType = {
   user: User | null;
@@ -10,6 +11,7 @@ type AuthContextType = {
   isLoading: boolean;
   isAdmin: boolean;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,6 +20,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   isAdmin: false,
   signOut: async () => {},
+  refreshSession: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -25,9 +28,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { toast } = useToast();
+
+  // Refresh the session - useful for when user's role changes
+  const refreshSession = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.auth.refreshSession();
+      if (error) throw error;
+      
+      setSession(data.session);
+      setUser(data.session?.user ?? null);
+      
+      if (data.session?.user) {
+        setTimeout(async () => {
+          try {
+            const { data: adminData, error: adminError } = await supabase.rpc('is_admin');
+            if (!adminError && adminData) {
+              setIsAdmin(adminData);
+            }
+          } catch (error) {
+            console.error('Error checking admin status:', error);
+          }
+        }, 0);
+      }
+    } catch (error) {
+      console.error('Error refreshing session:', error);
+    }
+  }, []);
 
   // Handle sign out with proper cleanup
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       // Clean up auth state first
       cleanupAuthState();
@@ -35,15 +65,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Attempt global sign out
       await supabase.auth.signOut({ scope: 'global' });
       
+      toast({
+        title: 'Signed out',
+        description: 'You have been signed out successfully',
+      });
+      
       // Force page reload for a clean state
-      window.location.href = '/auth';
+      window.location.href = '/';
     } catch (error) {
       console.error('Error signing out:', error);
-      window.location.href = '/auth';
+      toast({
+        title: 'Error',
+        description: 'Failed to sign out. Please try again.',
+        variant: 'destructive',
+      });
+      
+      // Try to clean up anyway
+      cleanupAuthState();
+      window.location.href = '/';
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
+    console.log('Setting up auth state listener');
+    
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -91,11 +136,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, isAdmin, signOut }}>
+    <AuthContext.Provider value={{ user, session, isLoading, isAdmin, signOut, refreshSession }}>
       {children}
     </AuthContext.Provider>
   );

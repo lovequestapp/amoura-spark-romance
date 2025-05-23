@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Index from './pages/Index';
 import Home from './pages/Home';
 import { Toaster } from './components/ui/toaster';
@@ -7,7 +7,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Messages from './pages/Messages';
 import NotFound from './pages/NotFound';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Community from './pages/Community';
 import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
@@ -24,6 +24,39 @@ import { ErrorProvider } from './contexts/ErrorContext';
 // Create React Context to track loading state
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './App.css';
+import { useEffect } from 'react';
+
+// Protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading } = useAuth();
+  
+  // Show nothing while checking authentication
+  if (isLoading) {
+    return <div className="w-full h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Admin route component
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAdmin, isLoading } = useAuth();
+  
+  // Show nothing while checking authentication
+  if (isLoading) {
+    return <div className="w-full h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 function App() {
   const queryClient = new QueryClient({
@@ -44,20 +77,62 @@ function App() {
               <div className="w-full max-w-full">
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/matches" element={<Matches />} />
-                  <Route path="/messages" element={<Messages />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/profile/:id" element={<ProfileDetail />} />
-                  <Route path="/community" element={<Community />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/auth/reset-password" element={<PasswordReset />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  
+                  {/* Protected routes */}
+                  <Route path="/home" element={
+                    <ProtectedRoute>
+                      <Home />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/matches" element={
+                    <ProtectedRoute>
+                      <Matches />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/messages" element={
+                    <ProtectedRoute>
+                      <Messages />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/profile/:id" element={
+                    <ProtectedRoute>
+                      <ProfileDetail />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/community" element={
+                    <ProtectedRoute>
+                      <Community />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/onboarding" element={
+                    <ProtectedRoute>
+                      <Onboarding />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Admin routes */}
+                  <Route path="/admin/dashboard" element={
+                    <AdminRoute>
+                      <Dashboard />
+                    </AdminRoute>
+                  } />
+                  
+                  {/* Public routes */}
                   <Route path="/help" element={<Help />} />
-                  <Route path="/admin/dashboard" element={<Dashboard />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <Toaster />
