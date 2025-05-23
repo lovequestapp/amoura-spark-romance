@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -20,6 +21,9 @@ import { useNavigate } from 'react-router-dom';
 // Placeholder profiles for development/testing are still available
 import { enhancedProfiles } from '@/utils/placeholderData';
 
+// Import the types we created
+import { User, PersonalityTrait, LifestylePreference } from '@/types/profiles';
+
 // Update the MatchingParams interface
 interface MatchingParams {
   userId: string;
@@ -30,10 +34,9 @@ interface MatchingParams {
   personalityTraits?: PersonalityTrait[];
   dealbreakers?: string[];
   lifestylePreferences?: Record<string, string | boolean>;
+  attachmentStyle?: string;
+  traitPreferences?: Array<{trait: string, importance: number}>;
 }
-
-// Import the types we created
-import { User, PersonalityTrait, LifestylePreference } from '@/types/profiles';
 
 const Home = () => {
   const { toast } = useToast();
@@ -121,6 +124,9 @@ const Home = () => {
               intentionScore: Math.floor(Math.random() * 80) + 20,
               locationScore: Math.floor(Math.random() * 90) + 10,
               lifestyleScore: Math.floor(Math.random() * 75) + 25,
+              // Add attachment style and score for UI testing
+              attachment_style: ['secure', 'anxious', 'avoidant', 'fearful'][Math.floor(Math.random() * 4)] as 'secure' | 'anxious' | 'avoidant' | 'fearful',
+              attachmentScore: Math.floor(Math.random() * 70) + 30,
               // Occasionally add dealbreakers for UI testing
               dealbreakers: Math.random() > 0.8 ? ['smoking'] : undefined
             }));
@@ -149,9 +155,11 @@ const Home = () => {
           distance: filters.distance,
           relationshipIntention: filters.relationshipIntention,
           interests: filters.interests,
-          personalityTraits: user.personality_traits as PersonalityTrait[],
-          dealbreakers: user.dealbreakers || [],
-          lifestylePreferences: user.lifestyle_preferences as Record<string, string | boolean>
+          personalityTraits: user.personality_traits,
+          dealbreakers: user.dealbreakers,
+          lifestylePreferences: user.lifestyle_preferences as Record<string, string | boolean>,
+          attachmentStyle: user.attachment_style,
+          traitPreferences: user.trait_preferences
         });
         
         setFilteredProfiles(matches);

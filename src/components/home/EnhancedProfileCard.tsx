@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { AlertTriangle, Info, Shield } from 'lucide-react';
+import { AlertTriangle, Info, Shield, Heart } from 'lucide-react';
 import ProfilePhotos from '@/components/profile/ProfilePhotos';
 import ProfilePrompt from '@/components/profile/ProfilePrompt';
 import PersonalityMatch from './PersonalityMatch';
@@ -53,6 +53,10 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
   
   // Check for dealbreakers
   const hasDealbreakers = profile.dealbreakers && profile.dealbreakers.length > 0;
+
+  // Check for attachment style
+  const hasAttachmentScore = (profile as any).attachmentScore !== undefined;
+  const attachmentScore = hasAttachmentScore ? (profile as any).attachmentScore : undefined;
   
   return (
     <motion.div 
@@ -102,6 +106,13 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
               <Badge variant="outline" className="bg-red-50 text-red-500 border-red-200 flex items-center gap-1">
                 <AlertTriangle size={12} />
                 <span>Dealbreaker</span>
+              </Badge>
+            )}
+
+            {hasAttachmentScore && attachmentScore > 80 && (
+              <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200 flex items-center gap-1">
+                <Heart size={12} className="fill-green-600" />
+                <span>Compatible Style</span>
               </Badge>
             )}
           </div>
@@ -168,6 +179,21 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                             <span>{(profile as any).lifestyleScore}%</span>
                           </div>
                         )}
+                        
+                        {/* Show attachment style match if available */}
+                        {hasAttachmentScore && (
+                          <div className="flex justify-between">
+                            <span>Attachment Style:</span>
+                            <span className={attachmentScore && attachmentScore > 80 
+                              ? "text-green-600 font-medium" 
+                              : attachmentScore && attachmentScore < 50 
+                                ? "text-red-500 font-medium"
+                                : ""
+                            }>
+                              {attachmentScore}%
+                            </span>
+                          </div>
+                        )}
                       </div>
                       
                       {/* Display dealbreakers if present */}
@@ -182,6 +208,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                               <li key={idx} className="flex items-center gap-1 ml-4">
                                 • {dealbreaker === 'smoking' ? 'Smoking habits' : 
                                    dealbreaker === 'kids-views' ? 'Different views on children' : 
+                                   dealbreaker === 'attachment-style' ? 'Incompatible attachment styles' :
                                    dealbreaker}
                               </li>
                             ))}
@@ -207,6 +234,32 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                   transition={{ duration: 0.3 }}
                 >
                   <p className="text-gray-700 mb-4">{profile.bio}</p>
+                  
+                  {/* Display attachment style if available */}
+                  {(profile as any).attachment_style && (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium">Attachment Style:</p>
+                        <Badge 
+                          className={`${
+                            (profile as any).attachment_style === 'secure' 
+                              ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                              : (profile as any).attachment_style === 'anxious'
+                                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                          }`}
+                        >
+                          {(profile as any).attachment_style === 'secure' 
+                            ? 'Secure' 
+                            : (profile as any).attachment_style === 'anxious'
+                              ? 'Anxious'
+                              : (profile as any).attachment_style === 'avoidant'
+                                ? 'Avoidant'
+                                : 'Fearful'}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Display interests if available */}
                   {(profile as any).interests && (profile as any).interests.length > 0 && (

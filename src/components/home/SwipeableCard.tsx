@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion, useAnimation, PanInfo } from 'framer-motion';
 import EnhancedProfileCard from './EnhancedProfileCard';
@@ -41,6 +42,8 @@ export interface Profile {
   lifestyle?: Record<string, string | boolean>;
   latitude?: number;
   longitude?: number;
+  attachment_style?: 'secure' | 'anxious' | 'avoidant' | 'fearful';
+  attachmentScore?: number;
 }
 
 interface SwipeableCardProps {

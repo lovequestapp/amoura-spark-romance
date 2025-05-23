@@ -13,6 +13,8 @@ interface MatchingParams {
   personalityTraits?: PersonalityTrait[];
   dealbreakers?: string[];
   lifestylePreferences?: Record<string, string | boolean>;
+  attachmentStyle?: string;
+  traitPreferences?: Array<{trait: string, importance: number}>;
 }
 
 interface WeightedMatch extends Profile {
@@ -23,30 +25,68 @@ interface WeightedMatch extends Profile {
   locationScore: number;
   lifestyleScore?: number;
   dealbreakers?: string[];
+  attachmentScore?: number;
 }
 
-// Calculate weighted compatibility score between two personality traits
-const calculateTraitCompatibility = (trait1: number, trait2: number, traitType: string): number => {
-  // Different traits have different compatibility patterns
-  switch(traitType.toLowerCase()) {
-    // For some traits, similarity is better (e.g., activity level, ambition)
-    case 'ambition':
-    case 'activity':
-    case 'organization':
-      return 1 - Math.abs(trait1 - trait2) / 100;
-      
-    // For some traits, complementary values may be better (e.g., extroversion/introversion)
-    case 'extroversion':
-      // Complementary matching - difference is actually good to a degree
-      const diff = Math.abs(trait1 - trait2);
-      // Optimal difference is around 30-40%, not complete opposites
-      return 1 - Math.abs(diff - 35) / 65;
-      
-    // For other traits, a mix of both approaches
-    default:
-      // Default to similarity matching with slight preference for moderate differences
-      return 1 - Math.pow(Math.abs(trait1 - trait2) / 100, 1.5);
+// Define which traits should use similarity vs complementary matching
+const COMPLEMENTARY_TRAITS = ['extroversion', 'openness', 'risk_taking'];
+const SIMILARITY_TRAITS = ['conscientiousness', 'agreeableness', 'emotional_stability', 'ambition'];
+
+// Map attachment style compatibility (higher = better match)
+const ATTACHMENT_COMPATIBILITY: Record<string, Record<string, number>> = {
+  'secure': {
+    'secure': 1.0,
+    'anxious': 0.7,
+    'avoidant': 0.7,
+    'fearful': 0.5
+  },
+  'anxious': {
+    'secure': 0.8,
+    'anxious': 0.4,
+    'avoidant': 0.3,
+    'fearful': 0.2
+  },
+  'avoidant': {
+    'secure': 0.8,
+    'anxious': 0.3,
+    'avoidant': 0.5,
+    'fearful': 0.3
+  },
+  'fearful': {
+    'secure': 0.7,
+    'anxious': 0.3,
+    'avoidant': 0.3,
+    'fearful': 0.2
   }
+};
+
+// Calculate weighted compatibility score between two personality traits
+const calculateTraitCompatibility = (
+  trait1: number, 
+  trait2: number, 
+  traitType: string,
+  userPreferences?: Array<{trait: string, importance: number}>
+): { score: number, weight: number } => {
+  // Get importance weight if specified in preferences
+  const preference = userPreferences?.find(p => p.trait.toLowerCase() === traitType.toLowerCase());
+  const importanceWeight = preference ? preference.importance / 5 : 1; // Normalize to 0.2-2.0 range
+  
+  // Determine if this trait should use complementary or similarity matching
+  const isComplementary = COMPLEMENTARY_TRAITS.includes(traitType.toLowerCase());
+  
+  let score: number;
+  
+  if (isComplementary) {
+    // For complementary traits, optimal difference is around 40-60%
+    const diff = Math.abs(trait1 - trait2);
+    // Score is highest when difference is around 50 (on 0-100 scale)
+    score = 1 - Math.abs(diff - 50) / 50;
+  } else {
+    // For similarity traits, closer values are better
+    score = 1 - Math.abs(trait1 - trait2) / 100;
+  }
+  
+  return { score, weight: importanceWeight };
 };
 
 // Calculate relationship intention compatibility on a spectrum
@@ -107,6 +147,13 @@ const calculateInterestCompatibility = (userInterests: string[], matchInterests:
   return baseScore;
 };
 
+// Calculate attachment style compatibility
+const calculateAttachmentCompatibility = (style1?: string, style2?: string): number => {
+  if (!style1 || !style2) return 0.5;
+  
+  return ATTACHMENT_COMPATIBILITY[style1]?.[style2] ?? 0.5;
+};
+
 // Calculate lifestyle compatibility score
 const calculateLifestyleCompatibility = (
   userLifestyle: Record<string, string | boolean> = {}, 
@@ -156,20 +203,30 @@ export const calculateMatchScore = (
   
   // Weights for different match factors (can be dynamically adjusted based on user preferences)
   const weights = {
-    interests: 0.35,
-    personality: 0.30,
-    intention: 0.20,
-    location: 0.15,
-    lifestyle: 0.20, // New weight for lifestyle compatibility
+    interests: 0.25,
+    personality: 0.25,
+    intention: 0.15,
+    location: 0.10,
+    lifestyle: 0.15,
+    attachment: 0.10, // New weight for attachment style compatibility
   };
   
-  // Normalize weights to sum to 1.0 (excluding lifestyle if not available)
+  // Normalize weights to sum to 1.0 (excluding factors that aren't available)
   const hasLifestyleData = userProfile.lifestyle && potentialMatch.lifestyle;
-  const totalWeight = Object.values(weights).reduce((sum, w) => sum + w, 0) - 
-    (!hasLifestyleData ? weights.lifestyle : 0);
+  const hasAttachmentData = userProfile.attachment_style && potentialMatch.attachment_style;
+  
+  let totalWeight = 0;
+  Object.keys(weights).forEach(key => {
+    if ((key === 'lifestyle' && hasLifestyleData) || 
+        (key === 'attachment' && hasAttachmentData) || 
+        (key !== 'lifestyle' && key !== 'attachment')) {
+      totalWeight += (weights as any)[key];
+    }
+  });
   
   Object.keys(weights).forEach(key => {
-    if (key === 'lifestyle' && !hasLifestyleData) {
+    if ((key === 'lifestyle' && !hasLifestyleData) || 
+        (key === 'attachment' && !hasAttachmentData)) {
       (weights as any)[key] = 0;
     } else {
       (weights as any)[key] = (weights as any)[key] / totalWeight;
@@ -185,21 +242,31 @@ export const calculateMatchScore = (
   // Calculate personality compatibility with trait-specific matching
   const userTraits = userProfile.personality_traits || [];
   const matchTraits = potentialMatch.personality_traits || [];
+  const userPreferences = userProfile.trait_preferences || [];
   
   let personalityScore = 0.5; // Default middle score
+  let totalTraitWeight = 0;
   
   if (userTraits.length > 0 && matchTraits.length > 0) {
-    // Compare traits using trait-specific compatibility logic
-    const compatibilityScores = userTraits.map(trait => {
+    let weightedTraitScore = 0;
+    
+    // Compare traits using trait-specific compatibility logic and user preferences
+    userTraits.forEach(trait => {
       const matchingTrait = matchTraits.find(t => t.name === trait.name);
       if (matchingTrait) {
-        return calculateTraitCompatibility(trait.value, matchingTrait.value, trait.name);
+        const { score, weight } = calculateTraitCompatibility(
+          trait.value, 
+          matchingTrait.value, 
+          trait.name,
+          userPreferences
+        );
+        weightedTraitScore += score * weight;
+        totalTraitWeight += weight;
       }
-      return 0.5; // Neutral score if trait not found
     });
     
-    personalityScore = compatibilityScores.reduce((sum, score) => sum + score, 0) / 
-      Math.max(compatibilityScores.length, 1);
+    personalityScore = totalTraitWeight > 0 ? 
+      weightedTraitScore / totalTraitWeight : 0.5;
   }
   
   // Calculate relationship intention alignment with spectrum matching
@@ -217,8 +284,17 @@ export const calculateMatchScore = (
     lifestyleScore = calculateLifestyleCompatibility(userProfile.lifestyle, potentialMatch.lifestyle);
   }
   
+  // Calculate attachment style compatibility if data available
+  let attachmentScore = 0.5;
+  if (hasAttachmentData) {
+    attachmentScore = calculateAttachmentCompatibility(
+      userProfile.attachment_style,
+      potentialMatch.attachment_style
+    );
+  }
+  
   // Check for dealbreakers
-  const dealbreakers = [];
+  const dealbreakers: string[] = [];
   if (userProfile.dealbreakers && userProfile.dealbreakers.length > 0) {
     // Example dealbreaker: smoking when user specified "no smoking"
     if (userProfile.dealbreakers.includes('no-smoking') && 
@@ -232,6 +308,13 @@ export const calculateMatchScore = (
         userProfile.lifestyle?.wantsKids !== potentialMatch.lifestyle?.wantsKids) {
       dealbreakers.push('kids-views');
     }
+    
+    // New dealbreaker: incompatible attachment styles
+    if (userProfile.dealbreakers.includes('attachment-style') &&
+        hasAttachmentData &&
+        attachmentScore < 0.4) {
+      dealbreakers.push('attachment-style');
+    }
   }
   
   // Calculate total weighted score, applying dealbreaker penalties
@@ -240,7 +323,8 @@ export const calculateMatchScore = (
     personalityScore * weights.personality + 
     intentionScore * weights.intention + 
     locationScore * weights.location +
-    (hasLifestyleData ? lifestyleScore * weights.lifestyle : 0)) * 100
+    (hasLifestyleData ? lifestyleScore * weights.lifestyle : 0) +
+    (hasAttachmentData ? attachmentScore * weights.attachment : 0)) * 100
   );
   
   // Apply dealbreaker penalties
@@ -258,6 +342,7 @@ export const calculateMatchScore = (
     intentionScore: Math.round(intentionScore * 100),
     locationScore: Math.round(locationScore * 100),
     lifestyleScore: hasLifestyleData ? Math.round(lifestyleScore * 100) : undefined,
+    attachmentScore: hasAttachmentData ? Math.round(attachmentScore * 100) : undefined,
     dealbreakers: dealbreakers.length > 0 ? dealbreakers : undefined
   };
 };
@@ -365,6 +450,17 @@ export const getPersonalizedMatches = async (
           return false;
         }
         
+        // New dealbreaker filter for attachment styles
+        if (params.dealbreakers?.includes('attachment-style') && 
+            userProfile.attachment_style && 
+            match.attachment_style) {
+          const compatScore = calculateAttachmentCompatibility(
+            userProfile.attachment_style, 
+            match.attachment_style
+          );
+          if (compatScore < 0.4) return false;
+        }
+        
         return true;
       });
     }
@@ -407,12 +503,17 @@ export const getFeaturedMatch = (matches: WeightedMatch[]): WeightedMatch | null
   
   // Option 2: Feature a slightly lower match but with complementary personality
   const complementaryMatch = matches.find(match => 
-    match.matchScore > 80 && match.personalityScore < 70 && match.interestsScore > 85
+    match.matchScore > 80 && 
+    match.personalityScore < 70 && 
+    match.interestsScore > 85 &&
+    match.attachmentScore && match.attachmentScore > 75
   );
   
   // Option 3: Feature a match with a unique quality 
   const uniqueMatch = matches.find(match => 
-    match.premium || match.verified || match.interests?.find(i => i.includes("rare"))
+    match.premium || match.verified || 
+    (match.interests?.find(i => i.includes("rare"))) ||
+    (match.attachmentScore && match.attachmentScore > 90)
   );
   
   // Choose the featured match with some randomness for variety

@@ -24,6 +24,11 @@ export interface UserProfile {
   dealbreakers?: string[];
   created_at?: string;
   updated_at?: string;
+  attachment_style?: 'secure' | 'anxious' | 'avoidant' | 'fearful';
+  trait_preferences?: {
+    trait: string;
+    importance: number; // 1-10 scale
+  }[];
 }
 
 export interface PersonalityTrait {
