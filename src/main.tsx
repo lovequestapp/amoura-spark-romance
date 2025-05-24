@@ -29,8 +29,23 @@ const addMobileSpecificClasses = () => {
 // Initialize mobile-specific configurations
 addMobileSpecificClasses();
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+// Ensure the app renders properly
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error('Root element not found');
+}
+
+// Add error boundary to catch render errors
+const root = ReactDOM.createRoot(rootElement);
+
+try {
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  );
+} catch (error) {
+  console.error('Error rendering app:', error);
+  // Fallback render without StrictMode
+  root.render(<App />);
+}

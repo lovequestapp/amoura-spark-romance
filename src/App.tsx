@@ -24,15 +24,20 @@ import { ErrorProvider } from './contexts/ErrorContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './App.css';
 
-// Protected route component
+// Protected route component with better error handling
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
+  
+  console.log('ProtectedRoute - isLoading:', isLoading, 'user:', !!user);
   
   // Show loading indicator while checking authentication
   if (isLoading) {
     return (
-      <div className="w-full h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink"></div>
+      <div className="w-full h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -46,17 +51,27 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Admin route component
+// Admin route component with better error handling
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAdmin, isLoading } = useAuth();
+  const { isAdmin, isLoading, user } = useAuth();
+  
+  console.log('AdminRoute - isLoading:', isLoading, 'user:', !!user, 'isAdmin:', isAdmin);
   
   // Show loading indicator while checking authentication
   if (isLoading) {
     return (
-      <div className="w-full h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink"></div>
+      <div className="w-full h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     );
+  }
+  
+  if (!user) {
+    console.log('No user found in AdminRoute, redirecting to /login');
+    return <Navigate to="/login" replace />;
   }
   
   if (!isAdmin) {
@@ -68,12 +83,34 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Public route component that redirects authenticated users
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading } = useAuth();
+  
+  console.log('PublicRoute - isLoading:', isLoading, 'user:', !!user);
+  
+  // Show loading indicator while checking authentication
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  return <>{children}</>;
+};
+
 function App() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         retry: 1,
         refetchOnWindowFocus: false,
+        staleTime: 5 * 60 * 1000, // 5 minutes
       },
     },
   });
@@ -84,13 +121,29 @@ function App() {
         <AuthProvider>
           <SubscriptionProvider>
             <BrowserRouter>
-              <div className="w-full max-w-full">
+              <div className="w-full max-w-full min-h-screen bg-white">
                 <Routes>
-                  <Route path="/" element={<Index />} />
+                  <Route path="/" element={
+                    <PublicRoute>
+                      <Index />
+                    </PublicRoute>
+                  } />
                   <Route path="/auth" element={<Navigate to="/login" replace />} />
-                  <Route path="/auth/reset-password" element={<PasswordReset />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/auth/reset-password" element={
+                    <PublicRoute>
+                      <PasswordReset />
+                    </PublicRoute>
+                  } />
+                  <Route path="/login" element={
+                    <PublicRoute>
+                      <Login />
+                    </PublicRoute>
+                  } />
+                  <Route path="/signup" element={
+                    <PublicRoute>
+                      <Signup />
+                    </PublicRoute>
+                  } />
                   
                   {/* Protected routes */}
                   <Route path="/home" element={

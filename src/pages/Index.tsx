@@ -50,8 +50,10 @@ const Index = () => {
   const navigate = useNavigate();
   
   const handleGetStarted = () => {
+    console.log('Get Started clicked - isLoading:', isLoading, 'user:', !!user);
+    
     if (isLoading) {
-      // Show loading state if auth is still being checked
+      console.log('Still loading auth state, waiting...');
       return;
     }
     
@@ -63,6 +65,18 @@ const Index = () => {
       navigate('/login');
     }
   };
+  
+  // Show loading state while auth is being determined
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white w-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-white w-full">
@@ -150,6 +164,7 @@ const Index = () => {
                 <Button 
                   className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                   onClick={handleGetStarted}
+                  disabled={isLoading}
                 >
                   {isLoading ? "Loading..." : (user ? "Go to Home" : "Get Started")}
                 </Button>

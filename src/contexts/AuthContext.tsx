@@ -91,15 +91,52 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log('Setting up auth state listener');
     
-    // Set up auth state listener first
+    // Get initial session immediately
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting initial session:', error);
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log('Initial session check:', initialSession ? 'Session found' : 'No session');
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        
+        if (initialSession?.user) {
+          try {
+            const { data, error: adminError } = await supabase.rpc('is_admin');
+            if (!adminError && data !== null) {
+              setIsAdmin(!!data);
+            }
+          } catch (error) {
+            console.error('Error checking admin status:', error);
+          }
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setIsLoading(false);
+      }
+    };
+    
+    // Initialize auth state
+    initializeAuth();
+    
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth event:', event);
+        console.log('Auth event:', event, 'Session exists:', !!session);
+        
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Use setTimeout to prevent potential deadlocks with Supabase client
-        if (session?.user) {
+        // Handle admin status check
+        if (session?.user && event === 'SIGNED_IN') {
           setTimeout(async () => {
             try {
               const { data, error } = await supabase.rpc('is_admin');
@@ -108,36 +145,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               }
             } catch (error) {
               console.error('Error checking admin status:', error);
-            } finally {
-              setIsLoading(false);
             }
-          }, 0);
-        } else {
+          }, 100);
+        } else if (!session) {
           setIsAdmin(false);
+        }
+        
+        // Only set loading to false after initial auth check
+        if (event !== 'INITIAL_SESSION') {
           setIsLoading(false);
         }
       }
     );
-
-    // Then check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('Initial session check:', session ? 'Session found' : 'No session');
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        try {
-          const { data, error } = await supabase.rpc('is_admin');
-          if (!error && data !== null) {
-            setIsAdmin(!!data);
-          }
-        } catch (error) {
-          console.error('Error checking admin status:', error);
-        }
-      }
-      
-      setIsLoading(false);
-    });
 
     return () => {
       subscription.unsubscribe();
