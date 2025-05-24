@@ -12,6 +12,7 @@ export interface Profile {
   occupation: string;
   photos: string[];
   bio: string;
+  birth_date?: string; // Add birth_date property
   premium?: boolean;
   verified?: boolean;
   featured?: boolean;

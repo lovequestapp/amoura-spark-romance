@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from '@/components/home/SwipeableCard';
 import { WeightedMatch } from './index';
@@ -122,8 +123,13 @@ class MLMatchingService {
     
     // Apply learned preferences
     if (userPrefs.preferredAgeRange) {
-      const matchAge = this.calculateAge(match.birth_date);
-      if (matchAge >= userPrefs.preferredAgeRange[0] && matchAge <= userPrefs.preferredAgeRange[1]) {
+      // Use age from match if available, or calculate from birth_date if available
+      let matchAge = match.age;
+      if (!matchAge && match.birth_date) {
+        matchAge = this.calculateAge(match.birth_date);
+      }
+      
+      if (matchAge && matchAge >= userPrefs.preferredAgeRange[0] && matchAge <= userPrefs.preferredAgeRange[1]) {
         mlScore += 15;
       }
     }
