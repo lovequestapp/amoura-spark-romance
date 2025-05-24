@@ -10,13 +10,13 @@ export const enhancedProfiles = [
     distance: "3 miles away",
     occupation: "Graphic Designer",
     photos: [
-      "/lovable-uploads/955e854b-03c9-4efe-91de-ea62233f88eb.png",
-      "/lovable-uploads/d96b24ef-01b0-41a0-afdf-564574149a3c.png",
-      "/lovable-uploads/c3b91871-0b81-4711-a02d-6771b41f44ed.png"
+      "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=600&fit=crop"
     ],
     video: {
       url: "https://example.com/sample-video.mp4",
-      thumbnail: "/assets/profile-1-video-thumb.jpg",
+      thumbnail: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=300&fit=crop",
       duration: 45
     },
     bio: "Coffee addict, design enthusiast, and weekend hiker. Looking for someone to share laughs and adventures with.",
@@ -48,7 +48,10 @@ export const enhancedProfiles = [
     age: 30,
     distance: "5 miles away",
     occupation: "Software Engineer",
-    photos: ["/assets/profile-2a.jpg", "/assets/profile-2b.jpg"],
+    photos: [
+      "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400&h=600&fit=crop"
+    ],
     bio: "Tech geek with a passion for hiking and craft beer. Looking for someone to explore new trails and breweries with.",
     premium: true,
     personalityMatch: 72,
@@ -74,7 +77,11 @@ export const enhancedProfiles = [
     age: 26,
     distance: "2 miles away",
     occupation: "Event Planner",
-    photos: ["/assets/profile-3a.jpg", "/assets/profile-3b.jpg", "/assets/profile-3c.jpg"],
+    photos: [
+      "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=600&fit=crop&seed=1",
+      "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=600&fit=crop&seed=2",
+      "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=600&fit=crop&seed=3"
+    ],
     bio: "Foodie, music lover, and avid traveler. Let's plan our next adventure together!",
     personalityMatch: 91,
     verified: true,
@@ -99,7 +106,10 @@ export const enhancedProfiles = [
     age: 32,
     distance: "8 miles away",
     occupation: "Photographer",
-    photos: ["/assets/profile-4a.jpg", "/assets/profile-4b.jpg"],
+    photos: [
+      "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=600&fit=crop&seed=4",
+      "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400&h=600&fit=crop&seed=5"
+    ],
     bio: "Visual storyteller, nature enthusiast, and amateur chef. Always looking for the perfect shot and the perfect meal.",
     personalityMatch: 78,
     verified: true,
@@ -124,7 +134,10 @@ export const enhancedProfiles = [
     age: 27,
     distance: "4 miles away",
     occupation: "Yoga Instructor",
-    photos: ["/assets/profile-5a.jpg", "/assets/profile-5b.jpg"],
+    photos: [
+      "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=600&fit=crop&seed=6",
+      "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=600&fit=crop&seed=7"
+    ],
     bio: "Mindfulness advocate, tea enthusiast, and book lover. Seeking someone to share quiet mornings and deep conversations.",
     personalityMatch: 88,
     verified: true,
