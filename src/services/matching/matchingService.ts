@@ -93,17 +93,18 @@ export const getPersonalizedMatches = async (
     // Apply dealbreaker filtering if specified
     if (params.dealbreakers && params.dealbreakers.length > 0) {
       filteredMatches = filteredMatches.filter(match => {
-        // Type guard for lifestyle_preferences
+        // Check if lifestyle_preferences exists and is not an error
         const lifestyle = match.lifestyle_preferences;
+        const hasValidLifestyle = lifestyle && typeof lifestyle === 'object' && !('message' in lifestyle);
         
         // Example implementation for a few common dealbreakers
         if (params.dealbreakers?.includes('no-smoking') && 
-            lifestyle && lifestyle.smoking && lifestyle.smoking !== 'never') {
+            hasValidLifestyle && lifestyle.smoking && lifestyle.smoking !== 'never') {
           return false;
         }
         
         if (params.dealbreakers?.includes('no-kids') && 
-            lifestyle && lifestyle.has_children === true) {
+            hasValidLifestyle && lifestyle.has_children === true) {
           return false;
         }
         
