@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { MatchingParams, WeightedMatch } from './index';
 import { calculateMatchScore } from './scoreCalculator';
@@ -102,6 +103,7 @@ export const getPersonalizedMatches = async (
         // Example implementation for a few common dealbreakers
         if (params.dealbreakers?.includes('no-smoking') && 
             hasValidLifestyle && 
+            lifestyle && 
             lifestyle.smoking && 
             lifestyle.smoking !== 'never') {
           return false;
@@ -109,6 +111,7 @@ export const getPersonalizedMatches = async (
         
         if (params.dealbreakers?.includes('no-kids') && 
             hasValidLifestyle && 
+            lifestyle && 
             lifestyle.has_children === true) {
           return false;
         }

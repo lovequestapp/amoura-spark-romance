@@ -18,32 +18,32 @@ const INTENTION_SPECTRUM = {
   'casual': { 
     value: 0, 
     commitment_level: 1, 
-    timeline_tolerance: ['no_rush', 'unsure'],
-    compatible_patterns: ['casual_dater', 'mixed']
+    timeline_tolerance: ['no_rush', 'unsure'] as string[],
+    compatible_patterns: ['casual_dater', 'mixed'] as string[]
   },
   'dating': { 
     value: 25, 
     commitment_level: 2, 
-    timeline_tolerance: ['within_year', 'no_rush', 'unsure'],
-    compatible_patterns: ['casual_dater', 'mixed', 'long_term_seeker']
+    timeline_tolerance: ['within_year', 'no_rush', 'unsure'] as string[],
+    compatible_patterns: ['casual_dater', 'mixed', 'long_term_seeker'] as string[]
   },
   'relationship': { 
     value: 50, 
     commitment_level: 3, 
-    timeline_tolerance: ['within_months', 'within_year', 'no_rush'],
-    compatible_patterns: ['mixed', 'long_term_seeker', 'serial_monogamist']
+    timeline_tolerance: ['within_months', 'within_year', 'no_rush'] as string[],
+    compatible_patterns: ['mixed', 'long_term_seeker', 'serial_monogamist'] as string[]
   },
   'serious': { 
     value: 75, 
     commitment_level: 4, 
-    timeline_tolerance: ['immediate', 'within_months', 'within_year'],
-    compatible_patterns: ['long_term_seeker', 'serial_monogamist']
+    timeline_tolerance: ['immediate', 'within_months', 'within_year'] as string[],
+    compatible_patterns: ['long_term_seeker', 'serial_monogamist'] as string[]
   },
   'marriage': { 
     value: 100, 
     commitment_level: 5, 
-    timeline_tolerance: ['immediate', 'within_months'],
-    compatible_patterns: ['long_term_seeker', 'serial_monogamist']
+    timeline_tolerance: ['immediate', 'within_months'] as string[],
+    compatible_patterns: ['long_term_seeker', 'serial_monogamist'] as string[]
   }
 } as const;
 
@@ -179,8 +179,8 @@ const calculateTimelineCompatibility = (
 
     if (spec1 && spec2) {
       // Check if timelines are compatible with stated intentions
-      const timeline1Compatible = spec1.timeline_tolerance.includes(timeline1 as any);
-      const timeline2Compatible = spec2.timeline_tolerance.includes(timeline2 as any);
+      const timeline1Compatible = spec1.timeline_tolerance.includes(timeline1);
+      const timeline2Compatible = spec2.timeline_tolerance.includes(timeline2);
 
       if (timeline1Compatible && timeline2Compatible) {
         timelineScore = Math.min(timelineScore + 0.2, 1.0);
