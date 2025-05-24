@@ -6,7 +6,9 @@ import {
   Users, 
   MessageSquare, 
   Settings,
-  LogOut
+  LogOut,
+  BarChart3,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +26,7 @@ const AdminSidebar = () => {
     <div className="w-64 min-h-screen bg-gray-900 text-white p-4">
       <div className="mb-8">
         <h1 className="text-xl font-bold">Admin Dashboard</h1>
+        <p className="text-sm text-gray-400">Amoura Admin Panel</p>
       </div>
       
       <nav className="space-y-2">
@@ -38,6 +41,18 @@ const AdminSidebar = () => {
         >
           <LayoutDashboard className="w-5 h-5" />
           <span>Dashboard</span>
+        </NavLink>
+        
+        <NavLink 
+          to="/admin/analytics" 
+          className={({ isActive }) =>
+            `flex items-center space-x-2 p-2 rounded hover:bg-gray-800 ${
+              isActive ? 'bg-gray-800' : ''
+            }`
+          }
+        >
+          <BarChart3 className="w-5 h-5" />
+          <span>Analytics</span>
         </NavLink>
         
         <NavLink 

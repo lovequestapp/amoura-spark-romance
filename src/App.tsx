@@ -17,6 +17,11 @@ import Matches from './pages/Matches';
 import Settings from './pages/Settings';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import Dashboard from './pages/admin/Dashboard';
+import Users from './pages/admin/Users';
+import Content from './pages/admin/Content';
+import AdminSettings from './pages/admin/Settings';
+import Analytics from './pages/admin/Analytics';
+import AdminLayout from './components/admin/AdminLayout';
 import ProfileDetail from './pages/ProfileDetail';
 import { ErrorProvider } from './contexts/ErrorContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -139,11 +144,17 @@ function App() {
                   } />
                   
                   {/* Admin routes */}
-                  <Route path="/admin/dashboard" element={
+                  <Route path="/admin" element={
                     <AdminRoute>
-                      <Dashboard />
+                      <AdminLayout />
                     </AdminRoute>
-                  } />
+                  }>
+                    <Route index element={<Dashboard />} />
+                    <Route path="analytics" element={<Analytics />} />
+                    <Route path="users" element={<Users />} />
+                    <Route path="content" element={<Content />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>
