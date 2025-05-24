@@ -40,8 +40,9 @@ const Content = () => {
   const { data: reports, isLoading } = useQuery({
     queryKey: ['contentReports'],
     queryFn: async () => {
+      // Use raw query since types aren't updated yet
       const { data, error } = await supabase
-        .from('content_moderation')
+        .from('content_moderation' as any)
         .select(`
           *,
           profiles!content_moderation_reported_by_fkey(full_name, username)
@@ -72,8 +73,9 @@ const Content = () => {
 
   const moderateContentMutation = useMutation({
     mutationFn: async ({ reportId, status, notes }: { reportId: string, status: string, notes: string }) => {
-      const { error } = await supabase
-        .from('content_moderation')
+      // Update the content moderation record
+      const { error: updateError } = await supabase
+        .from('content_moderation' as any)
         .update({
           status,
           admin_notes: notes,
@@ -82,15 +84,17 @@ const Content = () => {
         })
         .eq('id', reportId);
       
-      if (error) throw error;
+      if (updateError) throw updateError;
 
-      // Log admin activity
-      await supabase.rpc('log_admin_activity', {
+      // Log admin activity using RPC call
+      const { error: logError } = await supabase.rpc('log_admin_activity' as any, {
         action_param: `moderate_content_${status}`,
         target_type_param: 'content_report',
         target_id_param: reportId,
         details_param: { notes }
       });
+      
+      if (logError) throw logError;
     },
     onSuccess: () => {
       toast({
@@ -119,7 +123,7 @@ const Content = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {reports?.map((report) => (
+              {reports?.map((report: any) => (
                 <div
                   key={report.id}
                   className={`p-4 border rounded-lg cursor-pointer transition-colors ${

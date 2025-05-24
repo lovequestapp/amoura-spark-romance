@@ -35,7 +35,8 @@ const Analytics = () => {
   const { data: userAnalytics } = useQuery({
     queryKey: ['userAnalytics'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_user_analytics', { days_back: 30 });
+      // Call the function directly via RPC since types aren't updated yet
+      const { data, error } = await supabase.rpc('get_user_analytics' as any, { days_back: 30 });
       if (error) throw error;
       return data;
     },
@@ -44,8 +45,9 @@ const Analytics = () => {
   const { data: dashboardStats } = useQuery({
     queryKey: ['dashboardStats'],
     queryFn: async () => {
+      // Query the view directly since types aren't updated yet
       const { data, error } = await supabase
-        .from('admin_dashboard_stats')
+        .from('admin_dashboard_stats' as any)
         .select('*')
         .single();
       if (error) throw error;
@@ -87,8 +89,16 @@ const Analytics = () => {
   });
 
   const userTypeData = [
-    { name: 'Free Users', value: (dashboardStats?.total_users || 0) - (dashboardStats?.paid_subscribers || 0), color: '#8884d8' },
-    { name: 'Premium Users', value: dashboardStats?.paid_subscribers || 0, color: '#82ca9d' },
+    { 
+      name: 'Free Users', 
+      value: (dashboardStats?.total_users || 0) - (dashboardStats?.paid_subscribers || 0), 
+      color: '#8884d8' 
+    },
+    { 
+      name: 'Premium Users', 
+      value: dashboardStats?.paid_subscribers || 0, 
+      color: '#82ca9d' 
+    },
   ];
 
   return (
@@ -154,7 +164,7 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={userAnalytics}>
+              <LineChart data={userAnalytics || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="date" 
@@ -219,7 +229,7 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={engagementData}>
+              <BarChart data={engagementData || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} />
