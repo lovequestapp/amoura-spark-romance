@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle, Share, MoreVertical, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Share, MoreVertical, Trash2, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { Post } from '@/types/community';
 import { likePost, unlikePost, deletePost } from '@/services/community';
+import { likeProfile, checkProfileLiked } from '@/services/profileLikes';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
@@ -27,6 +28,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
   const { user } = useAuth();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
+  const [profileLiked, setProfileLiked] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -35,6 +37,21 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
       setLiked(!!post.isLiked);
     }
   }, [post]);
+
+  useEffect(() => {
+    const checkProfileLikeStatus = async () => {
+      if (user && post.author.id !== user.id) {
+        try {
+          const isLiked = await checkProfileLiked(post.author.id);
+          setProfileLiked(isLiked);
+        } catch (error) {
+          console.error("Error checking profile like status:", error);
+        }
+      }
+    };
+
+    checkProfileLikeStatus();
+  }, [user, post.author.id]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,6 +84,46 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
       toast({
         title: "Error",
         description: "Failed to update like. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleProfileLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to like profiles",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (post.author.id === user.id) {
+      toast({
+        title: "Cannot like your own profile",
+        description: "You cannot like your own profile",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      const newLikeStatus = await likeProfile(post.author.id);
+      setProfileLiked(newLikeStatus);
+      
+      toast({
+        title: newLikeStatus ? "Profile liked!" : "Profile unliked",
+        description: newLikeStatus 
+          ? `You liked ${post.author.name}'s profile` 
+          : `You unliked ${post.author.name}'s profile`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile like. Please try again.",
         variant: "destructive"
       });
     }
@@ -137,10 +194,29 @@ const PostCard: React.FC<PostCardProps> = ({ post, isMobile, onTagClick, selecte
             alt={post.author.name}
             className="w-10 h-10 rounded-full object-cover"
           />
-          <div>
+          <div className="flex-1">
             <p className="font-medium">{post.author.name}</p>
             <p className="text-xs text-muted-foreground">{post.timestamp}</p>
           </div>
+          
+          {/* Profile like button - only show if not user's own post */}
+          {user && post.author.id !== user.id && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`gap-1 ${profileLiked ? 'text-amoura-deep-pink' : 'text-muted-foreground'}`}
+              onClick={handleProfileLike}
+              title={profileLiked ? `Unlike ${post.author.name}'s profile` : `Like ${post.author.name}'s profile`}
+            >
+              <motion.div whileTap={{ scale: 1.2 }}>
+                <User 
+                  size={16} 
+                  className={profileLiked ? "fill-amoura-deep-pink text-amoura-deep-pink" : ""}
+                />
+              </motion.div>
+            </Button>
+          )}
+          
           {post.isUserPost && (
             <div className="ml-auto flex items-center gap-2">
               <Badge variant="outline">Your Post</Badge>
