@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -224,51 +223,82 @@ export const useOnboarding = () => {
     setIsSubmitting(true);
     
     try {
+      console.log('Starting onboarding submission...');
+      
       // Extract urls from photos objects
       const photoUrls = photos.map(photo => photo.url);
       
+      // Convert age to birth_date
+      const currentYear = new Date().getFullYear();
+      const birthYear = currentYear - formData.age;
+      const birthDate = `${birthYear}-01-01`; // Using January 1st as default
+      
       // TypeScript safe gender casting
       let genderValue: "woman" | "man" | "nonbinary" | "other" | null = null;
-      if (["woman", "man", "nonbinary", "other"].includes(formData.gender)) {
-        genderValue = formData.gender as "woman" | "man" | "nonbinary" | "other";
+      if (["woman", "man", "nonbinary", "other"].includes(formData.gender.toLowerCase())) {
+        genderValue = formData.gender.toLowerCase() as "woman" | "man" | "nonbinary" | "other";
       }
       
       // Convert prompts for database storage
       const jsonPrompts = JSON.parse(JSON.stringify(prompts)) as Json[];
       
-      // Update the user's profile
+      console.log('Updating profile with data:', {
+        full_name: formData.name,
+        birth_date: birthDate,
+        gender: genderValue,
+        location: formData.location,
+        photos: photoUrls,
+        prompts: jsonPrompts
+      });
+      
+      // Update the user's profile with correct column names
       const { error } = await supabase
         .from('profiles')
         .update({
           full_name: formData.name,
-          age: formData.age,
+          birth_date: birthDate,
           gender: genderValue,
-          location: formData.location,
-          occupation: formData.occupation,
-          education: formData.education,
-          relationship_type: formData.relationshipType,
           bio: formData.bio,
           height: formData.height,
-          religion: formData.religion,
           drinking: formData.drinking,
-          smoking: formData.smoking,
-          exercise: formData.exercise,
-          interests: selectedInterests,
-          prompts: jsonPrompts,
+          education: formData.education,
+          relationship_type: formData.relationshipType,
           photos: photoUrls,
+          prompts: jsonPrompts,
           onboarding_completed: true,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
       
       if (error) {
+        console.error('Profile update error:', error);
         throw new Error(error.message);
       }
       
-      // Update photos separately to ensure they're properly saved
-      const photoResult = await updateProfilePhotos(photoUrls);
-      if (!photoResult.success) {
-        console.warn('Warning: Photos may not have updated correctly');
+      console.log('Profile updated successfully');
+      
+      // Save interests separately
+      if (selectedInterests.length > 0) {
+        // First, delete existing interests
+        await supabase
+          .from('user_interests')
+          .delete()
+          .eq('user_id', user.id);
+
+        // Then insert new ones
+        const { error: interestsError } = await supabase
+          .from('user_interests')
+          .insert(
+            selectedInterests.map(interest_id => ({
+              user_id: user.id,
+              interest_id
+            }))
+          );
+
+        if (interestsError) {
+          console.error('Interests update error:', interestsError);
+          // Don't fail the whole process for interests
+        }
       }
       
       toast({
@@ -278,6 +308,7 @@ export const useOnboarding = () => {
       
       return true;
     } catch (error) {
+      console.error('Final submit error:', error);
       handleError(error, "Failed to save your profile. Please try again.");
       return false;
     } finally {
