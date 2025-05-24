@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { MatchingParams, WeightedMatch } from './index';
 import { calculateMatchScore } from './scoreCalculator';
@@ -93,27 +92,28 @@ export const getPersonalizedMatches = async (
     // Apply dealbreaker filtering if specified
     if (params.dealbreakers && params.dealbreakers.length > 0) {
       filteredMatches = filteredMatches.filter(match => {
-        // Check if lifestyle_preferences exists and is not an error
-        const lifestyle = match.lifestyle_preferences;
-        const hasValidLifestyle = lifestyle && 
-          typeof lifestyle === 'object' && 
-          !('message' in lifestyle) && 
-          lifestyle !== null;
+        // Get lifestyle preferences with proper type checking
+        const matchLifestyle = match.lifestyle_preferences;
+        
+        // Check if we have valid lifestyle data (not null and is an object)
+        const hasValidLifestyle = matchLifestyle && 
+          typeof matchLifestyle === 'object' && 
+          !Array.isArray(matchLifestyle) &&
+          !('message' in matchLifestyle);
         
         // Example implementation for a few common dealbreakers
-        if (params.dealbreakers?.includes('no-smoking') && 
-            hasValidLifestyle && 
-            lifestyle && 
-            lifestyle.smoking && 
-            lifestyle.smoking !== 'never') {
-          return false;
+        if (params.dealbreakers?.includes('no-smoking') && hasValidLifestyle) {
+          const lifestyle = matchLifestyle as any; // Type assertion for database object
+          if (lifestyle.smoking && lifestyle.smoking !== 'never') {
+            return false;
+          }
         }
         
-        if (params.dealbreakers?.includes('no-kids') && 
-            hasValidLifestyle && 
-            lifestyle && 
-            lifestyle.has_children === true) {
-          return false;
+        if (params.dealbreakers?.includes('no-kids') && hasValidLifestyle) {
+          const lifestyle = matchLifestyle as any; // Type assertion for database object
+          if (lifestyle.has_children === true) {
+            return false;
+          }
         }
         
         // New dealbreaker filter for attachment styles
