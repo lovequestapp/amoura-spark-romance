@@ -33,7 +33,7 @@ const AppMockup = () => {
 
   const handleCardClick = (path: string) => {
     if (!user) {
-      return "/auth";
+      return "/login";
     }
     return path;
   };

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -58,8 +59,8 @@ const Index = () => {
       console.log('User is logged in, navigating to /home');
       navigate('/home');
     } else {
-      console.log('User is not logged in, navigating to /auth');
-      navigate('/auth');
+      console.log('User is not logged in, navigating to /login');
+      navigate('/login');
     }
   };
   
@@ -318,7 +319,7 @@ const Index = () => {
               className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-7 px-12 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               asChild
             >
-              <Link to="/signup">
+              <Link to="/login">
                 Begin Your Love Story Today
                 <motion.span
                   animate={{ 

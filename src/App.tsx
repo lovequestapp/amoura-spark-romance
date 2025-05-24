@@ -11,7 +11,6 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Community from './pages/Community';
 import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
-import AuthPage from './pages/auth/AuthPage';
 import PasswordReset from './pages/auth/PasswordReset';
 import Help from './pages/help/Help';
 import Matches from './pages/Matches';
@@ -39,8 +38,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    console.log('No user found in ProtectedRoute, redirecting to /auth');
-    return <Navigate to="/auth" replace />;
+    console.log('No user found in ProtectedRoute, redirecting to /login');
+    return <Navigate to="/login" replace />;
   }
   
   console.log('User authenticated in ProtectedRoute, rendering children');
@@ -88,7 +87,7 @@ function App() {
               <div className="w-full max-w-full">
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/auth" element={<Navigate to="/login" replace />} />
                   <Route path="/auth/reset-password" element={<PasswordReset />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
