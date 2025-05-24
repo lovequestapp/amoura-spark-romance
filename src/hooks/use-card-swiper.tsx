@@ -106,8 +106,8 @@ export const useCardSwiper = (
           controls.set({ x: 0, opacity: 1 });
         }, 300);
       } else {
-        // Snap back to center
-        controls.start({ x: 0, y: 0, rotation: 0 });
+        // Snap back to center - changed rotation to rotate
+        controls.start({ x: 0, y: 0, rotate: 0 });
       }
     },
     [currentProfile, controls, handleSwipe]
