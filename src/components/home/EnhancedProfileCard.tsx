@@ -27,6 +27,17 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
+  // Early return if profile is null or undefined
+  if (!profile) {
+    return (
+      <div className="swipe-card touch-none mx-auto bg-white rounded-lg shadow-lg p-6">
+        <div className="text-center text-gray-500">
+          <p>No profile data available</p>
+        </div>
+      </div>
+    );
+  }
+  
   const handleLike = () => {
     onSwipe('right');
     toast({
@@ -44,18 +55,20 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
 
   const nextPrompt = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setPromptIndex((promptIndex + 1) % profile.prompts.length);
+    if (profile.prompts && profile.prompts.length > 0) {
+      setPromptIndex((promptIndex + 1) % profile.prompts.length);
+    }
   };
   
-  // Check for match score to display compatibility indicators
-  const hasMatchScore = 'matchScore' in profile;
-  const matchScore = hasMatchScore ? (profile as any).matchScore : profile.personalityMatch;
+  // Check for match score to display compatibility indicators - with null safety
+  const hasMatchScore = profile && 'matchScore' in profile && profile.matchScore !== null;
+  const matchScore = hasMatchScore ? (profile as any).matchScore : (profile?.personalityMatch || 0);
   
-  // Check for dealbreakers
-  const hasDealbreakers = profile.dealbreakers && profile.dealbreakers.length > 0;
+  // Check for dealbreakers - with null safety
+  const hasDealbreakers = profile?.dealbreakers && profile.dealbreakers.length > 0;
 
-  // Check for attachment style
-  const hasAttachmentScore = (profile as any).attachmentScore !== undefined;
+  // Check for attachment style - with null safety
+  const hasAttachmentScore = profile && (profile as any).attachmentScore !== undefined;
   const attachmentScore = hasAttachmentScore ? (profile as any).attachmentScore : undefined;
   
   return (
@@ -68,19 +81,21 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
       exit={{ scale: 0.95, opacity: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
     >
-      <ProfilePhotos photos={profile.photos} video={profile.video} />
+      {profile.photos && profile.photos.length > 0 && (
+        <ProfilePhotos photos={profile.photos} video={profile.video} />
+      )}
       
       <div className="px-4 py-3">
         <ProfileHeader 
-          name={profile.name}
-          age={profile.age}
-          distance={profile.distance}
+          name={profile.name || 'Unknown'}
+          age={profile.age || 0}
+          distance={profile.distance || 'Unknown'}
           verified={profile.verified}
           premium={profile.premium}
           featured={profile.featured}
         />
         
-        <p className="text-gray-700 mb-3">{profile.occupation}</p>
+        <p className="text-gray-700 mb-3">{profile.occupation || 'Not specified'}</p>
         
         {profile.relationshipIntention && profile.personalityBadges && (
           <div className="mb-3">
@@ -233,7 +248,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <p className="text-gray-700 mb-4">{profile.bio}</p>
+                  <p className="text-gray-700 mb-4">{profile.bio || 'No bio available'}</p>
                   
                   {/* Display attachment style if available */}
                   {(profile as any).attachment_style && (
@@ -266,8 +281,8 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                     <div className="mb-4">
                       <p className="text-sm font-medium mb-2">Interests</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {(profile as any).interests.map((interest: string) => (
-                          <Badge key={interest} variant="outline" className="bg-amoura-soft-pink/30 text-amoura-deep-pink border-amoura-deep-pink/20">
+                        {(profile as any).interests.map((interest: string, index: number) => (
+                          <Badge key={index} variant="outline" className="bg-amoura-soft-pink/30 text-amoura-deep-pink border-amoura-deep-pink/20">
                             {interest}
                           </Badge>
                         ))}
@@ -302,7 +317,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
                     </Button>
                   )}
                   
-                  {profile.prompts.length > 0 && (
+                  {profile.prompts && profile.prompts.length > 0 && (
                     <div onClick={nextPrompt} className="mb-4 cursor-pointer">
                       <ProfilePrompt 
                         question={profile.prompts[promptIndex].question}
@@ -327,7 +342,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
             </AnimatePresence>
             
             <CardActions
-              profileName={profile.name}
+              profileName={profile.name || 'Unknown'}
               onLike={handleLike}
               onPass={handlePass}
             />

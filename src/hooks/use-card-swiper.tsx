@@ -7,112 +7,127 @@ import { Profile } from "@/components/home/SwipeableCard";
 interface UseCardSwiperResult {
   currentIndex: number;
   currentProfile: Profile | null;
-  profiles: Profile[];
   controls: ReturnType<typeof useAnimation>;
   dragConstraints: React.RefObject<HTMLDivElement>;
-  dragging: boolean;
-  setDragging: React.Dispatch<React.SetStateAction<boolean>>;
   handleSwipe: (direction: string) => void;
   handleDragEnd: (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void;
-  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
-  setProfiles: React.Dispatch<React.SetStateAction<Profile[]>>;
+  setDragging: (dragging: boolean) => void;
+  setCurrentIndex: (index: number) => void;
+  setProfiles: (profiles: Profile[]) => void;
 }
 
 export const useCardSwiper = (
-  initialProfiles: Profile[],
+  profiles: Profile[],
   onSwipe?: (profile: Profile, direction: string) => void
 ): UseCardSwiperResult => {
-  const [profiles, setProfiles] = useState<Profile[]>(initialProfiles);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const dragConstraints = useRef<HTMLDivElement>(null);
+  const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
   const controls = useAnimation();
+  const dragConstraints = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  
-  // Update profiles when initial profiles change
-  useEffect(() => {
-    setProfiles(initialProfiles);
-    if (initialProfiles.length > 0 && currentIndex >= initialProfiles.length) {
-      setCurrentIndex(0);
-    }
-  }, [initialProfiles, currentIndex]);
-  
-  const currentProfile = profiles[currentIndex] || null;
 
-  const triggerMatch = useCallback((profile: Profile) => {
-    // Simulate a match with 30% probability
-    const isMatch = Math.random() < 0.3;
-    if (isMatch) {
-      toast({
-        title: "New Match! 🎉",
-        description: `You and ${profile.name} liked each other!`,
-        variant: "default",
-      });
-      // In a real app, you'd store this match in the database and show a match screen
+  // Update local profiles when external profiles change
+  useEffect(() => {
+    setLocalProfiles(profiles);
+    if (currentIndex >= profiles.length) {
+      setCurrentIndex(Math.max(0, profiles.length - 1));
     }
-  }, [toast]);
+  }, [profiles, currentIndex]);
+
+  // Get current profile with null safety
+  const currentProfile = localProfiles && localProfiles.length > 0 && currentIndex >= 0 && currentIndex < localProfiles.length 
+    ? localProfiles[currentIndex] 
+    : null;
 
   const handleSwipe = useCallback(
     (direction: string) => {
       if (!currentProfile) return;
-
-      const xMove = direction === "right" || direction === "superLike" ? 600 : -600;
       
-      controls.start({
-        x: xMove,
-        opacity: 0,
-        transition: { duration: 0.5 },
+      const profile = currentProfile;
+      
+      // Call the onSwipe callback if provided
+      if (onSwipe) {
+        onSwipe(profile, direction);
+      }
+
+      // Move to next profile
+      setCurrentIndex((prev) => {
+        const nextIndex = prev + 1;
+        return nextIndex >= localProfiles.length ? -1 : nextIndex;
       });
 
-      // Notify about the swipe
-      if (onSwipe) {
-        onSwipe(currentProfile, direction);
-      }
-      
-      // Trigger match logic on right swipe or super like
+      // Show appropriate toast message
       if (direction === "right" || direction === "superLike") {
-        triggerMatch(currentProfile);
+        toast({
+          title: direction === "superLike" ? "Super Like!" : "Liked!",
+          description: `You ${direction === "superLike" ? "super liked" : "liked"} ${profile.name}!`,
+        });
       }
-
-      // Move to next card after animation
-      setTimeout(() => {
-        setCurrentIndex((prev) => prev + 1);
-        controls.set({ x: 0, opacity: 1 });
-      }, 500);
     },
-    [currentProfile, controls, onSwipe, triggerMatch]
+    [currentProfile, localProfiles.length, onSwipe, toast]
   );
 
   const handleDragEnd = useCallback(
     (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      if (!currentProfile) return;
+      
       setDragging(false);
-      const threshold = 100;
+      const { offset, velocity } = info;
+      const swipeThreshold = 100;
+      const swipeVelocityThreshold = 500;
 
-      if (info.offset.x > threshold) {
-        handleSwipe("right");
-      } else if (info.offset.x < -threshold) {
-        handleSwipe("left");
-      } else {
+      if (
+        offset.x > swipeThreshold ||
+        velocity.x > swipeVelocityThreshold
+      ) {
+        // Swipe right - Like
         controls.start({
-          x: 0,
-          opacity: 1,
-          transition: { type: "spring", stiffness: 300, damping: 25 },
+          x: window.innerWidth,
+          opacity: 0,
+          transition: { duration: 0.3 },
         });
+        setTimeout(() => {
+          handleSwipe("right");
+          controls.set({ x: 0, opacity: 1 });
+        }, 300);
+      } else if (
+        offset.x < -swipeThreshold ||
+        velocity.x < -swipeVelocityThreshold
+      ) {
+        // Swipe left - Pass
+        controls.start({
+          x: -window.innerWidth,
+          opacity: 0,
+          transition: { duration: 0.3 },
+        });
+        setTimeout(() => {
+          handleSwipe("left");
+          controls.set({ x: 0, opacity: 1 });
+        }, 300);
+      } else {
+        // Snap back to center
+        controls.start({ x: 0, y: 0, rotation: 0 });
       }
     },
-    [controls, handleSwipe]
+    [currentProfile, controls, handleSwipe]
   );
+
+  const setProfiles = useCallback((newProfiles: Profile[]) => {
+    setLocalProfiles(newProfiles);
+    if (currentIndex >= newProfiles.length) {
+      setCurrentIndex(Math.max(0, newProfiles.length - 1));
+    }
+  }, [currentIndex]);
 
   return {
     currentIndex,
     currentProfile,
-    profiles,
     controls,
     dragConstraints,
-    dragging,
-    setDragging,
     handleSwipe,
     handleDragEnd,
+    setDragging,
     setCurrentIndex,
     setProfiles,
   };
