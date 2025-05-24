@@ -31,6 +31,14 @@ export interface UserProfile {
   }[];
   personality_traits?: PersonalityTrait[];
   lifestyle_preferences?: LifestylePreference;
+  // Enhanced intention matching fields
+  timeline_expectations?: 'immediate' | 'within_months' | 'within_year' | 'no_rush' | 'unsure';
+  dating_history?: {
+    longest_relationship?: number; // in months
+    relationship_count?: number;
+    time_since_last?: number; // in months
+    commitment_pattern?: 'serial_monogamist' | 'casual_dater' | 'long_term_seeker' | 'mixed';
+  };
 }
 
 export interface PersonalityTrait {
@@ -64,6 +72,13 @@ export interface UserWithRelations extends UserProfile {
     trait: string;
     importance: number;
   }[];
+  timeline_expectations?: 'immediate' | 'within_months' | 'within_year' | 'no_rush' | 'unsure';
+  dating_history?: {
+    longest_relationship?: number;
+    relationship_count?: number;
+    time_since_last?: number;
+    commitment_pattern?: 'serial_monogamist' | 'casual_dater' | 'long_term_seeker' | 'mixed';
+  };
 }
 
 export interface User extends UserProfile {
@@ -75,4 +90,11 @@ export interface User extends UserProfile {
     trait: string;
     importance: number;
   }[];
+  timeline_expectations?: 'immediate' | 'within_months' | 'within_year' | 'no_rush' | 'unsure';
+  dating_history?: {
+    longest_relationship?: number;
+    relationship_count?: number;
+    time_since_last?: number;
+    commitment_pattern?: 'serial_monogamist' | 'casual_dater' | 'long_term_seeker' | 'mixed';
+  };
 }

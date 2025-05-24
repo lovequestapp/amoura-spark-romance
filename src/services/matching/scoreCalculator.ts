@@ -28,7 +28,7 @@ export const calculateMatchScore = (
   };
   
   // Normalize weights to sum to 1.0 (excluding factors that aren't available)
-  const hasLifestyleData = userProfile.lifestyle && potentialMatch.lifestyle;
+  const hasLifestyleData = userProfile.lifestyle_preferences && potentialMatch.lifestyle_preferences;
   const hasAttachmentData = userProfile.attachment_style && potentialMatch.attachment_style;
   
   let totalWeight = 0;
@@ -50,8 +50,8 @@ export const calculateMatchScore = (
   });
   
   // Calculate interests overlap score with category weighting
-  const userInterests = userProfile.interests || [];
-  const matchInterests = potentialMatch.interests || [];
+  const userInterests = userProfile.user_interests?.map((ui: any) => ui.interests?.name).filter(Boolean) || [];
+  const matchInterests = potentialMatch.user_interests?.map((ui: any) => ui.interests?.name).filter(Boolean) || [];
   
   const interestsScore = calculateInterestCompatibility(userInterests, matchInterests);
   
@@ -67,8 +67,8 @@ export const calculateMatchScore = (
     let weightedTraitScore = 0;
     
     // Compare traits using trait-specific compatibility logic and user preferences
-    userTraits.forEach(trait => {
-      const matchingTrait = matchTraits.find(t => t.name === trait.name);
+    userTraits.forEach((trait: any) => {
+      const matchingTrait = matchTraits.find((t: any) => t.name === trait.name);
       if (matchingTrait) {
         const { score, weight } = calculateTraitCompatibility(
           trait.value, 
@@ -85,11 +85,9 @@ export const calculateMatchScore = (
       weightedTraitScore / totalTraitWeight : 0.5;
   }
   
-  // Calculate relationship intention alignment with spectrum matching
-  const intentionScore = calculateIntentionCompatibility(
-    userProfile.relationshipIntention,
-    potentialMatch.relationshipIntention
-  );
+  // Calculate relationship intention alignment with enhanced spectrum matching
+  const intentionResult = calculateIntentionCompatibility(userProfile, potentialMatch);
+  const intentionScore = intentionResult.score;
   
   // Calculate location proximity score with non-linear preference
   const locationScore = calculateDistanceScore(potentialMatch.distance, 50); // Assuming 50 miles max preference
@@ -97,7 +95,10 @@ export const calculateMatchScore = (
   // Calculate lifestyle compatibility if data available
   let lifestyleScore = 0.5;
   if (hasLifestyleData) {
-    lifestyleScore = calculateLifestyleCompatibility(userProfile.lifestyle, potentialMatch.lifestyle);
+    lifestyleScore = calculateLifestyleCompatibility(
+      userProfile.lifestyle_preferences, 
+      potentialMatch.lifestyle_preferences
+    );
   }
   
   // Calculate attachment style compatibility if data available
@@ -114,14 +115,14 @@ export const calculateMatchScore = (
   if (userProfile.dealbreakers && userProfile.dealbreakers.length > 0) {
     // Example dealbreaker: smoking when user specified "no smoking"
     if (userProfile.dealbreakers.includes('no-smoking') && 
-        potentialMatch.lifestyle?.smoking && 
-        potentialMatch.lifestyle.smoking !== 'never') {
+        potentialMatch.lifestyle_preferences?.smoking && 
+        potentialMatch.lifestyle_preferences.smoking !== 'never') {
       dealbreakers.push('smoking');
     }
     
     // Example dealbreaker: different views on having children
     if (userProfile.dealbreakers.includes('kids-alignment') && 
-        userProfile.lifestyle?.wantsKids !== potentialMatch.lifestyle?.wantsKids) {
+        userProfile.lifestyle_preferences?.wants_children !== potentialMatch.lifestyle_preferences?.wants_children) {
       dealbreakers.push('kids-views');
     }
     
@@ -159,6 +160,8 @@ export const calculateMatchScore = (
     locationScore: Math.round(locationScore * 100),
     lifestyleScore: hasLifestyleData ? Math.round(lifestyleScore * 100) : undefined,
     attachmentScore: hasAttachmentData ? Math.round(attachmentScore * 100) : undefined,
-    dealbreakers: dealbreakers.length > 0 ? dealbreakers : undefined
+    dealbreakers: dealbreakers.length > 0 ? dealbreakers : undefined,
+    // Add enhanced intention details if available
+    intentionDetails: intentionResult.details
   };
 };

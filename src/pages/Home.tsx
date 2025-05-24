@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -136,18 +137,22 @@ const Home = () => {
           return;
         }
         
-        // Production code - use enhanced matching algorithm
+        // Production code - use enhanced matching algorithm with new intention features
+        const userProfile = user as User;
         const matches = await getPersonalizedMatches({
-          userId: user.id,
+          userId: userProfile.id,
           ageRange: filters.ageRange,
           distance: filters.distance,
           relationshipIntention: filters.relationshipIntention,
           interests: filters.interests,
-          personalityTraits: user.personality_traits,
-          dealbreakers: user.dealbreakers,
-          lifestylePreferences: user.lifestyle_preferences as Record<string, string | boolean>,
-          attachmentStyle: user.attachment_style,
-          traitPreferences: user.trait_preferences
+          personalityTraits: userProfile.personality_traits,
+          dealbreakers: userProfile.dealbreakers,
+          lifestylePreferences: userProfile.lifestyle_preferences as Record<string, string | boolean>,
+          attachmentStyle: userProfile.attachment_style,
+          traitPreferences: userProfile.trait_preferences,
+          // Enhanced intention matching parameters
+          timelineExpectations: userProfile.timeline_expectations,
+          datingHistory: userProfile.dating_history
         });
         
         setFilteredProfiles(matches);

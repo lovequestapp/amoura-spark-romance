@@ -98,12 +98,12 @@ export const getPersonalizedMatches = async (
         
         // Example implementation for a few common dealbreakers
         if (params.dealbreakers?.includes('no-smoking') && 
-            lifestyle?.smoking && lifestyle.smoking !== 'never') {
+            lifestyle && lifestyle.smoking && lifestyle.smoking !== 'never') {
           return false;
         }
         
         if (params.dealbreakers?.includes('no-kids') && 
-            lifestyle?.has_children === true) {
+            lifestyle && lifestyle.has_children === true) {
           return false;
         }
         

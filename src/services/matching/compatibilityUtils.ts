@@ -1,5 +1,6 @@
 
 import { COMPLEMENTARY_TRAITS, ATTACHMENT_COMPATIBILITY } from './constants';
+import { calculateAdvancedIntentionCompatibility, IntentionProfile } from './intentionMatching';
 
 // Calculate weighted compatibility score between two personality traits
 export const calculateTraitCompatibility = (
@@ -30,9 +31,38 @@ export const calculateTraitCompatibility = (
   return { score, weight: importanceWeight };
 };
 
-// Calculate relationship intention compatibility on a spectrum
-export const calculateIntentionCompatibility = (intention1: string | null | undefined, intention2: string | null | undefined): number => {
-  if (!intention1 || !intention2) return 0.5; // Neutral if either is undefined
+// Enhanced relationship intention compatibility with spectrum and timeline analysis
+export const calculateIntentionCompatibility = (
+  userProfile: any,
+  matchProfile: any
+): { score: number; details?: any } => {
+  // Convert profiles to IntentionProfile format
+  const userIntentionProfile: IntentionProfile = {
+    relationshipIntention: userProfile.relationshipIntention || userProfile.relationship_type,
+    timeline_expectations: userProfile.timeline_expectations,
+    dating_history: userProfile.dating_history,
+    attachment_style: userProfile.attachment_style
+  };
+
+  const matchIntentionProfile: IntentionProfile = {
+    relationshipIntention: matchProfile.relationshipIntention || matchProfile.relationship_type,
+    timeline_expectations: matchProfile.timeline_expectations,
+    dating_history: matchProfile.dating_history,
+    attachment_style: matchProfile.attachment_style
+  };
+
+  // Use advanced intention matching if timeline or history data is available
+  if (userProfile.timeline_expectations || userProfile.dating_history || 
+      matchProfile.timeline_expectations || matchProfile.dating_history) {
+    const result = calculateAdvancedIntentionCompatibility(userIntentionProfile, matchIntentionProfile);
+    return { score: result.overallScore, details: result };
+  }
+
+  // Fallback to simple intention matching
+  const intention1 = userIntentionProfile.relationshipIntention;
+  const intention2 = matchIntentionProfile.relationshipIntention;
+  
+  if (!intention1 || !intention2) return { score: 0.5 };
   
   // Define relationship intention spectrum with numerical values
   const intentionValues: Record<string, number> = {
@@ -50,7 +80,9 @@ export const calculateIntentionCompatibility = (intention1: string | null | unde
   const similarity = 1 - Math.abs(value1 - value2) / 100;
   
   // But give a bonus for exact matches
-  return intention1 === intention2 ? Math.min(similarity + 0.3, 1.0) : similarity;
+  const score = intention1 === intention2 ? Math.min(similarity + 0.3, 1.0) : similarity;
+  
+  return { score };
 };
 
 // Calculate distance score based on user preferences and real distances
