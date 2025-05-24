@@ -9,7 +9,7 @@ export const likeProfile = async (profileId: string): Promise<boolean> => {
     }
 
     // Check if already liked
-    const { data: existingLike } = await supabase
+    const { data: existingLike } = await (supabase as any)
       .from('profile_likes')
       .select('id')
       .eq('liker_id', session.user.id)
@@ -18,7 +18,7 @@ export const likeProfile = async (profileId: string): Promise<boolean> => {
 
     if (existingLike) {
       // Unlike
-      await supabase
+      await (supabase as any)
         .from('profile_likes')
         .delete()
         .eq('liker_id', session.user.id)
@@ -26,7 +26,7 @@ export const likeProfile = async (profileId: string): Promise<boolean> => {
       return false;
     } else {
       // Like
-      await supabase
+      await (supabase as any)
         .from('profile_likes')
         .insert({
           liker_id: session.user.id,
@@ -45,7 +45,7 @@ export const checkProfileLiked = async (profileId: string): Promise<boolean> => 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return false;
 
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from('profile_likes')
       .select('id')
       .eq('liker_id', session.user.id)

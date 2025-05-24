@@ -302,6 +302,27 @@ export type Database = {
           },
         ]
       }
+      profile_likes: {
+        Row: {
+          created_at: string
+          id: string
+          liked_profile_id: string
+          liker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          liked_profile_id: string
+          liker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          liked_profile_id?: string
+          liker_id?: string
+        }
+        Relationships: []
+      }
       profile_prompts: {
         Row: {
           category: string | null
