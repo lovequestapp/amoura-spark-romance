@@ -1,4 +1,3 @@
-
 // Enhanced intention matching with spectrum analysis and timeline compatibility
 import { ATTACHMENT_COMPATIBILITY } from './constants';
 
@@ -19,32 +18,32 @@ const INTENTION_SPECTRUM = {
   'casual': { 
     value: 0, 
     commitment_level: 1, 
-    timeline_tolerance: ['no_rush', 'unsure'] as const,
-    compatible_patterns: ['casual_dater', 'mixed'] as const
+    timeline_tolerance: ['no_rush', 'unsure'],
+    compatible_patterns: ['casual_dater', 'mixed']
   },
   'dating': { 
     value: 25, 
     commitment_level: 2, 
-    timeline_tolerance: ['within_year', 'no_rush', 'unsure'] as const,
-    compatible_patterns: ['casual_dater', 'mixed', 'long_term_seeker'] as const
+    timeline_tolerance: ['within_year', 'no_rush', 'unsure'],
+    compatible_patterns: ['casual_dater', 'mixed', 'long_term_seeker']
   },
   'relationship': { 
     value: 50, 
     commitment_level: 3, 
-    timeline_tolerance: ['within_months', 'within_year', 'no_rush'] as const,
-    compatible_patterns: ['mixed', 'long_term_seeker', 'serial_monogamist'] as const
+    timeline_tolerance: ['within_months', 'within_year', 'no_rush'],
+    compatible_patterns: ['mixed', 'long_term_seeker', 'serial_monogamist']
   },
   'serious': { 
     value: 75, 
     commitment_level: 4, 
-    timeline_tolerance: ['immediate', 'within_months', 'within_year'] as const,
-    compatible_patterns: ['long_term_seeker', 'serial_monogamist'] as const
+    timeline_tolerance: ['immediate', 'within_months', 'within_year'],
+    compatible_patterns: ['long_term_seeker', 'serial_monogamist']
   },
   'marriage': { 
     value: 100, 
     commitment_level: 5, 
-    timeline_tolerance: ['immediate', 'within_months'] as const,
-    compatible_patterns: ['long_term_seeker', 'serial_monogamist'] as const
+    timeline_tolerance: ['immediate', 'within_months'],
+    compatible_patterns: ['long_term_seeker', 'serial_monogamist']
   }
 } as const;
 

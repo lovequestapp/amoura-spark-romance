@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { MatchingParams, WeightedMatch } from './index';
 import { calculateMatchScore } from './scoreCalculator';
@@ -95,16 +94,22 @@ export const getPersonalizedMatches = async (
       filteredMatches = filteredMatches.filter(match => {
         // Check if lifestyle_preferences exists and is not an error
         const lifestyle = match.lifestyle_preferences;
-        const hasValidLifestyle = lifestyle && typeof lifestyle === 'object' && !('message' in lifestyle);
+        const hasValidLifestyle = lifestyle && 
+          typeof lifestyle === 'object' && 
+          !('message' in lifestyle) && 
+          lifestyle !== null;
         
         // Example implementation for a few common dealbreakers
         if (params.dealbreakers?.includes('no-smoking') && 
-            hasValidLifestyle && lifestyle.smoking && lifestyle.smoking !== 'never') {
+            hasValidLifestyle && 
+            lifestyle.smoking && 
+            lifestyle.smoking !== 'never') {
           return false;
         }
         
         if (params.dealbreakers?.includes('no-kids') && 
-            hasValidLifestyle && lifestyle.has_children === true) {
+            hasValidLifestyle && 
+            lifestyle.has_children === true) {
           return false;
         }
         
