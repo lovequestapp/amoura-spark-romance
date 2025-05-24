@@ -30,6 +30,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
 
+  // Function to check admin status
+  const checkAdminStatus = useCallback(async (userId: string) => {
+    try {
+      console.log('Checking admin status for user:', userId);
+      const { data, error } = await supabase.rpc('is_admin');
+      console.log('Admin check result:', { data, error });
+      
+      if (!error && data !== null) {
+        setIsAdmin(!!data);
+        console.log('User admin status:', !!data);
+      } else {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      console.error('Error in admin status check:', error);
+      setIsAdmin(false);
+    }
+  }, []);
+
   // Refresh the session
   const refreshSession = useCallback(async () => {
     try {
@@ -40,21 +60,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(data.session?.user ?? null);
       
       if (data.session?.user) {
-        setTimeout(async () => {
-          try {
-            const { data: adminData, error: adminError } = await supabase.rpc('is_admin');
-            if (!adminError && adminData !== null) {
-              setIsAdmin(!!adminData);
-            }
-          } catch (error) {
-            console.error('Error checking admin status:', error);
-          }
+        setTimeout(() => {
+          checkAdminStatus(data.session.user.id);
         }, 0);
       }
     } catch (error) {
       console.error('Error refreshing session:', error);
     }
-  }, []);
+  }, [checkAdminStatus]);
 
   // Handle sign out with proper cleanup
   const signOut = useCallback(async () => {
@@ -91,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Set up auth state listener FIRST
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
-            console.log('Auth state change:', event, session?.user?.id);
+            console.log('Auth state change:', event, session?.user?.email);
             
             if (!mounted) return;
             
@@ -100,16 +113,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             
             // Handle admin status check
             if (session?.user && event === 'SIGNED_IN') {
-              setTimeout(async () => {
+              setTimeout(() => {
                 if (!mounted) return;
-                try {
-                  const { data, error } = await supabase.rpc('is_admin');
-                  if (!error && data !== null && mounted) {
-                    setIsAdmin(!!data);
-                  }
-                } catch (error) {
-                  console.error('Error checking admin status:', error);
-                }
+                checkAdminStatus(session.user.id);
               }, 100);
             } else if (!session && mounted) {
               setIsAdmin(false);
@@ -125,7 +131,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // THEN get initial session
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
-        console.log('Initial session:', initialSession?.user?.id, error);
+        console.log('Initial session:', initialSession?.user?.email, error);
         
         if (!mounted) return;
         
@@ -140,10 +146,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (initialSession?.user) {
           try {
-            const { data, error: adminError } = await supabase.rpc('is_admin');
-            if (!adminError && data !== null && mounted) {
-              setIsAdmin(!!data);
-            }
+            await checkAdminStatus(initialSession.user.id);
           } catch (error) {
             console.error('Error checking admin status:', error);
           }
@@ -174,9 +177,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       mounted = false;
       cleanup?.then(cleanupFn => cleanupFn?.());
     };
-  }, []);
+  }, [checkAdminStatus]);
 
-  console.log('AuthContext state:', { isLoading, user: !!user, session: !!session });
+  console.log('AuthContext state:', { isLoading, user: !!user, session: !!session, isAdmin });
 
   return (
     <AuthContext.Provider value={{ user, session, isLoading, isAdmin, signOut, refreshSession }}>

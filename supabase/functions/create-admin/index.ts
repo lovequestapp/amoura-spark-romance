@@ -18,29 +18,55 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Create the user
+    // Create the user with your email
     const { data: userData, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
-      email: 'hunainm.qureshi@gmail.com',
-      password: 'Samurai14@',
+      email: 'hunaincardinal@gmail.com',
+      password: 'AdminPass123!',
       email_confirm: true
     })
 
-    if (createUserError) throw createUserError
-    if (!userData.user) throw new Error('No user was created')
+    if (createUserError) {
+      console.log('User might already exist, trying to get existing user...')
+      // Try to get existing user
+      const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+      if (listError) throw listError
+      
+      const existingUser = users.find(user => user.email === 'hunaincardinal@gmail.com')
+      if (!existingUser) throw new Error('Could not create or find user')
+      
+      userData.user = existingUser
+    }
+
+    if (!userData.user) throw new Error('No user was created or found')
 
     // Call the create_admin_user function to set up the profile and role
     const { error: adminError } = await supabaseAdmin.rpc(
       'create_admin_user',
       { 
-        email: 'hunainm.qureshi@gmail.com',
+        email: 'hunaincardinal@gmail.com',
         user_id: userData.user.id
       }
     )
 
-    if (adminError) throw adminError
+    if (adminError) {
+      console.log('Admin setup error, might already exist:', adminError.message)
+      // Still try to assign admin role directly
+      const { error: roleError } = await supabaseAdmin
+        .from('user_roles')
+        .upsert({
+          user_id: userData.user.id,
+          role: 'admin'
+        })
+      
+      if (roleError) console.log('Role assignment error:', roleError.message)
+    }
 
     return new Response(
-      JSON.stringify({ message: 'Admin user created successfully' }),
+      JSON.stringify({ 
+        message: 'Admin user created/updated successfully',
+        user_id: userData.user.id,
+        email: userData.user.email
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
   } catch (error) {
