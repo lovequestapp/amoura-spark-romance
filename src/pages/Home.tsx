@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -8,7 +9,6 @@ import { useCardSwiper } from '@/hooks/use-card-swiper';
 import SwipeableCard, { Profile } from '@/components/home/SwipeableCard';
 import NoMoreProfiles from '@/components/home/NoMoreProfiles';
 import MatchFilters, { FilterOptions } from '@/components/home/MatchFilters';
-import RecentMatches from '@/components/home/RecentMatches';
 import { useToast } from '@/components/ui/use-toast';
 import PremiumFeatures from '@/components/subscription/PremiumFeatures';
 import { useSubscription } from '@/contexts/SubscriptionContext';
@@ -41,7 +41,6 @@ const Home = () => {
     relationshipIntention: null,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [recentMatches, setRecentMatches] = useState<Profile[]>([]);
   
   const {
     currentIndex,
@@ -142,12 +141,6 @@ const Home = () => {
             
             setFilteredProfiles(withScores);
             
-            // Simulate recent matches with better selection logic
-            const simulatedMatches = withScores
-              .filter(p => p.matchScore > 75) // High quality matches only
-              .slice(0, 3);
-            setRecentMatches(simulatedMatches);
-            
             setIsLoading(false);
             return;
           }, 500);
@@ -173,13 +166,6 @@ const Home = () => {
         });
         
         setFilteredProfiles(matches);
-        
-        // Get recent matches with highest compatibility
-        const highQualityMatches = matches
-          .filter(match => match.matchScore > 80)
-          .slice(0, 3);
-        
-        setRecentMatches(highQualityMatches);
       } catch (error) {
         console.error("Error fetching matches:", error);
         toast({
@@ -391,15 +377,6 @@ const Home = () => {
             >
               <Heart size={24} className="text-white" />
             </Button>
-          </div>
-        )}
-        
-        {recentMatches.length > 0 && (
-          <div className="sticky bottom-0 pb-4 z-10 w-full">
-            <RecentMatches 
-              profiles={recentMatches} 
-              onViewProfile={handleViewProfile} 
-            />
           </div>
         )}
       </div>
