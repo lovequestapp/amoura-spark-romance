@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -22,21 +21,10 @@ import { useNavigate } from 'react-router-dom';
 import { enhancedProfiles } from '@/utils/placeholderData';
 
 // Import the types we created
-import { User, PersonalityTrait, LifestylePreference } from '@/types/profiles';
+import { User } from '@/types/profiles';
 
-// Update the MatchingParams interface
-interface MatchingParams {
-  userId: string;
-  ageRange: [number, number];
-  distance: number;
-  relationshipIntention: string | null;
-  interests: string[];
-  personalityTraits?: PersonalityTrait[];
-  dealbreakers?: string[];
-  lifestylePreferences?: Record<string, string | boolean>;
-  attachmentStyle?: string;
-  traitPreferences?: Array<{trait: string, importance: number}>;
-}
+// Update the MatchingParams interface to use the imported one
+import { MatchingParams } from '@/services/matching';
 
 const Home = () => {
   const { toast } = useToast();

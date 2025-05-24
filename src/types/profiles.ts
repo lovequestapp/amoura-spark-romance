@@ -29,6 +29,8 @@ export interface UserProfile {
     trait: string;
     importance: number; // 1-10 scale
   }[];
+  personality_traits?: PersonalityTrait[];
+  lifestyle_preferences?: LifestylePreference;
 }
 
 export interface PersonalityTrait {
