@@ -62,4 +62,9 @@ export interface User extends UserProfile {
   personality_traits?: PersonalityTrait[];
   lifestyle_preferences?: LifestylePreference;
   dealbreakers?: string[];
+  attachment_style?: 'secure' | 'anxious' | 'avoidant' | 'fearful';
+  trait_preferences?: {
+    trait: string;
+    importance: number;
+  }[];
 }
