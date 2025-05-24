@@ -19,86 +19,64 @@ import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import Dashboard from './pages/admin/Dashboard';
 import ProfileDetail from './pages/ProfileDetail';
 import { ErrorProvider } from './contexts/ErrorContext';
-
-// Create React Context to track loading state
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './App.css';
 
-// Protected route component with better error handling
+// Loading component
+const LoadingScreen = () => (
+  <div className="w-full h-screen flex items-center justify-center bg-white">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
+      <p className="text-gray-600">Loading...</p>
+    </div>
+  </div>
+);
+
+// Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   
-  console.log('ProtectedRoute - isLoading:', isLoading, 'user:', !!user);
-  
-  // Show loading indicator while checking authentication
   if (isLoading) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
   
   if (!user) {
-    console.log('No user found in ProtectedRoute, redirecting to /login');
     return <Navigate to="/login" replace />;
   }
   
-  console.log('User authenticated in ProtectedRoute, rendering children');
   return <>{children}</>;
 };
 
-// Admin route component with better error handling
+// Admin route component
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAdmin, isLoading, user } = useAuth();
   
-  console.log('AdminRoute - isLoading:', isLoading, 'user:', !!user, 'isAdmin:', isAdmin);
-  
-  // Show loading indicator while checking authentication
   if (isLoading) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
   
   if (!user) {
-    console.log('No user found in AdminRoute, redirecting to /login');
     return <Navigate to="/login" replace />;
   }
   
   if (!isAdmin) {
-    console.log('User not admin in AdminRoute, redirecting to /');
     return <Navigate to="/" replace />;
   }
   
-  console.log('User is admin in AdminRoute, rendering children');
   return <>{children}</>;
 };
 
 // Public route component that redirects authenticated users
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+const PublicRoute = ({ children, redirectTo = "/home" }: { children: React.ReactNode; redirectTo?: string }) => {
   const { user, isLoading } = useAuth();
   
-  console.log('PublicRoute - isLoading:', isLoading, 'user:', !!user);
-  
-  // Show loading indicator while checking authentication
   if (isLoading) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
+  }
+  
+  // If user is authenticated, redirect to the specified route
+  if (user) {
+    return <Navigate to={redirectTo} replace />;
   }
   
   return <>{children}</>;
@@ -110,7 +88,7 @@ function App() {
       queries: {
         retry: 1,
         refetchOnWindowFocus: false,
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 5 * 60 * 1000,
       },
     },
   });
@@ -123,11 +101,7 @@ function App() {
             <BrowserRouter>
               <div className="w-full max-w-full min-h-screen bg-white">
                 <Routes>
-                  <Route path="/" element={
-                    <PublicRoute>
-                      <Index />
-                    </PublicRoute>
-                  } />
+                  <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Navigate to="/login" replace />} />
                   <Route path="/auth/reset-password" element={
                     <PublicRoute>

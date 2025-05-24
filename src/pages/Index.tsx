@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -50,33 +49,19 @@ const Index = () => {
   const navigate = useNavigate();
   
   const handleGetStarted = () => {
-    console.log('Get Started clicked - isLoading:', isLoading, 'user:', !!user);
-    
     if (isLoading) {
-      console.log('Still loading auth state, waiting...');
       return;
     }
     
     if (user) {
-      console.log('User is logged in, navigating to /home');
       navigate('/home');
     } else {
-      console.log('User is not logged in, navigating to /login');
       navigate('/login');
     }
   };
   
-  // Show loading state while auth is being determined
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white w-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  // Don't show loading for Index page - let it render normally
+  // The auth check will happen in navigation
   
   return (
     <div className="min-h-screen bg-white w-full">
@@ -332,25 +317,23 @@ const Index = () => {
           <div className="flex justify-center">
             <Button 
               className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-7 px-12 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              asChild
+              onClick={() => navigate('/login')}
             >
-              <Link to="/login">
-                Begin Your Love Story Today
-                <motion.span
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 5, -5, 0]
-                  }}
-                  transition={{ 
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatDelay: 3
-                  }}
-                  className="ml-2 inline-block"
-                >
-                  ❤️
-                </motion.span>
-              </Link>
+              Begin Your Love Story Today
+              <motion.span
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{ 
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatDelay: 3
+                }}
+                className="ml-2 inline-block"
+              >
+                ❤️
+              </motion.span>
             </Button>
           </div>
           

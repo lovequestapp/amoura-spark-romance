@@ -30,10 +30,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
 
-  // Refresh the session - useful for when user's role changes
+  // Refresh the session
   const refreshSession = useCallback(async () => {
     try {
-      console.log('Refreshing session...');
       const { data, error } = await supabase.auth.refreshSession();
       if (error) throw error;
       
@@ -60,11 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Handle sign out with proper cleanup
   const signOut = useCallback(async () => {
     try {
-      console.log('Signing out...');
-      // Clean up auth state first
       cleanupAuthState();
-      
-      // Attempt global sign out
       await supabase.auth.signOut({ scope: 'global' });
       
       toast({
@@ -72,7 +67,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: 'You have been signed out successfully',
       });
       
-      // Navigate to home instead of forcing a reload
       window.location.href = '/';
     } catch (error) {
       console.error('Error signing out:', error);
@@ -82,19 +76,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         variant: 'destructive',
       });
       
-      // Try to clean up anyway
       cleanupAuthState();
       window.location.href = '/';
     }
   }, [toast]);
 
   useEffect(() => {
-    console.log('Setting up auth state listener');
+    let mounted = true;
     
-    // Get initial session immediately
     const initializeAuth = async () => {
       try {
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
         
         if (error) {
           console.error('Error getting initial session:', error);
@@ -102,14 +96,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
         
-        console.log('Initial session check:', initialSession ? 'Session found' : 'No session');
         setSession(initialSession);
         setUser(initialSession?.user ?? null);
         
         if (initialSession?.user) {
           try {
             const { data, error: adminError } = await supabase.rpc('is_admin');
-            if (!adminError && data !== null) {
+            if (!adminError && data !== null && mounted) {
               setIsAdmin(!!data);
             }
           } catch (error) {
@@ -117,10 +110,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
         
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error('Error initializing auth:', error);
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
     
@@ -130,7 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth event:', event, 'Session exists:', !!session);
+        if (!mounted) return;
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -138,27 +135,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Handle admin status check
         if (session?.user && event === 'SIGNED_IN') {
           setTimeout(async () => {
+            if (!mounted) return;
             try {
               const { data, error } = await supabase.rpc('is_admin');
-              if (!error && data !== null) {
+              if (!error && data !== null && mounted) {
                 setIsAdmin(!!data);
               }
             } catch (error) {
               console.error('Error checking admin status:', error);
             }
           }, 100);
-        } else if (!session) {
+        } else if (!session && mounted) {
           setIsAdmin(false);
         }
         
-        // Only set loading to false after initial auth check
-        if (event !== 'INITIAL_SESSION') {
+        // Set loading to false after auth events
+        if (mounted && event !== 'INITIAL_SESSION') {
           setIsLoading(false);
         }
       }
     );
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
