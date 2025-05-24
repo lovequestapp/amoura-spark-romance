@@ -69,25 +69,6 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Public route component that redirects authenticated users
-const PublicRoute = ({ children, redirectTo = "/home" }: { children: React.ReactNode; redirectTo?: string }) => {
-  const { user, isLoading } = useAuth();
-  
-  console.log('PublicRoute - isLoading:', isLoading, 'user:', !!user);
-  
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-  
-  // If user is authenticated, redirect to the specified route
-  if (user) {
-    console.log('User authenticated, redirecting to:', redirectTo);
-    return <Navigate to={redirectTo} replace />;
-  }
-  
-  return <>{children}</>;
-};
-
 function App() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -107,23 +88,13 @@ function App() {
             <BrowserRouter>
               <div className="w-full max-w-full min-h-screen bg-white">
                 <Routes>
+                  {/* Public routes */}
                   <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
                   <Route path="/auth" element={<Navigate to="/login" replace />} />
-                  <Route path="/auth/reset-password" element={
-                    <PublicRoute>
-                      <PasswordReset />
-                    </PublicRoute>
-                  } />
-                  <Route path="/login" element={
-                    <PublicRoute>
-                      <Login />
-                    </PublicRoute>
-                  } />
-                  <Route path="/signup" element={
-                    <PublicRoute>
-                      <Signup />
-                    </PublicRoute>
-                  } />
+                  <Route path="/auth/reset-password" element={<PasswordReset />} />
+                  <Route path="/help" element={<Help />} />
                   
                   {/* Protected routes */}
                   <Route path="/home" element={
@@ -174,8 +145,6 @@ function App() {
                     </AdminRoute>
                   } />
                   
-                  {/* Public routes */}
-                  <Route path="/help" element={<Help />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <Toaster />

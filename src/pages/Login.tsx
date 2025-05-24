@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,15 +15,15 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   
   // Redirect if already authenticated
   useEffect(() => {
-    if (user) {
+    if (!authLoading && user) {
       console.log('User already logged in, redirecting to /home');
       navigate('/home', { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,15 +32,6 @@ const Login = () => {
     setIsLoading(true);
     try {
       console.log('Attempting login with:', email);
-      // Clean up auth state before attempting authentication
-      cleanupAuthState();
-      
-      // Try to sign out globally before signing in (prevents auth issues)
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        console.log('Pre-auth signout failed, continuing:', err);
-      }
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -54,10 +46,8 @@ const Login = () => {
         description: "Welcome back!",
       });
       
-      // Wait a moment for auth state to update, then navigate
-      setTimeout(() => {
-        navigate('/home', { replace: true });
-      }, 100);
+      // Navigate to home immediately
+      navigate('/home', { replace: true });
       
     } catch (error: any) {
       console.error("Login error:", error.message);
@@ -82,6 +72,18 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  // Show loading if auth is still loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-white p-6 w-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white p-6 w-full">

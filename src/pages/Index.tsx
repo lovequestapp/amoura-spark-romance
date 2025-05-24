@@ -49,9 +49,14 @@ const Index = () => {
   const navigate = useNavigate();
   
   const handleGetStarted = () => {
-    if (isLoading) {
-      return;
-    }
+    console.log('Get Started clicked - User:', !!user, 'Loading:', isLoading);
+    
+    // Always navigate to login first, let the auth system handle redirects
+    navigate('/login');
+  };
+  
+  const handleGoToHome = () => {
+    console.log('Go to Home clicked - User:', !!user, 'Loading:', isLoading);
     
     if (user) {
       navigate('/home');
@@ -59,9 +64,6 @@ const Index = () => {
       navigate('/login');
     }
   };
-  
-  // Don't show loading for Index page - let it render normally
-  // The auth check will happen in navigation
   
   return (
     <div className="min-h-screen bg-white w-full">
@@ -149,9 +151,8 @@ const Index = () => {
                 <Button 
                   className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-6 px-8 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                   onClick={handleGetStarted}
-                  disabled={isLoading}
                 >
-                  {isLoading ? "Loading..." : (user ? "Go to Home" : "Get Started")}
+                  Get Started
                 </Button>
               </motion.div>
               
@@ -317,7 +318,7 @@ const Index = () => {
           <div className="flex justify-center">
             <Button 
               className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full py-7 px-12 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              onClick={() => navigate('/login')}
+              onClick={handleGetStarted}
             >
               Begin Your Love Story Today
               <motion.span
