@@ -17,14 +17,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { getPersonalizedMatches, getFeaturedMatch, WeightedMatch } from '@/services/matching';
 import { useNavigate } from 'react-router-dom';
 
-// Placeholder profiles for development/testing are still available
+// Enhanced demo profiles for development/testing
 import { enhancedProfiles } from '@/utils/placeholderData';
-
-// Import the types we created
-import { User } from '@/types/profiles';
-
-// Update the MatchingParams interface to use the imported one
-import { MatchingParams } from '@/services/matching';
 
 const Home = () => {
   const { toast } = useToast();
@@ -32,7 +26,7 @@ const Home = () => {
   const { tier } = useSubscription();
   const navigate = useNavigate();
 
-  const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>(enhancedProfiles);
+  const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
   const [filters, setFilters] = useState<FilterOptions>({
     ageRange: [18, 65],
     distance: 25,
@@ -57,22 +51,24 @@ const Home = () => {
     if (user && profile.id) {
       recordProfileView(profile.id);
       
-      // Track ML interaction for learning
-      try {
-        const { trackUserInteraction } = await import('@/services/matching/matchingService');
-        await trackUserInteraction(
-          user.id, 
-          String(profile.id), 
-          direction as 'like' | 'pass' | 'super_like',
-          {
-            timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening',
-            dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
-            profilePosition: currentIndex,
-            matchScore: (profile as any).matchScore
-          }
-        );
-      } catch (error) {
-        console.error('Error tracking ML interaction:', error);
+      // Track ML interaction for learning (only if in production)
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          const { trackUserInteraction } = await import('@/services/matching/matchingService');
+          await trackUserInteraction(
+            user.id, 
+            String(profile.id), 
+            direction as 'like' | 'pass' | 'super_like',
+            {
+              timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening',
+              dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
+              profilePosition: currentIndex,
+              matchScore: (profile as any).matchScore
+            }
+          );
+        } catch (error) {
+          console.error('Error tracking ML interaction:', error);
+        }
       }
     }
   });
@@ -88,90 +84,80 @@ const Home = () => {
       setIsLoading(true);
       
       try {
-        // For development/demo, use placeholder data
-        if (process.env.NODE_ENV === 'development' && enhancedProfiles.length) {
-          setTimeout(() => {
-            // Apply enhanced filtering to sample data to simulate API call
-            let filtered = [...enhancedProfiles];
-            
-            if (filters.showVerifiedOnly) {
-              filtered = filtered.filter(p => p.verified);
-            }
-            
-            if (filters.relationshipIntention) {
-              // Apply more nuanced relationship intention matching
-              const intensityMap: Record<string, number> = {
-                'casual': 1,
-                'dating': 2,
-                'relationship': 3,
-                'serious': 4,
-                'marriage': 5
-              };
-              
-              const userIntensity = intensityMap[filters.relationshipIntention] || 3;
-              
-              filtered = filtered.filter(p => {
-                if (!p.relationshipIntention) return true;
-                const matchIntensity = intensityMap[p.relationshipIntention] || 3;
-                // More flexible matching - allow within +/- 1 level
-                return Math.abs(userIntensity - matchIntensity) <= 1;
-              });
-            }
-            
-            // Add match scores to simulated data with more realistic distribution
-            const withScores = filtered.map(p => ({
-              ...p,
-              // More realistic score distribution
-              matchScore: Math.floor(Math.random() * 30) + 55 + (p.verified ? 10 : 0) + 
-                          (filters.interests.some(i => p.interests?.includes(i)) ? 15 : 0),
-              interestsScore: Math.floor(Math.random() * 70) + 30,
-              personalityScore: Math.floor(Math.random() * 60) + 40,
-              intentionScore: Math.floor(Math.random() * 80) + 20,
-              locationScore: Math.floor(Math.random() * 90) + 10,
-              lifestyleScore: Math.floor(Math.random() * 75) + 25,
-              // Add attachment style and score for UI testing
-              attachment_style: ['secure', 'anxious', 'avoidant', 'fearful'][Math.floor(Math.random() * 4)] as 'secure' | 'anxious' | 'avoidant' | 'fearful',
-              attachmentScore: Math.floor(Math.random() * 70) + 30,
-              // Occasionally add dealbreakers for UI testing
-              dealbreakers: Math.random() > 0.8 ? ['smoking'] : undefined
-            }));
-            
-            // Sort by match score
-            withScores.sort((a, b) => b.matchScore - a.matchScore);
-            
-            setFilteredProfiles(withScores);
-            
-            setIsLoading(false);
-            return;
-          }, 500);
-          return;
+        console.log('Fetching matches for user:', user.email);
+        
+        // Always use demo profiles for development and testing
+        // Apply enhanced filtering to sample data to simulate API call
+        let filtered = [...enhancedProfiles];
+        
+        console.log('Starting with demo profiles:', filtered.length);
+        
+        if (filters.showVerifiedOnly) {
+          filtered = filtered.filter(p => p.verified);
+          console.log('After verified filter:', filtered.length);
         }
         
-        // Production code - use enhanced matching algorithm with new intention features
-        const userProfile = user as User;
-        const matches = await getPersonalizedMatches({
-          userId: userProfile.id,
-          ageRange: filters.ageRange,
-          distance: filters.distance,
-          relationshipIntention: filters.relationshipIntention,
-          interests: filters.interests,
-          personalityTraits: userProfile.personality_traits,
-          dealbreakers: userProfile.dealbreakers,
-          lifestylePreferences: userProfile.lifestyle_preferences as Record<string, string | boolean>,
-          attachmentStyle: userProfile.attachment_style,
-          traitPreferences: userProfile.trait_preferences,
-          // Enhanced intention matching parameters
-          timelineExpectations: userProfile.timeline_expectations,
-          datingHistory: userProfile.dating_history
-        });
+        if (filters.relationshipIntention) {
+          // Apply more nuanced relationship intention matching
+          const intensityMap: Record<string, number> = {
+            'casual': 1,
+            'dating': 2,
+            'relationship': 3,
+            'serious': 4,
+            'marriage': 5
+          };
+          
+          const userIntensity = intensityMap[filters.relationshipIntention] || 3;
+          
+          filtered = filtered.filter(p => {
+            if (!p.relationshipIntention) return true;
+            const matchIntensity = intensityMap[p.relationshipIntention] || 3;
+            // More flexible matching - allow within +/- 1 level
+            return Math.abs(userIntensity - matchIntensity) <= 1;
+          });
+          console.log('After relationship intention filter:', filtered.length);
+        }
         
-        setFilteredProfiles(matches);
+        // Add match scores to simulated data with more realistic distribution
+        const withScores = filtered.map(p => ({
+          ...p,
+          // More realistic score distribution
+          matchScore: Math.floor(Math.random() * 30) + 55 + (p.verified ? 10 : 0) + 
+                      (filters.interests.some(i => p.interests?.includes(i)) ? 15 : 0),
+          interestsScore: Math.floor(Math.random() * 70) + 30,
+          personalityScore: Math.floor(Math.random() * 60) + 40,
+          intentionScore: Math.floor(Math.random() * 80) + 20,
+          locationScore: Math.floor(Math.random() * 90) + 10,
+          lifestyleScore: Math.floor(Math.random() * 75) + 25,
+          // Add attachment style and score for UI testing
+          attachment_style: ['secure', 'anxious', 'avoidant', 'fearful'][Math.floor(Math.random() * 4)] as 'secure' | 'anxious' | 'avoidant' | 'fearful',
+          attachmentScore: Math.floor(Math.random() * 70) + 30,
+          // Occasionally add dealbreakers for UI testing
+          dealbreakers: Math.random() > 0.8 ? ['smoking'] : undefined
+        }));
+        
+        // Sort by match score
+        withScores.sort((a, b) => b.matchScore - a.matchScore);
+        
+        console.log('Final filtered profiles with scores:', withScores.length);
+        setFilteredProfiles(withScores);
+        
       } catch (error) {
         console.error("Error fetching matches:", error);
+        
+        // Fallback to basic demo profiles if there's any error
+        console.log('Using fallback demo profiles');
+        const fallbackProfiles = enhancedProfiles.map(p => ({
+          ...p,
+          matchScore: Math.floor(Math.random() * 40) + 60,
+          interestsScore: Math.floor(Math.random() * 70) + 30,
+          personalityScore: Math.floor(Math.random() * 60) + 40,
+        }));
+        setFilteredProfiles(fallbackProfiles);
+        
         toast({
-          title: "Error",
-          description: "Failed to load matches. Please try again.",
-          variant: "destructive",
+          title: "Using Demo Profiles",
+          description: "Showing demo profiles for testing purposes.",
         });
       } finally {
         setIsLoading(false);
@@ -260,21 +246,23 @@ const Home = () => {
       // Save this swipe in history
       setSwipedProfiles([...swipedProfiles, { profile: currentProfile, direction: "superLike" }]);
       
-      // Track super like for ML
-      try {
-        const { trackUserInteraction } = await import('@/services/matching/matchingService');
-        await trackUserInteraction(
-          user.id, 
-          String(currentProfile.id), 
-          'super_like',
-          {
-            timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening',
-            profilePosition: currentIndex,
-            action: 'super_like'
-          }
-        );
-      } catch (error) {
-        console.error('Error tracking super like:', error);
+      // Track super like for ML (only in production)
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          const { trackUserInteraction } = await import('@/services/matching/matchingService');
+          await trackUserInteraction(
+            user.id, 
+            String(currentProfile.id), 
+            'super_like',
+            {
+              timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening',
+              profilePosition: currentIndex,
+              action: 'super_like'
+            }
+          );
+        } catch (error) {
+          console.error('Error tracking super like:', error);
+        }
       }
       
       toast({
@@ -297,22 +285,24 @@ const Home = () => {
     if (currentProfile && user) {
       setSwipedProfiles([...swipedProfiles, { profile: currentProfile, direction }]);
       
-      // Track swipe for ML learning
-      try {
-        const { trackUserInteraction } = await import('@/services/matching/matchingService');
-        await trackUserInteraction(
-          user.id, 
-          String(currentProfile.id), 
-          direction as 'like' | 'pass',
-          {
-            timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening',
-            dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
-            profilePosition: currentIndex,
-            matchScore: (currentProfile as any).matchScore
-          }
-        );
-      } catch (error) {
-        console.error('Error tracking swipe:', error);
+      // Track swipe for ML learning (only in production)
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          const { trackUserInteraction } = await import('@/services/matching/matchingService');
+          await trackUserInteraction(
+            user.id, 
+            String(currentProfile.id), 
+            direction as 'like' | 'pass',
+            {
+              timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening',
+              dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
+              profilePosition: currentIndex,
+              matchScore: (currentProfile as any).matchScore
+            }
+          );
+        } catch (error) {
+          console.error('Error tracking swipe:', error);
+        }
       }
       
       handleSwipe(direction);
@@ -344,7 +334,7 @@ const Home = () => {
               className="w-full max-w-sm"
             >
               <AnimatePresence mode="wait">
-                {currentIndex >= 0 ? (
+                {currentIndex >= 0 && filteredProfiles.length > 0 ? (
                   <SwipeableCard
                     profile={currentProfile}
                     controls={controls}
@@ -353,14 +343,25 @@ const Home = () => {
                     onDragEnd={(event, info) => handleDragEnd(event, info)}
                   />
                 ) : (
-                  <NoMoreProfiles onRefresh={() => currentIndex === -1 && setCurrentIndex(0)} />
+                  <NoMoreProfiles onRefresh={() => {
+                    console.log('Refreshing profiles...');
+                    setCurrentIndex(0);
+                    // Reset to show demo profiles again
+                    const refreshedProfiles = enhancedProfiles.map(p => ({
+                      ...p,
+                      matchScore: Math.floor(Math.random() * 40) + 60,
+                      interestsScore: Math.floor(Math.random() * 70) + 30,
+                      personalityScore: Math.floor(Math.random() * 60) + 40,
+                    }));
+                    setFilteredProfiles(refreshedProfiles);
+                  }} />
                 )}
               </AnimatePresence>
             </div>
           )}
         </div>
         
-        {currentIndex >= 0 && !isLoading && (
+        {currentIndex >= 0 && !isLoading && filteredProfiles.length > 0 && (
           <div className="flex justify-center gap-4 py-6">
             <Button
               onClick={() => handleSwipeWithHistory("left")}

@@ -29,22 +29,33 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    // For demo purposes, we're simulating subscription data
-    // In a real app, this would verify with Stripe
+    // Get authorization header
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader) {
+      logStep("No authorization header provided");
+      throw new Error("No authorization header provided");
+    }
 
     const token = authHeader.replace("Bearer ", "");
+    
+    // Use the client to get user from the token
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    if (userError) {
+      logStep("Authentication error", { error: userError.message });
+      throw new Error(`Authentication error: ${userError.message}`);
+    }
+    
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
+    if (!user?.email) {
+      logStep("User not authenticated or email not available");
+      throw new Error("User not authenticated or email not available");
+    }
     
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     // Parse request body to get parameters
-    const requestData = await req.json();
+    const requestData = await req.json().catch(() => ({}));
     
     // Get tier from request body rather than URL params
     const tier = requestData.tier || 'foundation';
