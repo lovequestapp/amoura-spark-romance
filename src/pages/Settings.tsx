@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowLeft, Mail, Lock, LogOut, Info, HelpCircle, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +26,8 @@ const Settings = () => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const [distanceValue, setDistanceValue] = useState([25]);
+  const [ageRange, setAgeRange] = useState([24, 35]);
 
   const handleLogout = async () => {
     try {
@@ -194,10 +197,11 @@ const Settings = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     Distance
                   </label>
-                  <span className="text-sm text-gray-500">25 miles</span>
+                  <span className="text-sm text-gray-500">{distanceValue[0]} miles</span>
                 </div>
                 <Slider
-                  defaultValue={[25]}
+                  value={distanceValue}
+                  onValueChange={setDistanceValue}
                   max={100}
                   step={1}
                 />
@@ -208,10 +212,11 @@ const Settings = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     Age Range
                   </label>
-                  <span className="text-sm text-gray-500">24 - 35</span>
+                  <span className="text-sm text-gray-500">{ageRange[0]} - {ageRange[1]}</span>
                 </div>
                 <Slider
-                  defaultValue={[24, 35]}
+                  value={ageRange}
+                  onValueChange={setAgeRange}
                   min={18}
                   max={70}
                   step={1}
@@ -282,54 +287,64 @@ const Settings = () => {
             <h2 className="text-lg font-medium mb-4">App Settings</h2>
             
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Notifications</p>
-                  <p className="text-sm text-gray-500">Push, email, and in-app</p>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex-1 min-w-0 pr-4">
+                  <p className="font-medium text-sm sm:text-base leading-tight">Notifications</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Push, email, and in-app</p>
                 </div>
-                <Switch defaultChecked />
+                <div className="flex-shrink-0">
+                  <Switch defaultChecked />
+                </div>
               </div>
               
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Show online status</p>
-                  <p className="text-sm text-gray-500">Let others know when you're active</p>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex-1 min-w-0 pr-4">
+                  <p className="font-medium text-sm sm:text-base leading-tight">Show online status</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Let others know when you're active</p>
                 </div>
-                <Switch defaultChecked disabled={features.hideOnlineStatus} />
+                <div className="flex-shrink-0">
+                  <Switch defaultChecked disabled={features.hideOnlineStatus} />
+                </div>
               </div>
               
               {features.hideOnlineStatus && (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Hide online status</p>
-                    <p className="text-sm text-gray-500">Hide your activity status from others</p>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <p className="font-medium text-sm sm:text-base leading-tight">Hide online status</p>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Hide your activity status from others</p>
                   </div>
-                  <Switch defaultChecked />
+                  <div className="flex-shrink-0">
+                    <Switch defaultChecked />
+                  </div>
                 </div>
               )}
               
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Read receipts</p>
-                  <p className="text-sm text-gray-500">Show when you've read messages</p>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex-1 min-w-0 pr-4">
+                  <p className="font-medium text-sm sm:text-base leading-tight">Read receipts</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Show when you've read messages</p>
                 </div>
-                <Switch defaultChecked />
+                <div className="flex-shrink-0">
+                  <Switch defaultChecked />
+                </div>
               </div>
               
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Show my distance</p>
-                  <p className="text-sm text-gray-500">Display how far away you are</p>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex-1 min-w-0 pr-4">
+                  <p className="font-medium text-sm sm:text-base leading-tight">Show my distance</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Display how far away you are</p>
                 </div>
-                <Switch defaultChecked />
+                <div className="flex-shrink-0">
+                  <Switch defaultChecked />
+                </div>
               </div>
               
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Incognito mode</p>
-                  <p className="text-sm text-gray-500">Only show your profile to people you like</p>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex-1 min-w-0 pr-4">
+                  <p className="font-medium text-sm sm:text-base leading-tight">Incognito mode</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Only show your profile to people you like</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   {isPremiumFeature('commitment') && (
                     <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
                       Commitment
@@ -339,12 +354,12 @@ const Settings = () => {
                 </div>
               </div>
               
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Message before matching</p>
-                  <p className="text-sm text-gray-500">Send messages before matching</p>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex-1 min-w-0 pr-4">
+                  <p className="font-medium text-sm sm:text-base leading-tight">Message before matching</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Send messages before matching</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   {isPremiumFeature('chemistry') && (
                     <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
                       Chemistry+
@@ -355,12 +370,14 @@ const Settings = () => {
               </div>
               
               {features.travelMode && (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Travel Mode</p>
-                    <p className="text-sm text-gray-500">Change location for your next trip</p>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <p className="font-medium text-sm sm:text-base leading-tight">Travel Mode</p>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Change location for your next trip</p>
                   </div>
-                  <Switch defaultChecked />
+                  <div className="flex-shrink-0">
+                    <Switch defaultChecked />
+                  </div>
                 </div>
               )}
             </div>
