@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, X, Sparkles, HeartHandshake } from 'lucide-react';
@@ -221,11 +220,12 @@ const MatchFilters: React.FC<MatchFiltersProps> = ({ onApplyFilters }) => {
                       <span className="text-xs text-gray-500">{filters.ageRange[0]} - {filters.ageRange[1]}</span>
                     </div>
                     <Slider
-                      defaultValue={filters.ageRange}
+                      value={filters.ageRange}
                       min={18}
                       max={65}
                       step={1}
                       onValueChange={handleAgeRangeChange}
+                      className="w-full"
                     />
                   </div>
                   
@@ -236,11 +236,12 @@ const MatchFilters: React.FC<MatchFiltersProps> = ({ onApplyFilters }) => {
                       <span className="text-xs text-gray-500">Up to {filters.distance} miles</span>
                     </div>
                     <Slider
-                      defaultValue={[filters.distance]}
+                      value={[filters.distance]}
                       min={1}
                       max={100}
                       step={1}
                       onValueChange={handleDistanceChange}
+                      className="w-full"
                     />
                   </div>
                   
