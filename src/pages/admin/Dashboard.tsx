@@ -16,7 +16,6 @@ import {
   Eye,
   MessageSquare,
   TrendingUp,
-  AlertTriangle,
   Activity
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -25,28 +24,25 @@ const Dashboard = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['adminStats'],
     queryFn: async () => {
-      // Query the view directly since types aren't updated yet
       const { data, error } = await supabase
         .from('admin_dashboard_stats' as any)
         .select('*')
         .single();
         
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 
   const { data: recentActivity } = useQuery({
     queryKey: ['recentActivity'],
     queryFn: async () => {
-      // Get recent user signups
       const { data: recentUsers } = await supabase
         .from('profiles')
         .select('full_name, username, created_at')
         .order('created_at', { ascending: false })
         .limit(5);
 
-      // Get recent posts
       const { data: recentPosts } = await supabase
         .from('community_posts')
         .select('content, created_at, profiles(full_name, username)')
@@ -60,7 +56,6 @@ const Dashboard = () => {
   const { data: weeklyData } = useQuery({
     queryKey: ['weeklyData'],
     queryFn: async () => {
-      // Call the function directly via RPC since types aren't updated yet
       const { data, error } = await supabase.rpc('get_user_analytics' as any, { days_back: 7 });
       if (error) throw error;
       return data?.map((d: any) => ({
@@ -77,7 +72,7 @@ const Dashboard = () => {
   const mainStats = [
     {
       title: 'Total Users',
-      value: stats?.total_users || 0,
+      value: (stats as any)?.total_users || 0,
       description: 'Total registered users',
       icon: UsersIcon,
       change: '+12%',
@@ -85,7 +80,7 @@ const Dashboard = () => {
     },
     {
       title: 'Completed Profiles',
-      value: stats?.completed_profiles || 0,
+      value: (stats as any)?.completed_profiles || 0,
       description: 'Users with completed profiles',
       icon: UserCheck,
       change: '+8%',
@@ -93,7 +88,7 @@ const Dashboard = () => {
     },
     {
       title: 'Paid Subscribers',
-      value: stats?.paid_subscribers || 0,
+      value: (stats as any)?.paid_subscribers || 0,
       description: 'Active paid subscriptions',
       icon: CreditCard,
       change: '+23%',
@@ -101,7 +96,7 @@ const Dashboard = () => {
     },
     {
       title: 'Profile Views',
-      value: stats?.total_profile_views || 0,
+      value: (stats as any)?.total_profile_views || 0,
       description: 'Total profile views',
       icon: Eye,
       change: '+15%',
@@ -112,19 +107,19 @@ const Dashboard = () => {
   const additionalStats = [
     {
       title: 'Messages Today',
-      value: stats?.messages_today || 0,
+      value: (stats as any)?.messages_today || 0,
       description: 'Messages sent in last 24h',
       icon: MessageSquare,
     },
     {
       title: 'Posts Today',
-      value: stats?.posts_today || 0,
+      value: (stats as any)?.posts_today || 0,
       description: 'Community posts created today',
       icon: TrendingUp,
     },
     {
       title: 'New Users (Week)',
-      value: stats?.new_users_week || 0,
+      value: (stats as any)?.new_users_week || 0,
       description: 'Users joined this week',
       icon: Activity,
     },
@@ -240,7 +235,7 @@ const Dashboard = () => {
                     <div key={index} className="text-sm">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">
-                          {post.profiles?.full_name || post.profiles?.username || 'Anonymous'}
+                          {(post.profiles as any)?.full_name || (post.profiles as any)?.username || 'Anonymous'}
                         </span>
                         <span className="text-gray-500">
                           {new Date(post.created_at).toLocaleDateString()}

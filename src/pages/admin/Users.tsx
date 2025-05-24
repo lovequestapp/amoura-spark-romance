@@ -23,10 +23,6 @@ import { Input } from "@/components/ui/input";
 import { 
   Search, 
   UserX, 
-  UserCheck, 
-  Mail, 
-  Calendar,
-  Filter,
   Download
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
@@ -53,25 +49,30 @@ const Users = () => {
         query = query.or(`full_name.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%`);
       }
 
-      if (statusFilter !== 'all') {
-        if (statusFilter === 'premium') {
-          query = query.eq('subscribers.subscribed', true);
-        } else if (statusFilter === 'incomplete') {
-          query = query.eq('onboarding_completed', false);
-        } else if (statusFilter === 'admin') {
-          query = query.eq('user_roles.role', 'admin');
-        }
-      }
-
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      
+      let filteredData = data || [];
+      
+      if (statusFilter === 'premium') {
+        filteredData = filteredData.filter(user => 
+          Array.isArray(user.subscribers) && user.subscribers.some((sub: any) => sub.subscribed)
+        );
+      } else if (statusFilter === 'incomplete') {
+        filteredData = filteredData.filter(user => !user.onboarding_completed);
+      } else if (statusFilter === 'admin') {
+        filteredData = filteredData.filter(user => 
+          Array.isArray(user.user_roles) && user.user_roles.some((role: any) => role.role === 'admin')
+        );
+      }
+      
+      return filteredData as any[];
     },
   });
 
   const suspendUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      const { error } = await supabase.rpc('log_admin_activity', {
+      const { error } = await supabase.rpc('log_admin_activity' as any, {
         action_param: 'suspend_user',
         target_type_param: 'user',
         target_id_param: userId
@@ -91,12 +92,21 @@ const Users = () => {
     mutationFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('full_name, username, created_at, onboarding_completed')
-        .csv();
+        .select('full_name, username, created_at, onboarding_completed');
       
       if (error) throw error;
       
-      const blob = new Blob([data], { type: 'text/csv' });
+      const csvContent = [
+        ['Full Name', 'Username', 'Created At', 'Onboarding Completed'],
+        ...(data || []).map(user => [
+          user.full_name || '',
+          user.username || '',
+          user.created_at,
+          user.onboarding_completed ? 'Yes' : 'No'
+        ])
+      ].map(row => row.join(',')).join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -172,7 +182,7 @@ const Users = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users?.map((user) => (
+              {users?.map((user: any) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -192,13 +202,14 @@ const Users = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      {user.subscribers?.[0]?.subscribed && (
+                      {Array.isArray(user.subscribers) && user.subscribers.some((sub: any) => sub?.subscribed) && (
                         <Badge variant="outline">Premium</Badge>
                       )}
-                      {user.user_roles?.[0]?.role === 'admin' && (
+                      {Array.isArray(user.user_roles) && user.user_roles.some((role: any) => role?.role === 'admin') && (
                         <Badge>Admin</Badge>
                       )}
-                      {!user.subscribers?.[0]?.subscribed && user.user_roles?.[0]?.role !== 'admin' && (
+                      {(!Array.isArray(user.subscribers) || !user.subscribers.some((sub: any) => sub?.subscribed)) && 
+                       (!Array.isArray(user.user_roles) || !user.user_roles.some((role: any) => role?.role === 'admin')) && (
                         <Badge variant="secondary">Free</Badge>
                       )}
                     </div>

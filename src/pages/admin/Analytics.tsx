@@ -26,7 +26,6 @@ import {
 import { 
   TrendingUp, 
   Users, 
-  Heart,
   MessageCircle,
   Calendar
 } from 'lucide-react';
@@ -35,23 +34,21 @@ const Analytics = () => {
   const { data: userAnalytics } = useQuery({
     queryKey: ['userAnalytics'],
     queryFn: async () => {
-      // Call the function directly via RPC since types aren't updated yet
       const { data, error } = await supabase.rpc('get_user_analytics' as any, { days_back: 30 });
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
   const { data: dashboardStats } = useQuery({
     queryKey: ['dashboardStats'],
     queryFn: async () => {
-      // Query the view directly since types aren't updated yet
       const { data, error } = await supabase
         .from('admin_dashboard_stats' as any)
         .select('*')
         .single();
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 
@@ -73,7 +70,6 @@ const Analytics = () => {
         .select('viewed_at')
         .gte('viewed_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
-      // Group by day
       const last7Days = Array.from({ length: 7 }, (_, i) => {
         const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
         return date.toISOString().split('T')[0];
@@ -91,12 +87,12 @@ const Analytics = () => {
   const userTypeData = [
     { 
       name: 'Free Users', 
-      value: (dashboardStats?.total_users || 0) - (dashboardStats?.paid_subscribers || 0), 
+      value: ((dashboardStats as any)?.total_users || 0) - ((dashboardStats as any)?.paid_subscribers || 0), 
       color: '#8884d8' 
     },
     { 
       name: 'Premium Users', 
-      value: dashboardStats?.paid_subscribers || 0, 
+      value: (dashboardStats as any)?.paid_subscribers || 0, 
       color: '#82ca9d' 
     },
   ];
@@ -112,7 +108,7 @@ const Analytics = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardStats?.new_users_week || 0}</div>
+            <div className="text-2xl font-bold">{(dashboardStats as any)?.new_users_week || 0}</div>
             <p className="text-xs text-muted-foreground">New users this week</p>
           </CardContent>
         </Card>
@@ -123,7 +119,7 @@ const Analytics = () => {
             <MessageCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardStats?.messages_today || 0}</div>
+            <div className="text-2xl font-bold">{(dashboardStats as any)?.messages_today || 0}</div>
             <p className="text-xs text-muted-foreground">Messages sent today</p>
           </CardContent>
         </Card>
@@ -134,7 +130,7 @@ const Analytics = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardStats?.total_profile_views || 0}</div>
+            <div className="text-2xl font-bold">{(dashboardStats as any)?.total_profile_views || 0}</div>
             <p className="text-xs text-muted-foreground">Total profile views</p>
           </CardContent>
         </Card>
@@ -146,8 +142,8 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {dashboardStats?.avg_onboarding_time_hours 
-                ? `${Math.round(dashboardStats.avg_onboarding_time_hours)}h`
+              {(dashboardStats as any)?.avg_onboarding_time_hours 
+                ? `${Math.round((dashboardStats as any).avg_onboarding_time_hours)}h`
                 : '0h'
               }
             </div>

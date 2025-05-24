@@ -9,16 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { 
   MessageSquare, 
@@ -26,8 +17,7 @@ import {
   User, 
   CheckCircle, 
   XCircle,
-  AlertTriangle,
-  Eye
+  AlertTriangle
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
@@ -40,7 +30,6 @@ const Content = () => {
   const { data: reports, isLoading } = useQuery({
     queryKey: ['contentReports'],
     queryFn: async () => {
-      // Use raw query since types aren't updated yet
       const { data, error } = await supabase
         .from('content_moderation' as any)
         .select(`
@@ -50,7 +39,7 @@ const Content = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
@@ -67,13 +56,12 @@ const Content = () => {
         .limit(20);
       
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
   const moderateContentMutation = useMutation({
     mutationFn: async ({ reportId, status, notes }: { reportId: string, status: string, notes: string }) => {
-      // Update the content moderation record
       const { error: updateError } = await supabase
         .from('content_moderation' as any)
         .update({
@@ -86,7 +74,6 @@ const Content = () => {
       
       if (updateError) throw updateError;
 
-      // Log admin activity using RPC call
       const { error: logError } = await supabase.rpc('log_admin_activity' as any, {
         action_param: `moderate_content_${status}`,
         target_type_param: 'content_report',
@@ -138,17 +125,18 @@ const Content = () => {
                       {report.content_type === 'profile' && <User className="w-4 h-4" />}
                       <span className="font-medium capitalize">{report.content_type}</span>
                     </div>
-                    <Badge variant={
-                      report.status === 'pending' ? 'destructive' :
-                      report.status === 'approved' ? 'default' :
-                      report.status === 'rejected' ? 'secondary' : 'outline'
-                    }>
+                    <span className={`px-2 py-1 text-xs rounded ${
+                      report.status === 'pending' ? 'bg-red-100 text-red-800' :
+                      report.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      report.status === 'rejected' ? 'bg-gray-100 text-gray-800' : 
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
                       {report.status}
-                    </Badge>
+                    </span>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">{report.reason}</p>
                   <p className="text-xs text-gray-500">
-                    Reported by {report.profiles?.full_name || report.profiles?.username} • {new Date(report.created_at).toLocaleDateString()}
+                    Reported by {(report.profiles as any)?.full_name || (report.profiles as any)?.username || 'Anonymous'} • {new Date(report.created_at).toLocaleDateString()}
                   </p>
                 </div>
               ))}
@@ -163,14 +151,14 @@ const Content = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {communityPosts?.map((post) => (
+              {communityPosts?.map((post: any) => (
                 <div key={post.id} className="p-4 border rounded-lg">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                      {post.profiles?.full_name?.charAt(0) || 'U'}
+                      {(post.profiles as any)?.full_name?.charAt(0) || 'U'}
                     </div>
                     <div>
-                      <p className="font-medium text-sm">{post.profiles?.full_name || 'Anonymous'}</p>
+                      <p className="font-medium text-sm">{(post.profiles as any)?.full_name || 'Anonymous'}</p>
                       <p className="text-xs text-gray-500">{new Date(post.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
