@@ -36,11 +36,14 @@ const LoadingScreen = () => (
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   
+  console.log('ProtectedRoute - isLoading:', isLoading, 'user:', !!user);
+  
   if (isLoading) {
     return <LoadingScreen />;
   }
   
   if (!user) {
+    console.log('No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
   
@@ -70,12 +73,15 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children, redirectTo = "/home" }: { children: React.ReactNode; redirectTo?: string }) => {
   const { user, isLoading } = useAuth();
   
+  console.log('PublicRoute - isLoading:', isLoading, 'user:', !!user);
+  
   if (isLoading) {
     return <LoadingScreen />;
   }
   
   // If user is authenticated, redirect to the specified route
   if (user) {
+    console.log('User authenticated, redirecting to:', redirectTo);
     return <Navigate to={redirectTo} replace />;
   }
   

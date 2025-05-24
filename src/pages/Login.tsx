@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,14 +48,17 @@ const Login = () => {
       
       if (error) throw error;
       
-      console.log("Login successful, redirecting to home");
+      console.log("Login successful", data);
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
       
-      // Navigate programmatically instead of forcing page reload
-      navigate('/home', { replace: true });
+      // Wait a moment for auth state to update, then navigate
+      setTimeout(() => {
+        navigate('/home', { replace: true });
+      }, 100);
+      
     } catch (error: any) {
       console.error("Login error:", error.message);
       

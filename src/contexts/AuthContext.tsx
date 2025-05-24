@@ -86,7 +86,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth...');
+        
+        // Set up auth state listener FIRST
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            console.log('Auth state change:', event, session?.user?.id);
+            
+            if (!mounted) return;
+            
+            setSession(session);
+            setUser(session?.user ?? null);
+            
+            // Handle admin status check
+            if (session?.user && event === 'SIGNED_IN') {
+              setTimeout(async () => {
+                if (!mounted) return;
+                try {
+                  const { data, error } = await supabase.rpc('is_admin');
+                  if (!error && data !== null && mounted) {
+                    setIsAdmin(!!data);
+                  }
+                } catch (error) {
+                  console.error('Error checking admin status:', error);
+                }
+              }, 100);
+            } else if (!session && mounted) {
+              setIsAdmin(false);
+            }
+            
+            // Always set loading to false after any auth event
+            if (mounted) {
+              setIsLoading(false);
+            }
+          }
+        );
+        
+        // THEN get initial session
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        console.log('Initial session:', initialSession?.user?.id, error);
         
         if (!mounted) return;
         
@@ -110,9 +149,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
         
+        // Set loading to false after initialization
         if (mounted) {
           setIsLoading(false);
         }
+        
+        // Cleanup function
+        return () => {
+          subscription.unsubscribe();
+        };
+        
       } catch (error) {
         console.error('Error initializing auth:', error);
         if (mounted) {
@@ -122,45 +168,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
     
     // Initialize auth state
-    initializeAuth();
+    const cleanup = initializeAuth();
     
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Handle admin status check
-        if (session?.user && event === 'SIGNED_IN') {
-          setTimeout(async () => {
-            if (!mounted) return;
-            try {
-              const { data, error } = await supabase.rpc('is_admin');
-              if (!error && data !== null && mounted) {
-                setIsAdmin(!!data);
-              }
-            } catch (error) {
-              console.error('Error checking admin status:', error);
-            }
-          }, 100);
-        } else if (!session && mounted) {
-          setIsAdmin(false);
-        }
-        
-        // Set loading to false after auth events
-        if (mounted && event !== 'INITIAL_SESSION') {
-          setIsLoading(false);
-        }
-      }
-    );
-
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      cleanup?.then(cleanupFn => cleanupFn?.());
     };
   }, []);
+
+  console.log('AuthContext state:', { isLoading, user: !!user, session: !!session });
 
   return (
     <AuthContext.Provider value={{ user, session, isLoading, isAdmin, signOut, refreshSession }}>
