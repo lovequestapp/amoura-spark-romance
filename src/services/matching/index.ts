@@ -1,12 +1,12 @@
 
-import { getPersonalizedMatches, getFeaturedMatch } from './matchingService';
+import { getPersonalizedMatches, getFeaturedMatch, trackUserInteraction } from './matchingService';
 import { calculateMatchScore } from './scoreCalculator';
 import { calculateAdvancedIntentionCompatibility } from './intentionMatching';
 import { Profile } from '@/components/home/SwipeableCard';
 import { UserProfile, PersonalityTrait, LifestylePreference } from '@/types/profiles';
 
 // Re-export the main matching interface
-export { getPersonalizedMatches, getFeaturedMatch, calculateMatchScore, calculateAdvancedIntentionCompatibility };
+export { getPersonalizedMatches, getFeaturedMatch, calculateMatchScore, calculateAdvancedIntentionCompatibility, trackUserInteraction };
 
 // Re-export types for external use
 export interface WeightedMatch extends Profile {
@@ -19,6 +19,10 @@ export interface WeightedMatch extends Profile {
   dealbreakers?: string[];
   attachmentScore?: number;
   intentionDetails?: any; // Enhanced intention analysis details
+  // ML Enhancement fields
+  mlEnhanced?: boolean;
+  mlConfidence?: number;
+  successProbability?: number;
 }
 
 export interface MatchingParams {

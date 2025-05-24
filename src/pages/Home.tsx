@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -54,10 +53,28 @@ const Home = () => {
     setDragging,
     setCurrentIndex,
     setProfiles
-  } = useCardSwiper(filteredProfiles, (profile, direction) => {
+  } = useCardSwiper(filteredProfiles, async (profile, direction) => {
     // Record profile view when swiping
     if (user && profile.id) {
       recordProfileView(profile.id);
+      
+      // Track ML interaction for learning
+      try {
+        const { trackUserInteraction } = await import('@/services/matching/matchingService');
+        await trackUserInteraction(
+          user.id, 
+          String(profile.id), 
+          direction as 'like' | 'pass' | 'super_like',
+          {
+            timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening',
+            dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
+            profilePosition: currentIndex,
+            matchScore: (profile as any).matchScore
+          }
+        );
+      } catch (error) {
+        console.error('Error tracking ML interaction:', error);
+      }
     }
   });
   
@@ -250,12 +267,29 @@ const Home = () => {
     }
   };
   
-  const handleSuperLike = () => {
-    if (currentProfile) {
+  const handleSuperLike = async () => {
+    if (currentProfile && user) {
       handleSwipe("superLike");
       
       // Save this swipe in history
       setSwipedProfiles([...swipedProfiles, { profile: currentProfile, direction: "superLike" }]);
+      
+      // Track super like for ML
+      try {
+        const { trackUserInteraction } = await import('@/services/matching/matchingService');
+        await trackUserInteraction(
+          user.id, 
+          String(currentProfile.id), 
+          'super_like',
+          {
+            timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening',
+            profilePosition: currentIndex,
+            action: 'super_like'
+          }
+        );
+      } catch (error) {
+        console.error('Error tracking super like:', error);
+      }
       
       toast({
         title: "Super Like Sent!",
@@ -272,10 +306,29 @@ const Home = () => {
     });
   };
   
-  // Enhanced swipe handlers that maintain swipe history
-  const handleSwipeWithHistory = (direction: string) => {
-    if (currentProfile) {
+  // Enhanced swipe handlers that maintain swipe history and ML tracking
+  const handleSwipeWithHistory = async (direction: string) => {
+    if (currentProfile && user) {
       setSwipedProfiles([...swipedProfiles, { profile: currentProfile, direction }]);
+      
+      // Track swipe for ML learning
+      try {
+        const { trackUserInteraction } = await import('@/services/matching/matchingService');
+        await trackUserInteraction(
+          user.id, 
+          String(currentProfile.id), 
+          direction as 'like' | 'pass',
+          {
+            timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening',
+            dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase(),
+            profilePosition: currentIndex,
+            matchScore: (currentProfile as any).matchScore
+          }
+        );
+      } catch (error) {
+        console.error('Error tracking swipe:', error);
+      }
+      
       handleSwipe(direction);
     }
   };

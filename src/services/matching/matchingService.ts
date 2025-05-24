@@ -1,7 +1,9 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { MatchingParams, WeightedMatch } from './index';
 import { calculateMatchScore } from './scoreCalculator';
 import { calculateGeoDistance, calculateAttachmentCompatibility } from './compatibilityUtils';
+import { mlMatchingService } from './mlMatchingService';
 
 export const getPersonalizedMatches = async (
   params: MatchingParams
@@ -132,9 +134,18 @@ export const getPersonalizedMatches = async (
     }
     
     // Calculate match scores and sort by score
-    const scoredMatches = filteredMatches.map(match => 
+    let scoredMatches = filteredMatches.map(match => 
       calculateMatchScore(userProfile, match)
     );
+    
+    // Apply ML enhancements to improve matching
+    try {
+      console.log('Applying ML enhancements to matches...');
+      scoredMatches = await mlMatchingService.enhanceMatchScoring(scoredMatches, params.userId);
+    } catch (mlError) {
+      console.warn('ML enhancement failed, using base scoring:', mlError);
+      // Continue with base scoring if ML fails
+    }
     
     // Sort by match score (highest first)
     return scoredMatches.sort((a, b) => b.matchScore - a.matchScore);
@@ -148,11 +159,12 @@ export const getPersonalizedMatches = async (
 export const getFeaturedMatch = (matches: WeightedMatch[]): WeightedMatch | null => {
   if (!matches.length) return null;
   
-  // More sophisticated featured match selection
+  // More sophisticated featured match selection with ML insights
   // Consider both match score and diversity of profiles shown
   
-  // Option 1: Feature the highest scoring match
-  const topMatch = matches[0];
+  // Option 1: Feature the highest scoring ML-enhanced match
+  const mlEnhancedMatches = matches.filter((match: any) => match.mlEnhanced);
+  const topMLMatch = mlEnhancedMatches.length > 0 ? mlEnhancedMatches[0] : matches[0];
   
   // Option 2: Feature a slightly lower match but with complementary personality
   const complementaryMatch = matches.find(match => 
@@ -162,18 +174,40 @@ export const getFeaturedMatch = (matches: WeightedMatch[]): WeightedMatch | null
     match.attachmentScore && match.attachmentScore > 75
   );
   
-  // Option 3: Feature a match with a unique quality 
-  const uniqueMatch = matches.find(match => 
-    match.premium || match.verified || 
-    (match.interests?.find(i => i.includes("rare"))) ||
-    (match.attachmentScore && match.attachmentScore > 90)
+  // Option 3: Feature a high-confidence ML match
+  const highConfidenceMatch = matches.find((match: any) => 
+    match.mlEnhanced && 
+    match.mlConfidence > 0.8 &&
+    match.matchScore > 75
   );
   
-  // Choose the featured match with some randomness for variety
-  const featured = Math.random() > 0.7 ? (complementaryMatch || uniqueMatch || topMatch) : topMatch;
+  // Choose the featured match with some intelligent randomness
+  const featured = Math.random() > 0.6 ? 
+    (highConfidenceMatch || complementaryMatch || topMLMatch) : 
+    topMLMatch;
   
   return {
     ...featured,
     featured: true
   };
+};
+
+// Track user interactions for ML learning
+export const trackUserInteraction = async (
+  userId: string, 
+  targetUserId: string, 
+  action: 'like' | 'pass' | 'super_like' | 'message' | 'match',
+  contextData?: any
+): Promise<void> => {
+  try {
+    await mlMatchingService.trackInteraction({
+      userId,
+      targetUserId,
+      action,
+      timestamp: new Date(),
+      contextData
+    });
+  } catch (error) {
+    console.error('Error tracking user interaction:', error);
+  }
 };
