@@ -30,7 +30,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
   // Early return if profile is null or undefined
   if (!profile) {
     return (
-      <div className="swipe-card touch-none mx-auto bg-white rounded-lg shadow-lg p-6">
+      <div className="w-full h-96 flex items-center justify-center bg-gray-50 rounded-2xl">
         <div className="text-center text-gray-500">
           <p>No profile data available</p>
         </div>
@@ -72,14 +72,9 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
   const attachmentScore = hasAttachmentScore ? (profile as any).attachmentScore : undefined;
   
   return (
-    <motion.div 
-      layout
-      className="swipe-card touch-none mx-auto"
-      style={{ maxWidth: isMobile ? 'calc(100% - 24px)' : '400px', width: '100%' }}
-      initial={{ scale: 0.95, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0.95, opacity: 0 }}
-      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+    <div 
+      className="w-full bg-transparent"
+      style={{ maxWidth: isMobile ? '100%' : '400px' }}
     >
       {profile.photos && profile.photos.length > 0 && (
         <ProfilePhotos photos={profile.photos} video={profile.video} />
@@ -358,7 +353,7 @@ const EnhancedProfileCard: React.FC<EnhancedProfileCardProps> = ({ profile, onSw
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useAnimation, PanInfo } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
 import { Profile } from "@/components/home/SwipeableCard";
@@ -35,10 +35,12 @@ export const useCardSwiper = (
     }
   }, [profiles, currentIndex]);
 
-  // Get current profile with null safety
-  const currentProfile = localProfiles && localProfiles.length > 0 && currentIndex >= 0 && currentIndex < localProfiles.length 
-    ? localProfiles[currentIndex] 
-    : null;
+  // Memoize current profile to prevent unnecessary re-renders
+  const currentProfile = useMemo(() => {
+    return localProfiles && localProfiles.length > 0 && currentIndex >= 0 && currentIndex < localProfiles.length 
+      ? localProfiles[currentIndex] 
+      : null;
+  }, [localProfiles, currentIndex]);
 
   const handleSwipe = useCallback(
     (direction: string) => {
@@ -75,25 +77,24 @@ export const useCardSwiper = (
       setDragging(false);
       const { offset, velocity } = info;
       
-      // Enhanced thresholds for more responsive swiping
-      const swipeThreshold = 80; // Reduced threshold for easier swiping
-      const swipeVelocityThreshold = 400; // Reduced velocity threshold
+      // Optimized thresholds for better responsiveness
+      const swipeThreshold = 100;
+      const swipeVelocityThreshold = 500;
       
       // Calculate if swipe should trigger based on distance OR velocity
       const shouldSwipeRight = offset.x > swipeThreshold || velocity.x > swipeVelocityThreshold;
       const shouldSwipeLeft = offset.x < -swipeThreshold || velocity.x < -swipeVelocityThreshold;
 
       if (shouldSwipeRight) {
-        // Swipe right - Like with enhanced animation
+        // Swipe right - Like with smooth animation
         controls.start({
-          x: window.innerWidth + 100,
-          y: offset.y * 0.3, // Add slight vertical movement
-          rotate: 30,
-          scale: 0.8,
-          opacity: 0,
+          x: window.innerWidth + 50,
+          y: offset.y * 0.2,
+          rotate: 20,
+          scale: 0.9,
           transition: { 
-            duration: 0.4,
-            ease: [0.4, 0.0, 0.2, 1] // Custom easing for smooth exit
+            duration: 0.3,
+            ease: [0.4, 0.0, 0.2, 1]
           },
         });
         setTimeout(() => {
@@ -102,21 +103,19 @@ export const useCardSwiper = (
             x: 0, 
             y: 0, 
             rotate: 0, 
-            scale: 1, 
-            opacity: 1 
+            scale: 1
           });
-        }, 400);
+        }, 300);
       } else if (shouldSwipeLeft) {
-        // Swipe left - Pass with enhanced animation
+        // Swipe left - Pass with smooth animation
         controls.start({
-          x: -window.innerWidth - 100,
-          y: offset.y * 0.3, // Add slight vertical movement
-          rotate: -30,
-          scale: 0.8,
-          opacity: 0,
+          x: -window.innerWidth - 50,
+          y: offset.y * 0.2,
+          rotate: -20,
+          scale: 0.9,
           transition: { 
-            duration: 0.4,
-            ease: [0.4, 0.0, 0.2, 1] // Custom easing for smooth exit
+            duration: 0.3,
+            ease: [0.4, 0.0, 0.2, 1]
           },
         });
         setTimeout(() => {
@@ -125,10 +124,9 @@ export const useCardSwiper = (
             x: 0, 
             y: 0, 
             rotate: 0, 
-            scale: 1, 
-            opacity: 1 
+            scale: 1
           });
-        }, 400);
+        }, 300);
       } else {
         // Snap back to center with smooth spring animation
         controls.start({ 
@@ -138,8 +136,8 @@ export const useCardSwiper = (
           scale: 1,
           transition: {
             type: "spring",
-            stiffness: 300,
-            damping: 30,
+            stiffness: 400,
+            damping: 40,
             mass: 1
           }
         });

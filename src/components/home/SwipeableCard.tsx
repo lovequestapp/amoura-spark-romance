@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { motion, useAnimation, PanInfo, useMotionValue, useTransform } from 'framer-motion';
 import EnhancedProfileCard from './EnhancedProfileCard';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ export interface Profile {
   occupation: string;
   photos: string[];
   bio: string;
-  birth_date?: string; // Add birth_date property
+  birth_date?: string;
   premium?: boolean;
   verified?: boolean;
   featured?: boolean;
@@ -64,46 +64,43 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // Motion values for smooth dragging animations
+  // Motion values for smooth dragging animations - optimized for performance
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   
-  // Transform values for dynamic animations during drag
-  const rotate = useTransform(x, [-300, 0, 300], [-30, 0, 30]);
-  const scale = useTransform(x, [-300, 0, 300], [0.8, 1, 0.8]);
-  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0, 0.5, 1, 0.5, 0]);
+  // Optimized transform values with reduced calculations
+  const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15]);
+  const scale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
 
-  const handleProfileClick = (e: React.MouseEvent) => {
+  const handleProfileClick = useCallback((e: React.MouseEvent) => {
     // Prevent navigation if currently dragging
     if (Math.abs(x.get()) > 5) return;
     navigate(`/profile/${profile.id}`);
-  };
+  }, [x, navigate, profile.id]);
   
   const cardVariants = {
     hidden: { 
       opacity: 0, 
-      y: 50,
-      scale: 0.9,
-      rotate: -5
+      y: 20,
+      scale: 0.95
     },
     visible: { 
       opacity: 1, 
       y: 0,
       scale: 1,
-      rotate: 0,
       transition: {
         type: "spring",
-        stiffness: 200,
-        damping: 25,
-        mass: 1
+        stiffness: 300,
+        damping: 30,
+        mass: 0.8
       }
     },
     exit: {
-      scale: 0.8,
+      scale: 0.9,
       opacity: 0,
       transition: { 
-        duration: 0.2,
-        ease: "easeInOut"
+        duration: 0.15,
+        ease: "easeOut"
       }
     }
   };
@@ -116,7 +113,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
       exit="exit"
       drag
       dragConstraints={dragConstraints}
-      dragElastic={0.8}
+      dragElastic={0.2}
       dragMomentum={false}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
@@ -124,32 +121,23 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
         x, 
         y, 
         rotate, 
-        scale,
-        originX: 0.5,
-        originY: 0.5
+        scale
       }}
-      className="relative cursor-pointer touch-none"
+      className="relative cursor-pointer touch-none will-change-transform"
       onClick={handleProfileClick}
       whileHover={{ 
-        scale: 1.02,
-        transition: { duration: 0.2 }
+        scale: 1.01,
+        transition: { duration: 0.2, ease: "easeOut" }
       }}
       whileTap={{ 
-        scale: 0.98,
+        scale: 0.99,
         transition: { duration: 0.1 }
       }}
     >
-      {/* Card with enhanced shadow and styling */}
-      <motion.div
-        style={{ opacity }}
-        className="relative bg-white rounded-3xl shadow-2xl overflow-hidden"
-        whileHover={{
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          transition: { duration: 0.3 }
-        }}
-      >
+      {/* Single clean card container */}
+      <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
         <EnhancedProfileCard profile={profile} onSwipe={() => {}} />
-      </motion.div>
+      </div>
     </motion.div>
   );
 };
