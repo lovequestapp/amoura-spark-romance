@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, ShoppingCart, Star, Zap, Users, BarChart3, Heart, Check } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Star, Zap, Users, Heart, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/hooks/useCart';
@@ -36,17 +36,13 @@ const AddOns = () => {
   const categoryIcons = {
     profile: Heart,
     communication: Zap,
-    matching: Users,
-    analytics: BarChart3,
-    special: Star
+    matching: Users
   };
 
   const categoryColors = {
     profile: 'bg-pink-500',
     communication: 'bg-blue-500',
-    matching: 'bg-purple-500',
-    analytics: 'bg-green-500',
-    special: 'bg-yellow-500'
+    matching: 'bg-purple-500'
   };
 
   useEffect(() => {
@@ -59,6 +55,7 @@ const AddOns = () => {
         .from('products')
         .select('*')
         .eq('is_active', true)
+        .in('category', ['profile', 'communication', 'matching'])
         .order('price_cents', { ascending: true });
 
       if (error) throw error;
@@ -109,7 +106,7 @@ const AddOns = () => {
     ? products 
     : products.filter(p => p.category === selectedCategory);
 
-  const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))];
+  const categories = ['all', 'profile', 'communication', 'matching'];
 
   if (loading) {
     return (
@@ -153,15 +150,13 @@ const AddOns = () => {
             </Button>
           </div>
 
-          {/* Category Tabs */}
+          {/* Simplified Category Tabs */}
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-4 mb-6">
               <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="profile">Profile Boosts</TabsTrigger>
               <TabsTrigger value="communication">Messages</TabsTrigger>
               <TabsTrigger value="matching">Matching</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="special">Special</TabsTrigger>
             </TabsList>
 
             <TabsContent value={selectedCategory} className="mt-6">
@@ -177,7 +172,7 @@ const AddOns = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <Card className="h-full hover:shadow-lg transition-shadow">
+                      <Card className="h-full hover:shadow-lg transition-shadow bg-white/80 backdrop-blur-sm">
                         <CardHeader className="pb-4">
                           <div className="flex items-center gap-3 mb-2">
                             <div className={`w-10 h-10 ${colorClass} rounded-full flex items-center justify-center`}>
@@ -185,7 +180,7 @@ const AddOns = () => {
                             </div>
                             <div>
                               <CardTitle className="text-lg">{product.name}</CardTitle>
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs capitalize">
                                 {product.category}
                               </Badge>
                             </div>
@@ -205,7 +200,7 @@ const AddOns = () => {
 
                         <CardContent className="pt-0">
                           <ul className="space-y-2 mb-6">
-                            {product.features.map((feature, idx) => (
+                            {product.features.slice(0, 4).map((feature, idx) => (
                               <li key={idx} className="flex items-center text-sm">
                                 <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                                 <span>{feature}</span>
