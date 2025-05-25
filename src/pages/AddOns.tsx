@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -116,27 +115,28 @@ const AddOns = () => {
       <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 p-4">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="flex items-center mb-8">
+          <div className="flex items-center gap-4 mb-8">
             <Button
               variant="ghost"
               onClick={() => navigate(-1)}
-              className="mr-4"
+              className="flex-shrink-0"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <div className="flex-1 text-center">
+            <div className="flex-1 text-center max-w-3xl mx-auto">
               <h1 className="text-3xl font-bold text-gray-900">Premium Add-Ons</h1>
               <p className="text-gray-600 mt-1">Boost your dating experience with premium features</p>
             </div>
             <Button
               variant="outline"
               onClick={() => navigate('/cart')}
-              className="ml-4 relative"
+              className="flex-shrink-0 relative px-3"
+              size="sm"
             >
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              Cart
+              <ShoppingCart className="w-4 h-4" />
+              <span className="hidden sm:inline ml-2">Cart</span>
               {getCartCount() > 0 && (
-                <Badge className="absolute -top-2 -right-2 bg-amoura-deep-pink text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                <Badge className="absolute -top-2 -right-2 bg-amoura-deep-pink text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                   {getCartCount()}
                 </Badge>
               )}
