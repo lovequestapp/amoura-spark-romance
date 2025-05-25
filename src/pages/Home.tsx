@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -308,6 +309,9 @@ const Home = () => {
     }
   };
   
+  // Debug logging for current state
+  console.log('Home render - currentIndex:', currentIndex, 'filteredProfiles.length:', filteredProfiles.length, 'currentProfile:', currentProfile);
+  
   return (
     <AppLayout>
       <div className="flex-1 flex flex-col p-4 w-full max-w-full">
@@ -333,9 +337,9 @@ const Home = () => {
               className="w-full max-w-sm relative"
             >
               <AnimatePresence mode="wait">
-                {currentIndex >= 0 && filteredProfiles.length > 0 ? (
+                {currentIndex >= 0 && filteredProfiles.length > 0 && currentProfile ? (
                   <SwipeableCard
-                    key={currentProfile?.id || 'current'}
+                    key={currentProfile.id || 'current'}
                     profile={currentProfile}
                     controls={controls}
                     dragConstraints={dragConstraints}
@@ -361,7 +365,7 @@ const Home = () => {
           )}
         </div>
         
-        {currentIndex >= 0 && !isLoading && filteredProfiles.length > 0 && (
+        {currentIndex >= 0 && !isLoading && filteredProfiles.length > 0 && currentProfile && (
           <motion.div 
             className="flex justify-center gap-4 py-6"
             initial={{ opacity: 0, y: 20 }}

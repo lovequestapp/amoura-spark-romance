@@ -48,7 +48,7 @@ export interface Profile {
 }
 
 interface SwipeableCardProps {
-  profile: Profile;
+  profile: Profile | null;
   controls: ReturnType<typeof useAnimation>;
   dragConstraints: React.RefObject<HTMLDivElement>;
   onDragStart: () => void;
@@ -64,6 +64,12 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  // Early return if profile is null
+  if (!profile) {
+    console.log('SwipeableCard: profile is null, not rendering');
+    return null;
+  }
+
   // Motion values for smooth dragging animations - optimized for performance
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -73,10 +79,10 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
   const scale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
 
   const handleProfileClick = useCallback((e: React.MouseEvent) => {
-    // Prevent navigation if currently dragging
-    if (Math.abs(x.get()) > 5) return;
+    // Prevent navigation if currently dragging or profile is null
+    if (!profile || Math.abs(x.get()) > 5) return;
     navigate(`/profile/${profile.id}`);
-  }, [x, navigate, profile.id]);
+  }, [x, navigate, profile]);
   
   const cardVariants = {
     hidden: { 
@@ -135,7 +141,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
       }}
     >
       {/* Single clean card container */}
-      <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+      <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden">
         <EnhancedProfileCard profile={profile} onSwipe={() => {}} />
       </div>
     </motion.div>
