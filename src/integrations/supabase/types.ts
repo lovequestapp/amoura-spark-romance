@@ -536,6 +536,36 @@ export type Database = {
         }
         Relationships: []
       }
+      usage_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          item_type: string
+          quantity_changed: number
+          remaining_quantity: number
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          item_type: string
+          quantity_changed: number
+          remaining_quantity: number
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          item_type?: string
+          quantity_changed?: number
+          remaining_quantity?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_interests: {
         Row: {
           created_at: string
@@ -561,6 +591,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_inventory: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          item_type: string
+          quantity: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          item_type: string
+          quantity?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          item_type?: string
+          quantity?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_purchases: {
         Row: {
@@ -637,6 +697,15 @@ export type Database = {
       }
     }
     Functions: {
+      add_to_inventory: {
+        Args: {
+          user_id_param: string
+          item_type_param: string
+          quantity_param: number
+          expires_at_param?: string
+        }
+        Returns: undefined
+      }
       assign_admin_role: {
         Args: { user_id_param: string }
         Returns: undefined
@@ -664,6 +733,22 @@ export type Database = {
           remaining_super_likes: number
           boost_until: string
         }[]
+      }
+      get_user_inventory: {
+        Args: { user_id_param: string }
+        Returns: {
+          item_type: string
+          quantity: number
+          expires_at: string
+        }[]
+      }
+      has_inventory_item: {
+        Args: {
+          user_id_param: string
+          item_type_param: string
+          min_quantity_param?: number
+        }
+        Returns: boolean
       }
       has_liked_post: {
         Args: { post_id_param: string }
@@ -696,6 +781,14 @@ export type Database = {
       update_remaining_super_likes: {
         Args: { user_id_param: string; new_value: number }
         Returns: undefined
+      }
+      use_inventory_item: {
+        Args: {
+          user_id_param: string
+          item_type_param: string
+          quantity_param?: number
+        }
+        Returns: boolean
       }
     }
     Enums: {

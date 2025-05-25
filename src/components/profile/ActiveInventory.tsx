@@ -1,105 +1,50 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Package, Clock, Zap, Heart, MessageSquare, Eye, Infinity } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
-
-interface InventoryItem {
-  id: string;
-  name: string;
-  category: string;
-  quantity?: number;
-  expires_at?: string;
-  is_active: boolean;
-  features: string[];
-  icon: React.ComponentType<any>;
-  color: string;
-  usage?: number;
-  max_usage?: number;
-}
+import { useInventory } from '@/hooks/useInventory';
+import { useNavigate } from 'react-router-dom';
 
 const ActiveInventory = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { inventory, loading } = useInventory();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user) {
-      fetchInventory();
-    }
-  }, [user]);
-
-  const fetchInventory = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('user_purchases')
-        .select(`
-          *,
-          products (
-            name,
-            category,
-            features
-          )
-        `)
-        .eq('user_id', user?.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const inventoryItems: InventoryItem[] = (data || []).map(purchase => {
-        const iconMap: { [key: string]: React.ComponentType<any> } = {
-          'profile': Zap,
-          'communication': MessageSquare,
-          'matching': Heart,
-          'analytics': Eye,
-          'special': Package
-        };
-
-        const colorMap: { [key: string]: string } = {
-          'profile': 'from-yellow-400 to-orange-500',
-          'communication': 'from-blue-400 to-blue-600',
-          'matching': 'from-pink-400 to-rose-600',
-          'analytics': 'from-purple-400 to-purple-600',
-          'special': 'from-green-400 to-emerald-600'
-        };
-
-        return {
-          id: purchase.id,
-          name: purchase.products.name,
-          category: purchase.products.category,
-          quantity: purchase.quantity,
-          expires_at: purchase.expires_at,
-          is_active: purchase.is_active,
-          features: purchase.products.features,
-          icon: iconMap[purchase.products.category] || Package,
-          color: colorMap[purchase.products.category] || 'from-gray-400 to-gray-600',
-          usage: Math.floor(Math.random() * 5), // Mock usage data
-          max_usage: purchase.products.name.includes('Messages') ? 5 : 
-                    purchase.products.name.includes('Likes') ? 50 : undefined
-        };
-      });
-
-      setInventory(inventoryItems);
-    } catch (error) {
-      console.error('Error fetching inventory:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load your inventory.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+  const getIconForItemType = (itemType: string) => {
+    switch (itemType) {
+      case 'messages': return MessageSquare;
+      case 'super_likes': return Heart;
+      case 'rewinds': return Zap;
+      case 'boosts': return Eye;
+      default: return Package;
     }
   };
 
-  const getTimeRemaining = (expiresAt: string) => {
+  const getColorForItemType = (itemType: string) => {
+    switch (itemType) {
+      case 'messages': return 'from-blue-400 to-blue-600';
+      case 'super_likes': return 'from-pink-400 to-rose-600';
+      case 'rewinds': return 'from-green-400 to-emerald-600';
+      case 'boosts': return 'from-purple-400 to-purple-600';
+      default: return 'from-gray-400 to-gray-600';
+    }
+  };
+
+  const getDisplayName = (itemType: string) => {
+    switch (itemType) {
+      case 'messages': return 'Premium Messages';
+      case 'super_likes': return 'Super Likes';
+      case 'rewinds': return 'Rewinds';
+      case 'boosts': return 'Profile Boosts';
+      default: return itemType;
+    }
+  };
+
+  const getTimeRemaining = (expiresAt?: string) => {
+    if (!expiresAt) return null;
+    
     const now = new Date();
     const expiry = new Date(expiresAt);
     const diff = expiry.getTime() - now.getTime();
@@ -111,11 +56,6 @@ const ActiveInventory = () => {
     
     if (days > 0) return `${days}d ${hours}h`;
     return `${hours}h`;
-  };
-
-  const getUsageProgress = (usage?: number, maxUsage?: number) => {
-    if (!usage || !maxUsage) return undefined;
-    return (usage / maxUsage) * 100;
   };
 
   if (loading) {
@@ -145,7 +85,7 @@ const ActiveInventory = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No active items</h3>
           <p className="text-gray-600 mb-4">Purchase premium add-ons to enhance your dating experience!</p>
           <Button 
-            onClick={() => window.location.href = '/add-ons'}
+            onClick={() => navigate('/add-ons')}
             className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
           >
             Browse Add-ons
@@ -166,67 +106,50 @@ const ActiveInventory = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {inventory.map((item) => {
-          const IconComponent = item.icon;
-          const usageProgress = getUsageProgress(item.usage, item.max_usage);
+          const IconComponent = getIconForItemType(item.item_type);
+          const colorClass = getColorForItemType(item.item_type);
+          const displayName = getDisplayName(item.item_type);
+          const timeRemaining = getTimeRemaining(item.expires_at);
           
           return (
-            <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-all duration-200">
-              <div className={`h-2 bg-gradient-to-r ${item.color}`} />
+            <Card key={item.item_type} className="overflow-hidden hover:shadow-lg transition-all duration-200">
+              <div className={`h-2 bg-gradient-to-r ${colorClass}`} />
               
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-gradient-to-r ${item.color}`}>
+                    <div className={`p-2 rounded-lg bg-gradient-to-r ${colorClass}`}>
                       <IconComponent className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg leading-tight">{item.name}</CardTitle>
+                      <CardTitle className="text-lg leading-tight">{displayName}</CardTitle>
                       <Badge variant="outline" className="mt-1 text-xs">
-                        {item.category}
+                        {item.item_type}
                       </Badge>
                     </div>
                   </div>
                   
-                  {item.quantity && item.quantity > 1 && (
-                    <Badge className="bg-gray-100 text-gray-700">
-                      {item.quantity}x
-                    </Badge>
-                  )}
+                  <Badge className="bg-gray-100 text-gray-700 text-lg font-bold">
+                    {item.quantity}
+                  </Badge>
                 </div>
               </CardHeader>
               
               <CardContent className="space-y-4">
-                {/* Features */}
-                <div className="flex flex-wrap gap-1">
-                  {item.features.slice(0, 2).map((feature, idx) => (
-                    <Badge key={idx} variant="secondary" className="text-xs">
-                      {feature}
-                    </Badge>
-                  ))}
-                  {item.features.length > 2 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{item.features.length - 2} more
-                    </Badge>
-                  )}
+                {/* Usage Progress */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Available</span>
+                    <span className="font-medium">{item.quantity} remaining</span>
+                  </div>
                 </div>
                 
-                {/* Usage Progress */}
-                {usageProgress !== undefined && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Usage</span>
-                      <span className="font-medium">{item.usage}/{item.max_usage}</span>
-                    </div>
-                    <Progress value={usageProgress} className="h-2" />
-                  </div>
-                )}
-                
                 {/* Expiry */}
-                {item.expires_at && (
+                {timeRemaining && (
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="w-4 h-4 text-gray-500" />
                     <span className="text-gray-600">
-                      {getTimeRemaining(item.expires_at)} remaining
+                      {timeRemaining} remaining
                     </span>
                   </div>
                 )}
