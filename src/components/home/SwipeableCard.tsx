@@ -72,10 +72,6 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
   const rotate = useTransform(x, [-300, 0, 300], [-30, 0, 30]);
   const scale = useTransform(x, [-300, 0, 300], [0.8, 1, 0.8]);
   const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0, 0.5, 1, 0.5, 0]);
-  
-  // Like/Pass indicator opacity
-  const likeOpacity = useTransform(x, [0, 150], [0, 1]);
-  const passOpacity = useTransform(x, [-150, 0], [1, 0]);
 
   const handleProfileClick = (e: React.MouseEvent) => {
     // Prevent navigation if currently dragging
@@ -111,19 +107,6 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
       }
     }
   };
-
-  const indicatorVariants = {
-    hidden: { scale: 0, opacity: 0 },
-    visible: { 
-      scale: 1, 
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 20
-      }
-    }
-  };
   
   return (
     <motion.div
@@ -156,28 +139,6 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
         transition: { duration: 0.1 }
       }}
     >
-      {/* Like Indicator */}
-      <motion.div
-        style={{ opacity: likeOpacity }}
-        variants={indicatorVariants}
-        className="absolute top-8 left-8 z-20 pointer-events-none"
-      >
-        <div className="bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg shadow-lg border-4 border-white transform rotate-12">
-          LIKE
-        </div>
-      </motion.div>
-
-      {/* Pass Indicator */}
-      <motion.div
-        style={{ opacity: passOpacity }}
-        variants={indicatorVariants}
-        className="absolute top-8 right-8 z-20 pointer-events-none"
-      >
-        <div className="bg-red-500 text-white px-6 py-3 rounded-full font-bold text-lg shadow-lg border-4 border-white transform -rotate-12">
-          PASS
-        </div>
-      </motion.div>
-
       {/* Card with enhanced shadow and styling */}
       <motion.div
         style={{ opacity }}
