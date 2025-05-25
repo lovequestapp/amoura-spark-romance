@@ -22,6 +22,14 @@ const zodiacSigns = [
   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
 ];
 
+const relationshipTypes = [
+  { value: 'long_term', label: 'Long-term relationship' },
+  { value: 'short_term', label: 'Short-term relationship' },
+  { value: 'casual', label: 'Something casual' },
+  { value: 'friendship', label: 'New friends' },
+  { value: 'figuring_out', label: 'Still figuring it out' }
+];
+
 const BasicInfoEdit = ({ open, onClose, profile, onProfileUpdated }: BasicInfoEditProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -79,32 +87,34 @@ const BasicInfoEdit = ({ open, onClose, profile, onProfileUpdated }: BasicInfoEd
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="full_name">Full Name</Label>
+            <Label htmlFor="full_name" className="text-sm font-medium text-gray-700">Full Name</Label>
             <Input
               id="full_name"
               value={formData.full_name}
               onChange={(e) => handleInputChange('full_name', e.target.value)}
               placeholder="Enter your full name"
+              className="mt-1"
             />
           </div>
 
           <div>
-            <Label htmlFor="birth_date">Birth Date</Label>
+            <Label htmlFor="birth_date" className="text-sm font-medium text-gray-700">Birth Date</Label>
             <Input
               id="birth_date"
               type="date"
               value={formData.birth_date}
               onChange={(e) => handleInputChange('birth_date', e.target.value)}
+              className="mt-1"
             />
           </div>
 
           <div>
-            <Label htmlFor="zodiac_sign">Zodiac Sign</Label>
+            <Label htmlFor="zodiac_sign" className="text-sm font-medium text-gray-700">Zodiac Sign</Label>
             <Select
               value={formData.zodiac_sign}
               onValueChange={(value) => handleInputChange('zodiac_sign', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="mt-1">
                 <SelectValue placeholder="Select your zodiac sign" />
               </SelectTrigger>
               <SelectContent>
@@ -118,30 +128,31 @@ const BasicInfoEdit = ({ open, onClose, profile, onProfileUpdated }: BasicInfoEd
           </div>
 
           <div>
-            <Label htmlFor="education">Education</Label>
+            <Label htmlFor="education" className="text-sm font-medium text-gray-700">Education</Label>
             <Input
               id="education"
               value={formData.education}
               onChange={(e) => handleInputChange('education', e.target.value)}
               placeholder="e.g., University of California, Berkeley"
+              className="mt-1"
             />
           </div>
 
           <div>
-            <Label htmlFor="relationship_type">Looking For</Label>
+            <Label htmlFor="relationship_type" className="text-sm font-medium text-gray-700">Looking For</Label>
             <Select
               value={formData.relationship_type}
               onValueChange={(value) => handleInputChange('relationship_type', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="mt-1">
                 <SelectValue placeholder="What are you looking for?" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="long_term">Long-term relationship</SelectItem>
-                <SelectItem value="short_term">Short-term relationship</SelectItem>
-                <SelectItem value="casual">Something casual</SelectItem>
-                <SelectItem value="friendship">New friends</SelectItem>
-                <SelectItem value="figuring_out">Still figuring it out</SelectItem>
+                {relationshipTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -150,7 +161,11 @@ const BasicInfoEdit = ({ open, onClose, profile, onProfileUpdated }: BasicInfoEd
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isUpdating}>
+            <Button 
+              type="submit" 
+              disabled={isUpdating}
+              className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
+            >
               {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Changes'}
             </Button>
           </div>

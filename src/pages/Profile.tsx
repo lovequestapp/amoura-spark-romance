@@ -14,9 +14,9 @@ import PromptsEditDialog from '@/components/profile/PromptsEditDialog';
 import ActiveInventory from '@/components/profile/ActiveInventory';
 import QuickStats from '@/components/profile/QuickStats';
 import BasicInfoEdit from '@/components/profile/BasicInfoEdit';
+import ProfileHeader from '@/components/profile/ProfileHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { fetchProfileData } from '@/services/profile';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -49,6 +49,20 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getAge = (birthDate: string) => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return age;
   };
 
   const handlePhotoUploaded = (url: string) => {
@@ -89,7 +103,7 @@ const Profile = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink"></div>
         </div>
       </AppLayout>
@@ -98,188 +112,204 @@ const Profile = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <div className="p-4 flex items-center border-b">
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center"
-          >
-            <ArrowLeft size={18} className="mr-1" />
-            Back
-          </button>
-          <h1 className="text-lg font-medium mx-auto">My Profile</h1>
+        <div className="bg-white border-b p-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <button 
+              onClick={() => navigate(-1)}
+              className="flex items-center text-gray-600 hover:text-gray-900 mr-4"
+            >
+              <ArrowLeft size={20} className="mr-1" />
+              Back
+            </button>
+            <h1 className="text-xl font-semibold text-gray-900">My Profile</h1>
+          </div>
           <Button
             onClick={() => navigate('/settings')}
             variant="ghost"
             size="sm"
+            className="text-gray-600 hover:text-gray-900"
           >
             Settings
           </Button>
         </div>
 
-        <div className="p-6 space-y-8 max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto p-6 space-y-8">
+          {/* Profile Header */}
+          <ProfileHeader profile={profile} getAge={getAge} />
+
           {/* Quick Stats */}
           <QuickStats />
 
           <Separator />
 
-          {/* Basic Information */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium">Basic Information</h2>
-              <Button
-                onClick={() => setShowBasicInfoEdit(true)}
-                variant="outline"
-                size="sm"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            </div>
-            
-            <Card>
-              <CardContent className="p-4 space-y-3">
+          {/* Basic Information Card */}
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-semibold text-gray-900">Basic Information</CardTitle>
+                <Button
+                  onClick={() => setShowBasicInfoEdit(true)}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-gray-500">Name</p>
-                  <p className="font-medium">{profile?.full_name || 'Add your name'}</p>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Full Name</label>
+                  <p className="text-gray-900 font-medium">{profile?.full_name || 'Add your name'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Age</p>
-                  <p className="font-medium">
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Age</label>
+                  <p className="text-gray-900 font-medium">
                     {profile?.birth_date 
-                      ? new Date().getFullYear() - new Date(profile.birth_date).getFullYear()
+                      ? getAge(profile.birth_date)
                       : 'Add your age'
                     }
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Location</p>
-                  <p className="font-medium">San Francisco, CA</p>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Location</label>
+                  <p className="text-gray-900 font-medium">San Francisco, CA</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Zodiac Sign</p>
-                  <p className="font-medium">{profile?.zodiac_sign || 'Add your zodiac sign'}</p>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Zodiac Sign</label>
+                  <p className="text-gray-900 font-medium">{profile?.zodiac_sign || 'Add your zodiac sign'}</p>
                 </div>
-              </CardContent>
-            </Card>
-          </section>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Education</label>
+                  <p className="text-gray-900 font-medium">{profile?.education || 'Add your education'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Looking For</label>
+                  <p className="text-gray-900 font-medium">{profile?.relationship_type || 'Add what you\'re looking for'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <Separator />
-
-          {/* Photos */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium">Photos</h2>
-              <Button
-                onClick={() => setShowPhotoUpload(true)}
-                variant="outline"
-                size="sm"
-              >
-                <Camera className="w-4 h-4 mr-2" />
-                Add Photo
-              </Button>
-            </div>
-            
-            {profile?.photos && profile.photos.length > 0 ? (
-              <ProfileGallery 
-                photos={profile.photos} 
-                editable={true}
-                onAddPhoto={() => setShowPhotoUpload(true)}
-                onPhotosChanged={handlePhotosChanged}
-              />
-            ) : (
-              <Card className="border-dashed border-2">
-                <CardContent className="p-8 text-center">
+          {/* Photos Section */}
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-semibold text-gray-900">Photos</CardTitle>
+                <Button
+                  onClick={() => setShowPhotoUpload(true)}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  Add Photo
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {profile?.photos && profile.photos.length > 0 ? (
+                <ProfileGallery 
+                  photos={profile.photos} 
+                  editable={true}
+                  onAddPhoto={() => setShowPhotoUpload(true)}
+                  onPhotosChanged={handlePhotosChanged}
+                />
+              ) : (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                   <Camera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Add your first photo</h3>
                   <p className="text-gray-600 mb-4">Share photos to show your personality</p>
-                  <Button onClick={() => setShowPhotoUpload(true)}>
+                  <Button onClick={() => setShowPhotoUpload(true)} className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90">
                     <Plus className="w-4 h-4 mr-2" />
                     Upload Photo
                   </Button>
-                </CardContent>
-              </Card>
-            )}
-          </section>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-          <Separator />
+          {/* About Me Section */}
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-semibold text-gray-900">About Me</CardTitle>
+                <Button
+                  onClick={() => setShowBioEdit(true)}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {profile?.bio ? (
+                <p className="text-gray-700 leading-relaxed">{profile.bio}</p>
+              ) : (
+                <p className="text-gray-500 italic">Tell people about yourself! Add a bio to help others get to know you better.</p>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* About Me */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium">About Me</h2>
-              <Button
-                onClick={() => setShowBioEdit(true)}
-                variant="outline"
-                size="sm"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            </div>
-            
-            <Card>
-              <CardContent className="p-4">
-                {profile?.bio ? (
-                  <p className="text-gray-700 leading-relaxed">{profile.bio}</p>
-                ) : (
-                  <p className="text-gray-500 italic">Tell people about yourself! Add a bio to help others get to know you better.</p>
-                )}
-              </CardContent>
-            </Card>
-          </section>
-
-          <Separator />
-
-          {/* Prompts */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium">Conversation Starters</h2>
-              <Button
-                onClick={() => setShowPromptsEdit(true)}
-                variant="outline"
-                size="sm"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            </div>
-            
-            {profile?.prompts && profile.prompts.length > 0 ? (
-              <div className="space-y-4">
-                {profile.prompts.map((prompt: any, index: number) => (
-                  <Card key={index}>
-                    <CardContent className="p-4">
+          {/* Conversation Starters */}
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-semibold text-gray-900">Conversation Starters</CardTitle>
+                <Button
+                  onClick={() => setShowPromptsEdit(true)}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {profile?.prompts && profile.prompts.length > 0 ? (
+                <div className="space-y-4">
+                  {profile.prompts.map((prompt: any, index: number) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
                       <p className="text-sm font-medium text-amoura-deep-pink mb-2">
                         {prompt.question}
                       </p>
                       <p className="text-gray-700">{prompt.answer}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card className="border-dashed border-2">
-                <CardContent className="p-6 text-center">
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Add conversation starters</h3>
                   <p className="text-gray-600 mb-4">Answer prompts to show your personality and give others something to talk about</p>
-                  <Button onClick={() => setShowPromptsEdit(true)}>
+                  <Button onClick={() => setShowPromptsEdit(true)} className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Prompts
                   </Button>
-                </CardContent>
-              </Card>
-            )}
-          </section>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           <Separator />
 
           {/* Active Inventory */}
-          <section>
-            <h2 className="text-lg font-medium mb-4">Active Inventory</h2>
-            <ActiveInventory />
-          </section>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-gray-900">Active Inventory</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ActiveInventory />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Edit Dialogs */}
