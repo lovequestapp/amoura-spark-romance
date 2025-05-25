@@ -136,16 +136,16 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         </div>
       </div>
 
-      {/* Clean Action Buttons - Like reference image */}
-      <div className="absolute bottom-16 left-0 right-0 z-20 px-6">
+      {/* Clean Action Buttons - Moved up by 100px */}
+      <div className="absolute bottom-32 left-0 right-0 z-20 px-6">
         <div className="flex items-center justify-center gap-4">
-          {/* Message Button */}
+          {/* Message Button with $ indicator for premium feature */}
           <Button
             onClick={handleMessage}
             className="h-14 px-8 bg-black/60 backdrop-blur-md hover:bg-black/70 text-white rounded-full flex items-center gap-3 font-medium text-base transition-all duration-200 hover:scale-105 border border-white/20"
           >
             <MessageCircle className="w-5 h-5" />
-            Message
+            $ Message
           </Button>
 
           {/* Like Button - Primary action */}
@@ -158,7 +158,7 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
           </Button>
         </div>
         
-        {/* Secondary Actions - Smaller and less prominent */}
+        {/* Secondary Actions - Smaller and less prominent - Also moved up */}
         <div className="flex justify-center gap-6 mt-4">
           {/* Pass Button */}
           <Button
