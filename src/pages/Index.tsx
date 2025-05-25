@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -189,32 +190,97 @@ const Index = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.7, delay: 0.3 }}
-                className="relative w-[280px] h-[560px] bg-amoura-black rounded-[40px] p-3 shadow-2xl"
+                className="relative w-[300px] h-[600px] bg-amoura-black rounded-[45px] p-2 shadow-2xl"
               >
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-[30px] bg-amoura-black rounded-b-[14px]"></div>
-                <div className="w-full h-full rounded-[32px] overflow-hidden border-[8px] border-amoura-black">
+                {/* Phone frame with cleaner design */}
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-[35px] bg-amoura-black rounded-b-[18px] z-10"></div>
+                
+                {/* Screen content */}
+                <div className="w-full h-full rounded-[38px] overflow-hidden bg-white relative">
+                  {/* Status bar overlay */}
+                  <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-amoura-deep-pink to-transparent z-20 flex items-center justify-between px-6 text-white text-sm font-medium">
+                    <span>12:56</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs">5G</span>
+                      <div className="flex gap-1">
+                        <div className="w-1 h-3 bg-white rounded-full"></div>
+                        <div className="w-1 h-3 bg-white rounded-full"></div>
+                        <div className="w-1 h-3 bg-white rounded-full"></div>
+                        <div className="w-1 h-3 bg-white/60 rounded-full"></div>
+                      </div>
+                      <div className="w-6 h-3 bg-white rounded-sm text-xs flex items-center justify-center text-black font-bold">75</div>
+                    </div>
+                  </div>
+                  
+                  {/* Profile image */}
                   <img 
-                    src="/lovable-uploads/47129695-da2d-45c2-af99-edd3aa1c1244.png" 
-                    alt="App Preview" 
+                    src="/lovable-uploads/7d408e6b-06c5-4527-8848-6cc3f50683ac.png" 
+                    alt="Isabella Profile" 
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent flex items-center justify-between">
-                    <div>
-                      <h3 className="text-white font-bold text-xl">Emma, 28</h3>
-                      <p className="text-white/80 text-sm">2 miles away</p>
+                  
+                  {/* Profile overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                    {/* Back arrow and Like button */}
+                    <div className="flex items-center justify-between mb-4">
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
+                      >
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="bg-amoura-deep-pink text-white px-6 py-2 rounded-full font-medium shadow-lg"
+                      >
+                        <Heart className="w-4 h-4 inline mr-2" />
+                        Like Profile
+                      </motion.div>
                     </div>
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="w-12 h-12 bg-amoura-deep-pink rounded-full flex items-center justify-center shadow-lg"
-                    >
-                      <Heart className="text-white w-6 h-6" />
-                    </motion.div>
+                    
+                    {/* Profile info */}
+                    <div className="text-white">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-3xl font-bold">Isabella, 25</h3>
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
+                      <p className="text-white/80 text-sm mb-1">📍 1 mile away</p>
+                      <p className="text-white/80 text-sm">Graduate Student</p>
+                    </div>
+                    
+                    {/* Action buttons */}
+                    <div className="flex gap-3 mt-6">
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex-1 bg-white/10 backdrop-blur-sm text-white py-3 rounded-full text-center font-medium border border-white/20"
+                      >
+                        💰 Message
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex-1 bg-amoura-deep-pink text-white py-3 rounded-full text-center font-medium shadow-lg"
+                      >
+                        ❤️ Like
+                      </motion.div>
+                    </div>
                   </div>
                 </div>
+                
+                {/* Home indicator */}
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-1/3 h-1 bg-white/30 rounded-full"></div>
               </motion.div>
               
-              {/* Decorations */}
+              {/* Decorative elements */}
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -345,7 +411,7 @@ const Index = () => {
             className="mt-8 text-gray-500 text-sm"
           >
             Join over 2 million singles already on Amoura
-          </motion.p>
+          </p>
         </motion.div>
       </section>
     </div>
