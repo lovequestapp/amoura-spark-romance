@@ -15,6 +15,7 @@ import PasswordReset from './pages/auth/PasswordReset';
 import Help from './pages/help/Help';
 import Matches from './pages/Matches';
 import Settings from './pages/Settings';
+import Explore from './pages/Explore';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import Dashboard from './pages/admin/Dashboard';
 import Users from './pages/admin/Users';
@@ -105,6 +106,11 @@ function App() {
                   <Route path="/home" element={
                     <ProtectedRoute>
                       <Home />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/explore" element={
+                    <ProtectedRoute>
+                      <Explore />
                     </ProtectedRoute>
                   } />
                   <Route path="/matches" element={

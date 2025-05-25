@@ -1,66 +1,54 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { MessageCircle, Search, User, Users } from 'lucide-react';
+import { Heart, MessageCircle, Home, User, Users, Search } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const AppNavigation = () => {
   const location = useLocation();
-  
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-  
+  const navigate = useNavigate();
+
+  const navItems = [
+    { icon: Home, label: 'Home', path: '/home' },
+    { icon: Search, label: 'Explore', path: '/explore' },
+    { icon: Heart, label: 'Matches', path: '/matches' },
+    { icon: MessageCircle, label: 'Messages', path: '/messages' },
+    { icon: Users, label: 'Community', path: '/community' },
+    { icon: User, label: 'Profile', path: '/profile' },
+  ];
+
   return (
-    <nav className="border-t py-3 px-4 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-      <div className="flex justify-around">
-        <Link to="/home" className="flex flex-col items-center">
-          <motion.div
-            whileTap={{ scale: 0.9 }}
-            className={`p-2 rounded-full ${isActive('/home') ? 'bg-amoura-soft-pink' : ''}`}
-          >
-            <Search size={26} className={`${isActive('/home') ? 'text-amoura-deep-pink' : 'text-gray-500'}`} />
-          </motion.div>
-          <span className={`text-xs mt-1 ${isActive('/home') ? 'text-amoura-deep-pink font-medium' : 'text-gray-500'}`}>
-            Discover
-          </span>
-        </Link>
-        
-        <Link to="/community" className="flex flex-col items-center">
-          <motion.div
-            whileTap={{ scale: 0.9 }}
-            className={`p-2 rounded-full ${isActive('/community') ? 'bg-amoura-soft-pink' : ''}`}
-          >
-            <Users size={26} className={`${isActive('/community') ? 'text-amoura-deep-pink' : 'text-gray-500'}`} />
-          </motion.div>
-          <span className={`text-xs mt-1 ${isActive('/community') ? 'text-amoura-deep-pink font-medium' : 'text-gray-500'}`}>
-            Community
-          </span>
-        </Link>
-        
-        <Link to="/matches" className="flex flex-col items-center">
-          <motion.div
-            whileTap={{ scale: 0.9 }}
-            className={`p-2 rounded-full ${isActive('/matches') ? 'bg-amoura-soft-pink' : ''}`}
-          >
-            <MessageCircle size={26} className={`${isActive('/matches') ? 'text-amoura-deep-pink' : 'text-gray-500'}`} />
-          </motion.div>
-          <span className={`text-xs mt-1 ${isActive('/matches') ? 'text-amoura-deep-pink font-medium' : 'text-gray-500'}`}>
-            Matches
-          </span>
-        </Link>
-        
-        <Link to="/profile" className="flex flex-col items-center">
-          <motion.div
-            whileTap={{ scale: 0.9 }}
-            className={`p-2 rounded-full ${isActive('/profile') ? 'bg-amoura-soft-pink' : ''}`}
-          >
-            <User size={26} className={`${isActive('/profile') ? 'text-amoura-deep-pink' : 'text-gray-500'}`} />
-          </motion.div>
-          <span className={`text-xs mt-1 ${isActive('/profile') ? 'text-amoura-deep-pink font-medium' : 'text-gray-500'}`}>
-            Profile
-          </span>
-        </Link>
+    <nav className="bg-white border-t border-gray-200 px-4 py-2 safe-area-bottom">
+      <div className="flex justify-around items-center max-w-md mx-auto">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          const IconComponent = item.icon;
+          
+          return (
+            <motion.button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors ${
+                isActive 
+                  ? 'text-amoura-deep-pink' 
+                  : 'text-gray-500 hover:text-amoura-deep-pink'
+              }`}
+              whileTap={{ scale: 0.95 }}
+            >
+              <IconComponent 
+                size={24} 
+                className={`mb-1 ${isActive ? 'fill-current' : ''}`}
+              />
+              <span className="text-xs font-medium">{item.label}</span>
+              {isActive && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute -bottom-1 w-6 h-0.5 bg-amoura-deep-pink rounded-full"
+                />
+              )}
+            </motion.button>
+          );
+        })}
       </div>
     </nav>
   );
