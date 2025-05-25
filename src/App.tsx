@@ -23,6 +23,7 @@ import Settings from "./pages/Settings";
 import Onboarding from "./pages/Onboarding";
 import Community from "./pages/Community";
 import MessagePurchase from "./pages/MessagePurchase";
+import AddOns from "./pages/AddOns";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";

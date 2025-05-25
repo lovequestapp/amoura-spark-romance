@@ -302,6 +302,45 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          duration_days: number | null
+          features: string[] | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price_cents: number
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          duration_days?: number | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price_cents: number
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          duration_days?: number | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price_cents?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profile_likes: {
         Row: {
           created_at: string
@@ -519,6 +558,47 @@ export type Database = {
             columns: ["interest_id"]
             isOneToOne: false
             referencedRelation: "interests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_purchases: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          product_id: string | null
+          quantity: number | null
+          total_price_cents: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          product_id?: string | null
+          quantity?: number | null
+          total_price_cents: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          product_id?: string | null
+          quantity?: number | null
+          total_price_cents?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]

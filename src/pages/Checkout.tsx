@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -12,6 +12,19 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, CreditCard, Lock, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+
+interface CartItem {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  priceValue: number;
+  quantity: number;
+  category: string;
+  features?: string[];
+  messages?: number;
+}
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -19,26 +32,33 @@ const Checkout = () => {
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  // Demo cart items - in real app this would come from state
-  const cartItems = [
-    {
-      id: 'starter',
-      name: 'Starter Pack',
-      description: 'Perfect for casual conversations',
-      price: '$4.99',
-      priceValue: 499,
-      messages: 10,
-      quantity: 1
+  useEffect(() => {
+    // Load cart from localStorage
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      setCartItems(JSON.parse(savedCart));
     }
-  ];
+  }, []);
 
   const getTotalPrice = () => {
     return cartItems.reduce((total, item) => total + (item.priceValue * item.quantity), 0);
   };
 
-  const getTotalMessages = () => {
-    return cartItems.reduce((total, item) => total + (item.messages * item.quantity), 0);
+  const getTotalItems = () => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'communication': return '💬';
+      case 'profile': return '👤';
+      case 'matching': return '💝';
+      case 'analytics': return '📊';
+      case 'special': return '⭐';
+      default: return '📦';
+    }
   };
 
   const handlePayment = async () => {
@@ -52,20 +72,49 @@ const Checkout = () => {
       return;
     }
 
+    if (cartItems.length === 0) {
+      toast({
+        title: "Cart is empty",
+        description: "Add some items to your cart before checkout.",
+        variant: "destructive"
+      });
+      navigate('/cart');
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Create purchase records for each item
+      for (const item of cartItems) {
+        const purchaseData = {
+          user_id: user.id,
+          product_id: item.id,
+          quantity: item.quantity,
+          total_price_cents: item.priceValue * item.quantity,
+          expires_at: null, // Will be set based on product duration_days
+          is_active: true
+        };
+
+        const { error } = await supabase
+          .from('user_purchases')
+          .insert(purchaseData);
+
+        if (error) throw error;
+      }
+
+      // Clear cart
+      localStorage.removeItem('cart');
       
       toast({
         title: "Payment Successful!",
-        description: `You've purchased ${getTotalMessages()} premium messages!`,
+        description: `You've purchased ${getTotalItems()} items!`,
       });
       
-      // Navigate to success page or back to messages
-      navigate('/messages');
+      // Navigate to success page or profile
+      navigate('/profile');
     } catch (error) {
+      console.error('Purchase error:', error);
       toast({
         title: "Payment Failed",
         description: "There was an error processing your payment. Please try again.",
@@ -208,15 +257,31 @@ const Checkout = () => {
                   {/* Items */}
                   <div className="space-y-3">
                     {cartItems.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center">
-                        <div>
-                          <div className="font-medium">{item.name}</div>
-                          <div className="text-sm text-gray-600">
-                            {item.messages} messages × {item.quantity}
+                      <div key={item.id} className="border-b pb-3">
+                        <div className="flex justify-between items-start mb-1">
+                          <div className="flex items-center gap-2">
+                            <span>{getCategoryIcon(item.category)}</span>
+                            <div>
+                              <div className="font-medium">{item.name}</div>
+                              <div className="text-xs text-gray-500">
+                                {item.category} × {item.quantity}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="font-semibold">
+                            ${((item.priceValue * item.quantity) / 100).toFixed(2)}
                           </div>
                         </div>
-                        <div className="font-semibold">
-                          ${((item.priceValue * item.quantity) / 100).toFixed(2)}
+                        {/* Features */}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {item.messages && (
+                            <Badge variant="outline" className="text-xs">{item.messages} messages</Badge>
+                          )}
+                          {item.features?.slice(0, 2).map((feature, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {feature}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
                     ))}
@@ -227,7 +292,7 @@ const Checkout = () => {
                   {/* Totals */}
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span>Subtotal:</span>
+                      <span>Items ({getTotalItems()}):</span>
                       <span>${(getTotalPrice() / 100).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
@@ -257,11 +322,11 @@ const Checkout = () => {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Check className="w-4 h-4 text-green-500" />
-                        <span>{getTotalMessages()} premium messages</span>
+                        <span>Instant feature activation</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Check className="w-4 h-4 text-green-500" />
-                        <span>Instant message delivery</span>
+                        <span>Premium support included</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Check className="w-4 h-4 text-green-500" />
@@ -283,7 +348,7 @@ const Checkout = () => {
                         Processing Payment...
                       </div>
                     ) : (
-                      `Complete Payment - ${(getTotalPrice() / 100).toFixed(2)}`
+                      `Complete Payment - $${(getTotalPrice() / 100).toFixed(2)}`
                     )}
                   </Button>
                 </CardContent>

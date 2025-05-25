@@ -1,182 +1,68 @@
 
 import React, { useState, useEffect } from 'react';
-import AppLayout from '@/components/layout/AppLayout';
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from '@/contexts/AuthContext';
-import { useSubscription } from '@/contexts/SubscriptionContext';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import AppLayout from '@/components/layout/AppLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Camera, Edit, MapPin, Calendar, GraduationCap, Briefcase, Heart, Star, Settings, ShoppingBag } from 'lucide-react';
+import ProfilePhotos from '@/components/profile/ProfilePhotos';
+import ProfilePrompt from '@/components/profile/ProfilePrompt';
+import ProfileInterests from '@/components/profile/ProfileInterests';
 import ProfileStats from '@/components/profile/ProfileStats';
-import ProfileGallery from '@/components/profile/ProfileGallery';
-import ProfileAnalytics from '@/components/profile/ProfileAnalytics';
-import PremiumFeatures from '@/components/subscription/PremiumFeatures';
-import { useToast } from '@/hooks/use-toast';
-import PremiumModal from '@/components/subscription/PremiumModal';
-import PhotoUploadDialog from '@/components/profile/PhotoUploadDialog';
-import BioEditDialog from '@/components/profile/BioEditDialog';
-import PromptsEditDialog from '@/components/profile/PromptsEditDialog';
-import { fetchProfileData, updateProfileBio, updateProfilePrompts, type ProfilePrompt } from '@/services/profile';
+import PurchaseHistory from '@/components/profile/PurchaseHistory';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const Profile = () => {
-  const { user } = useAuth();
-  const { tier, isSubscribed } = useSubscription();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
-  
-  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
-  const [showBioEdit, setShowBioEdit] = useState(false);
-  const [showPromptsEdit, setShowPromptsEdit] = useState(false);
-  const [profileData, setProfileData] = useState<{
-    photos: string[];
-    bio: string;
-    prompts: ProfilePrompt[];
-  }>({
-    photos: [],
-    bio: "",
-    prompts: []
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadProfileData = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-      
-      setIsLoading(true);
-      setLoadError(null);
-      
-      try {
-        const data = await fetchProfileData();
-        setProfileData({
-          photos: data.photos || [],
-          bio: data.bio || "",
-          prompts: data.prompts || []
-        });
-      } catch (error) {
-        console.error('Error loading profile data:', error);
-        setLoadError('There was a problem loading your profile data. Please try refreshing the page.');
-        toast({
-          title: "Error loading profile",
-          description: "There was a problem loading your profile data. Please try again later.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
 
-    loadProfileData();
-  }, [user, toast]);
-
-  const handlePhotoUploaded = (url: string) => {
-    const newPhotos = [...profileData.photos, url];
-    setProfileData(prev => ({ ...prev, photos: newPhotos }));
-  };
-
-  const handlePhotosChanged = (newPhotos: string[]) => {
-    setProfileData(prev => ({ ...prev, photos: newPhotos }));
-  };
-
-  const handleBioUpdated = async (newBio: string) => {
+  const fetchProfile = async () => {
     try {
-      const success = await updateProfileBio(newBio);
-      if (success) {
-        setProfileData(prev => ({ ...prev, bio: newBio }));
-        toast({
-          title: "Bio updated",
-          description: "Your bio has been updated successfully."
-        });
-      } else {
-        toast({
-          title: "Update failed",
-          description: "There was an error updating your bio. Please try again.",
-          variant: "destructive"
-        });
-      }
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
+        .single();
+
+      if (error) throw error;
+      setProfile(data);
     } catch (error) {
-      console.error('Error updating bio:', error);
-      toast({
-        title: "Update failed",
-        description: "There was an error updating your bio. Please try again.",
-        variant: "destructive"
-      });
+      console.error('Error fetching profile:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handlePromptsUpdated = async (newPrompts: ProfilePrompt[]) => {
-    try {
-      const success = await updateProfilePrompts(newPrompts);
-      if (success) {
-        setProfileData(prev => ({ ...prev, prompts: newPrompts }));
-        toast({
-          title: "Prompts updated",
-          description: "Your prompts have been updated successfully."
-        });
-      } else {
-        toast({
-          title: "Update failed",
-          description: "There was an error updating your prompts. Please try again.",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Error updating prompts:', error);
-      toast({
-        title: "Update failed",
-        description: "There was an error updating your prompts. Please try again.",
-        variant: "destructive"
-      });
+  const getAge = (birthDate: string) => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
     }
+    return age;
   };
 
-  const getUserInitials = () => {
-    if (user?.email) {
-      return user.email[0].toUpperCase();
-    }
-    return "U";
-  };
-
-  if (isLoading) {
+  if (loading) {
     return (
       <AppLayout>
-        <div className="p-4 max-w-3xl mx-auto">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-pulse text-gray-500">Loading profile...</div>
-          </div>
-        </div>
-      </AppLayout>
-    );
-  }
-
-  if (!user) {
-    return (
-      <AppLayout>
-        <div className="p-4 max-w-3xl mx-auto">
-          <div className="flex flex-col justify-center items-center h-64 gap-4">
-            <div className="text-xl font-semibold text-center text-gray-700">
-              Please sign in to view your profile
-            </div>
-            <Button onClick={() => navigate('/auth')}>Sign In</Button>
-          </div>
-        </div>
-      </AppLayout>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <AppLayout>
-        <div className="p-4 max-w-3xl mx-auto">
-          <div className="flex flex-col justify-center items-center h-64 gap-4">
-            <div className="text-xl font-semibold text-center text-red-600">
-              {loadError}
-            </div>
-            <Button onClick={() => window.location.reload()}>Refresh Page</Button>
-          </div>
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 p-4 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink"></div>
         </div>
       </AppLayout>
     );
@@ -184,144 +70,163 @@ const Profile = () => {
 
   return (
     <AppLayout>
-      <div className="p-4 max-w-3xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <Avatar className="h-20 w-20 border-2 border-amoura-deep-pink">
-            <AvatarImage src={profileData.photos[0]} />
-            <AvatarFallback>{getUserInitials()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-2xl font-bold">Your Profile</h1>
-            <p className="text-gray-600">{user?.email}</p>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <ProfileStats 
-            profileViews={124}
-            superLikes={18}
-            popularity="high"
-            verified={true}
-          />
-        </div>
-
-        <div className="mt-6">
-          <h2 className="font-medium text-lg mb-2">Your Photos</h2>
-          <ProfileGallery 
-            photos={profileData.photos} 
-            editable={true} 
-            onAddPhoto={() => setShowPhotoUpload(true)} 
-            onPhotosChanged={handlePhotosChanged}
-          />
-          <Button 
-            variant="outline" 
-            className="w-full mt-3"
-            onClick={() => setShowPhotoUpload(true)}
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8"
           >
-            Edit Photos
-          </Button>
-        </div>
-        
-        <div className="mt-6">
-          <h2 className="font-medium text-lg mb-2">About You</h2>
-          <div className="bg-white p-4 rounded-lg border">
-            <p>{profileData.bio || "Add a bio to tell people about yourself..."}</p>
-          </div>
-          <Button 
-            variant="outline" 
-            className="w-full mt-3"
-            onClick={() => setShowBioEdit(true)}
-          >
-            Edit Bio
-          </Button>
-        </div>
-        
-        <div className="mt-6">
-          <h2 className="font-medium text-lg mb-2">Your Prompts</h2>
-          {profileData.prompts && profileData.prompts.length > 0 ? (
-            profileData.prompts.map((prompt, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg border mb-3">
-                <h3 className="font-medium text-amoura-deep-pink">{prompt.question}</h3>
-                <p className="mt-1">{prompt.answer}</p>
-              </div>
-            ))
-          ) : (
-            <div className="bg-white p-4 rounded-lg border mb-3">
-              <p className="text-gray-500">No prompts added yet. Add some prompts to make your profile stand out.</p>
-            </div>
-          )}
-          <Button 
-            variant="outline" 
-            className="w-full mt-3 mb-8"
-            onClick={() => setShowPromptsEdit(true)}
-          >
-            Edit Prompts
-          </Button>
-        </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
+            <p className="text-gray-600">Manage your profile and view your activity</p>
+          </motion.div>
 
-        {!isSubscribed && (
-          <div className="bg-gradient-to-r from-amoura-deep-pink to-amoura-gold p-4 rounded-lg mb-4 text-white flex justify-between items-center">
-            <div>
-              <h2 className="font-bold">Upgrade to Premium</h2>
-              <p className="text-sm">Get more visibility and premium features</p>
-            </div>
-            <Button 
-              onClick={() => setShowPremiumModal(true)}
-              size="sm"
-              variant="secondary"
-              className="bg-white text-amoura-deep-pink hover:bg-gray-100"
-            >
-              View Plans
-            </Button>
-          </div>
-        )}
-        <PremiumFeatures />
-
-        <div className="mt-6">
-          <ProfileAnalytics />
-        </div>
-        
-        <div className="mt-8 flex justify-center gap-4 mb-20">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/settings')}
+          {/* Profile Header Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-6"
           >
-            Account Settings
-          </Button>
-          <Button 
-            variant="default"
-            onClick={() => navigate('/profile/edit')}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="relative">
+                    <Avatar className="w-32 h-32">
+                      <AvatarImage src={profile?.avatar_url} />
+                      <AvatarFallback className="text-2xl">
+                        {profile?.full_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <Button
+                      size="sm"
+                      className="absolute -bottom-2 -right-2 rounded-full"
+                      onClick={() => navigate('/settings')}
+                    >
+                      <Camera className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="flex-1 text-center md:text-left">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                      {profile?.full_name || 'Your Name'}
+                      {profile?.birth_date && (
+                        <span className="text-gray-600 font-normal ml-2">
+                          {getAge(profile.birth_date)}
+                        </span>
+                      )}
+                    </h2>
+                    
+                    <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
+                      {profile?.gender && (
+                        <Badge variant="outline">{profile.gender}</Badge>
+                      )}
+                      {profile?.relationship_type && (
+                        <Badge variant="outline">{profile.relationship_type}</Badge>
+                      )}
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-600">
+                      {profile?.education && (
+                        <div className="flex items-center gap-2">
+                          <GraduationCap className="w-4 h-4" />
+                          <span>{profile.education}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        <span>San Francisco, CA</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate('/settings')}
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/add-ons')}
+                      className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
+                    >
+                      <ShoppingBag className="w-4 h-4 mr-2" />
+                      Add-ons
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Profile Tabs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
           >
-            Edit Profile
-          </Button>
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="photos">Photos</TabsTrigger>
+                <TabsTrigger value="interests">Interests</TabsTrigger>
+                <TabsTrigger value="stats">Stats</TabsTrigger>
+                <TabsTrigger value="purchases">Purchases</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview" className="mt-6">
+                <div className="grid gap-6">
+                  {/* Bio */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Heart className="w-5 h-5" />
+                        About Me
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-700 leading-relaxed">
+                        {profile?.bio || "Tell people about yourself! Add a bio in your settings to help others get to know you better."}
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Prompts */}
+                  {profile?.prompts && profile.prompts.length > 0 && (
+                    <div className="space-y-4">
+                      {profile.prompts.slice(0, 3).map((prompt: any, index: number) => (
+                        <ProfilePrompt
+                          key={index}
+                          question={prompt.question}
+                          answer={prompt.answer}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="photos" className="mt-6">
+                <ProfilePhotos photos={profile?.photos || []} />
+              </TabsContent>
+
+              <TabsContent value="interests" className="mt-6">
+                <ProfileInterests />
+              </TabsContent>
+
+              <TabsContent value="stats" className="mt-6">
+                <ProfileStats />
+              </TabsContent>
+
+              <TabsContent value="purchases" className="mt-6">
+                <PurchaseHistory />
+              </TabsContent>
+            </Tabs>
+          </motion.div>
         </div>
-
-        <PhotoUploadDialog
-          open={showPhotoUpload}
-          onClose={() => setShowPhotoUpload(false)}
-          onPhotoUploaded={handlePhotoUploaded}
-          currentPhotos={profileData.photos}
-          currentPhotosCount={profileData.photos.length}
-        />
-        
-        <BioEditDialog
-          open={showBioEdit}
-          onClose={() => setShowBioEdit(false)}
-          currentBio={profileData.bio}
-          onBioUpdated={handleBioUpdated}
-        />
-        
-        <PromptsEditDialog
-          open={showPromptsEdit}
-          onClose={() => setShowPromptsEdit(false)}
-          currentPrompts={profileData.prompts}
-          onPromptsUpdated={handlePromptsUpdated}
-        />
-
-        <PremiumModal 
-          isOpen={showPremiumModal}
-          onClose={() => setShowPremiumModal(false)}
-        />
       </div>
     </AppLayout>
   );

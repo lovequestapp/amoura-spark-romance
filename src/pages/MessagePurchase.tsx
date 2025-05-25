@@ -60,13 +60,32 @@ const MessagePurchase = () => {
       return;
     }
 
-    // Add to cart logic would go here
+    // Add to cart logic using localStorage
+    const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingItem = existingCart.find((item: any) => item.id === pack.id);
+
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      existingCart.push({
+        id: pack.id,
+        name: pack.name,
+        description: pack.description,
+        price: pack.price,
+        priceValue: pack.priceValue,
+        messages: pack.messages,
+        quantity: 1,
+        category: 'communication',
+        features: pack.features
+      });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(existingCart));
+
     toast({
       title: "Added to Cart!",
       description: `${pack.name} has been added to your cart.`,
     });
-    
-    navigate('/cart');
   };
 
   const handlePurchase = async (pack: typeof messagePacks[0]) => {
@@ -80,28 +99,9 @@ const MessagePurchase = () => {
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast({
-        title: "Purchase Successful!",
-        description: `You've purchased ${pack.messages} premium messages for ${pack.price}.`,
-      });
-      
-      // Navigate back to messages or previous page
-      navigate(-1);
-    } catch (error) {
-      toast({
-        title: "Purchase Failed",
-        description: "There was an error processing your payment. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // Add to cart and redirect to checkout
+    handleAddToCart(pack);
+    navigate('/checkout');
   };
 
   return (
@@ -123,7 +123,14 @@ const MessagePurchase = () => {
                 <p className="text-gray-600 mt-1">Choose your message pack and start connecting</p>
               </div>
             </div>
-            <div className="w-12"></div> {/* Spacer to balance the back button */}
+            <Button
+              variant="outline"
+              onClick={() => navigate('/cart')}
+              className="ml-4"
+            >
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              Cart
+            </Button>
           </div>
 
           {/* Info Card */}
@@ -213,14 +220,7 @@ const MessagePurchase = () => {
                           : 'bg-green-600 hover:bg-green-700'
                         } text-white`}
                       >
-                        {isLoading ? (
-                          <div className="flex items-center">
-                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                            Processing...
-                          </div>
-                        ) : (
-                          `Buy Now - ${pack.messages} Messages`
-                        )}
+                        Buy Now - {pack.messages} Messages
                       </Button>
                     </div>
                   </CardContent>
@@ -233,6 +233,15 @@ const MessagePurchase = () => {
           <div className="mt-12 text-center text-sm text-gray-500">
             <p>All purchases are one-time payments. No recurring charges.</p>
             <p className="mt-1">Unused messages expire based on the pack validity period.</p>
+            <div className="mt-4">
+              <Button 
+                variant="link" 
+                onClick={() => navigate('/add-ons')}
+                className="text-amoura-deep-pink"
+              >
+                Explore more premium add-ons →
+              </Button>
+            </div>
           </div>
         </div>
       </div>

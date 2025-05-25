@@ -6,7 +6,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, X, ShoppingCart, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, X, ShoppingCart, Plus, Minus, Package } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -16,26 +16,30 @@ interface CartItem {
   description: string;
   price: string;
   priceValue: number;
-  messages: number;
   quantity: number;
+  category: string;
+  features?: string[];
+  messages?: number; // For message packs
 }
 
 const Cart = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    // Demo items - in real app this would come from state/localStorage
-    {
-      id: 'starter',
-      name: 'Starter Pack',
-      description: 'Perfect for casual conversations',
-      price: '$4.99',
-      priceValue: 499,
-      messages: 10,
-      quantity: 1
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  useEffect(() => {
+    // Load cart from localStorage
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      setCartItems(JSON.parse(savedCart));
     }
-  ]);
+  }, []);
+
+  useEffect(() => {
+    // Save cart to localStorage whenever it changes
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
 
   const updateQuantity = (id: string, newQuantity: number) => {
     if (newQuantity === 0) {
@@ -62,8 +66,19 @@ const Cart = () => {
     return cartItems.reduce((total, item) => total + (item.priceValue * item.quantity), 0);
   };
 
-  const getTotalMessages = () => {
-    return cartItems.reduce((total, item) => total + (item.messages * item.quantity), 0);
+  const getTotalItems = () => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'communication': return '💬';
+      case 'profile': return '👤';
+      case 'matching': return '💝';
+      case 'analytics': return '📊';
+      case 'special': return '⭐';
+      default: return '📦';
+    }
   };
 
   const handleCheckout = () => {
@@ -110,13 +125,22 @@ const Cart = () => {
             <Card className="text-center p-12">
               <ShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h2>
-              <p className="text-gray-600 mb-6">Add some message packs to get started!</p>
-              <Button
-                onClick={() => navigate('/message-purchase')}
-                className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
-              >
-                Browse Message Packs
-              </Button>
+              <p className="text-gray-600 mb-6">Add some premium features to get started!</p>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => navigate('/add-ons')}
+                  className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 w-full"
+                >
+                  Browse Add-ons
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/message-purchase')}
+                  className="w-full"
+                >
+                  Message Packs
+                </Button>
+              </div>
             </Card>
           </div>
         </div>
@@ -155,12 +179,35 @@ const Cart = () => {
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-lg">{item.name}</h3>
-                            <p className="text-gray-600 text-sm">{item.description}</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline">{item.messages} messages</Badge>
-                              <span className="text-lg font-bold text-amoura-deep-pink">{item.price}</span>
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-lg">{getCategoryIcon(item.category)}</span>
+                              <div>
+                                <h3 className="font-semibold text-lg">{item.name}</h3>
+                                <Badge variant="outline" className="text-xs">
+                                  {item.category}
+                                </Badge>
+                              </div>
                             </div>
+                            <p className="text-gray-600 text-sm mb-2">{item.description}</p>
+                            
+                            {/* Features or Messages */}
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {item.messages && (
+                                <Badge variant="outline">{item.messages} messages</Badge>
+                              )}
+                              {item.features?.slice(0, 2).map((feature, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs">
+                                  {feature}
+                                </Badge>
+                              ))}
+                              {item.features && item.features.length > 2 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{item.features.length - 2} more
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            <span className="text-lg font-bold text-amoura-deep-pink">{item.price}</span>
                           </div>
                           
                           <div className="flex items-center gap-4">
@@ -211,13 +258,8 @@ const Cart = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
-                    <span>Total Messages:</span>
-                    <span className="font-semibold">{getTotalMessages()}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
                     <span>Items:</span>
-                    <span>{cartItems.reduce((total, item) => total + item.quantity, 0)}</span>
+                    <span className="font-semibold">{getTotalItems()}</span>
                   </div>
                   
                   <div className="border-t pt-4">
@@ -237,13 +279,23 @@ const Cart = () => {
                     Proceed to Checkout
                   </Button>
                   
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/message-purchase')}
-                    className="w-full"
-                  >
-                    Continue Shopping
-                  </Button>
+                  <div className="space-y-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate('/add-ons')}
+                      className="w-full"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Browse Add-ons
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate('/message-purchase')}
+                      className="w-full"
+                    >
+                      Message Packs
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
