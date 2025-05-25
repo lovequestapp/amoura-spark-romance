@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Star, X } from "lucide-react";
+import { Heart, Star, X } from "lucide-react";
 import { Profile } from '@/components/home/SwipeableCard';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -131,38 +131,36 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         </div>
       </div>
 
-      {/* Action Buttons - Moved significantly higher */}
-      <div className="absolute bottom-16 left-0 right-0 z-20 px-6">
-        <div className="flex justify-center gap-6">
+      {/* Action Buttons - Styled and positioned */}
+      <div className="absolute bottom-20 left-0 right-0 z-20 px-6">
+        <div className="flex justify-center gap-4">
           {/* Pass Button */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+          <Button
             onClick={handlePass}
-            className="w-16 h-16 bg-white rounded-full shadow-2xl flex items-center justify-center border-2 border-gray-100"
+            variant="outline"
+            className="h-14 px-6 bg-white/95 backdrop-blur-sm border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-800 shadow-lg flex items-center gap-2 font-medium"
           >
-            <X className="w-7 h-7 text-gray-600" />
-          </motion.button>
+            <X className="w-5 h-5" />
+            Pass
+          </Button>
 
           {/* Super Like Button */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+          <Button
             onClick={handleSuperLike}
-            className="w-18 h-18 bg-blue-500 rounded-full shadow-2xl flex items-center justify-center"
+            className="h-14 px-6 bg-blue-500 hover:bg-blue-600 text-white shadow-lg flex items-center gap-2 font-medium"
           >
-            <Star className="w-8 h-8 text-white fill-current" />
-          </motion.button>
+            <Star className="w-5 h-5 fill-current" />
+            Super Like
+          </Button>
 
           {/* Like Button */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+          <Button
             onClick={handleLike}
-            className="w-16 h-16 bg-pink-500 rounded-full shadow-2xl flex items-center justify-center"
+            className="h-14 px-6 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white shadow-lg flex items-center gap-2 font-medium"
           >
-            <Heart className="w-7 h-7 text-white" />
-          </motion.button>
+            <Heart className="w-5 h-5" />
+            Like
+          </Button>
         </div>
       </div>
     </motion.div>
