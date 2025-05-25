@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
-import { Heart, Star, X } from "lucide-react";
+import { Heart, Star, X, MessageCircle } from "lucide-react";
 import { Profile } from '@/components/home/SwipeableCard';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -74,6 +74,11 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
     onSwipe("left");
   };
 
+  const handleMessage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/messages`);
+  };
+
   if (!profile) {
     console.log('ExploreCard: No profile provided');
     return null;
@@ -131,35 +136,45 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         </div>
       </div>
 
-      {/* Enhanced Action Buttons */}
-      <div className="absolute bottom-20 left-0 right-0 z-20 px-8">
-        <div className="flex justify-center gap-3">
+      {/* Clean Action Buttons - Like reference image */}
+      <div className="absolute bottom-16 left-0 right-0 z-20 px-6">
+        <div className="flex items-center justify-center gap-4">
+          {/* Message Button */}
+          <Button
+            onClick={handleMessage}
+            className="h-14 px-8 bg-black/60 backdrop-blur-md hover:bg-black/70 text-white rounded-full flex items-center gap-3 font-medium text-base transition-all duration-200 hover:scale-105 border border-white/20"
+          >
+            <MessageCircle className="w-5 h-5" />
+            Message
+          </Button>
+
+          {/* Like Button - Primary action */}
+          <Button
+            onClick={handleLike}
+            className="h-14 px-10 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full flex items-center gap-3 font-semibold text-base transition-all duration-200 hover:scale-105 shadow-lg"
+          >
+            <Heart className="w-5 h-5" />
+            Like
+          </Button>
+        </div>
+        
+        {/* Secondary Actions - Smaller and less prominent */}
+        <div className="flex justify-center gap-6 mt-4">
           {/* Pass Button */}
           <Button
             onClick={handlePass}
-            variant="outline"
-            className="h-16 px-8 bg-white/95 backdrop-blur-md border-2 border-gray-300 text-gray-700 hover:bg-white hover:border-gray-400 hover:text-gray-900 shadow-xl rounded-2xl flex items-center gap-3 font-semibold text-lg transition-all duration-200 hover:scale-105"
+            variant="ghost"
+            className="h-10 w-10 rounded-full bg-black/40 hover:bg-black/60 text-white border border-white/20 flex items-center justify-center transition-all duration-200 hover:scale-105"
           >
-            <X className="w-6 h-6" />
-            Pass
+            <X className="w-5 h-5" />
           </Button>
 
           {/* Super Like Button */}
           <Button
             onClick={handleSuperLike}
-            className="h-16 px-8 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-xl rounded-2xl flex items-center gap-3 font-semibold text-lg transition-all duration-200 hover:scale-105 border-2 border-blue-400"
+            className="h-10 w-10 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg"
           >
-            <Star className="w-6 h-6 fill-current" />
-            Super Like
-          </Button>
-
-          {/* Like Button */}
-          <Button
-            onClick={handleLike}
-            className="h-16 px-8 bg-gradient-to-r from-amoura-deep-pink to-pink-500 hover:from-pink-600 hover:to-amoura-deep-pink text-white shadow-xl rounded-2xl flex items-center gap-3 font-semibold text-lg transition-all duration-200 hover:scale-105 border-2 border-pink-400"
-          >
-            <Heart className="w-6 h-6" />
-            Like
+            <Star className="w-5 h-5 fill-current" />
           </Button>
         </div>
       </div>
