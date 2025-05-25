@@ -2,12 +2,11 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { FormattedMessage } from './useRealtimeMessages';
 
 // Helper function to convert demo IDs to UUIDs consistently
 const getDemoUUID = (demoId: string) => {
-  // Generate deterministic UUIDs for demo users
   if (!isNaN(Number(demoId))) {
     switch (demoId) {
       case "1": return "00000000-0000-0000-0000-000000000001";
@@ -16,20 +15,30 @@ const getDemoUUID = (demoId: string) => {
       default: return `00000000-0000-0000-0000-${demoId.padStart(12, '0')}`;
     }
   }
-  return demoId; // If it's already a UUID, return as is
+  return demoId;
 };
 
 export const useSendMessage = (conversationId: string | null, senderId: string | null, onMessageSent?: (message: FormattedMessage) => void) => {
   const [sending, setSending] = useState(false);
 
   const sendTextMessage = async (content: string) => {
-    if (!conversationId || !senderId || !content.trim()) return null;
+    if (!conversationId || !senderId || !content.trim()) {
+      console.log('Cannot send message - missing required data:', { conversationId, senderId, content: content.trim() });
+      return null;
+    }
     
     setSending(true);
     try {
       const safeSenderId = getDemoUUID(senderId);
       const messageId = uuidv4();
-      const now = new Date().toISOString();
+      
+      console.log('Sending message with data:', {
+        id: messageId,
+        conversation_id: conversationId,
+        sender_id: safeSenderId,
+        content,
+        message_type: 'text'
+      });
       
       const { data, error } = await supabase
         .from('messages')
@@ -43,7 +52,12 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting message:', error);
+        throw error;
+      }
+      
+      console.log('Message inserted successfully:', data);
       
       const formattedMessage: FormattedMessage = {
         id: data.id,
@@ -59,11 +73,11 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
       }
       
       return formattedMessage;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: error?.message || "Failed to send message",
         variant: "destructive",
       });
       return null;
@@ -124,11 +138,11 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
       }
       
       return formattedMessage;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending voice message:', error);
       toast({
         title: "Error",
-        description: "Failed to send voice message",
+        description: error?.message || "Failed to send voice message",
         variant: "destructive",
       });
       return null;

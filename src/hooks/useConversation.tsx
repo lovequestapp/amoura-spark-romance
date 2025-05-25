@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 export interface Conversation {
   id: string;
@@ -39,6 +39,7 @@ export const useConversation = (userId: string | null, otherUserId: string | nul
 
       try {
         setLoading(true);
+        setError(null);
         
         const safeUserId = getDemoUUID(userId);
         const safeOtherUserId = getDemoUUID(otherUserId);
@@ -82,12 +83,13 @@ export const useConversation = (userId: string | null, otherUserId: string | nul
         console.log('Created new conversation:', newConv);
         setConversation(newConv);
         
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error getting or creating conversation:', err);
-        setError('Failed to load conversation');
+        const errorMessage = err?.message || 'Failed to load conversation';
+        setError(errorMessage);
         toast({
           title: "Error",
-          description: "Failed to load conversation",
+          description: errorMessage,
           variant: "destructive",
         });
       } finally {
