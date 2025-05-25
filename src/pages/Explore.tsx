@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Star } from "lucide-react";
+import { Heart, MessageCircle, Star, X } from "lucide-react";
 import { Profile } from '@/components/home/SwipeableCard';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -69,6 +70,11 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
     onSwipe("superLike");
   };
 
+  const handlePass = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSwipe("left");
+  };
+
   if (!profile) {
     console.log('ExploreCard: No profile provided');
     return null;
@@ -88,64 +94,74 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
       style={{ touchAction: 'pan-x' }}
       onClick={handleCardClick}
     >
-      <div className="relative w-full h-full overflow-hidden bg-white rounded-2xl mx-4" style={{ height: 'calc(100vh - 200px)' }}>
-        {/* Profile Image - Takes most of the space */}
-        <div className="relative w-full h-5/6">
-          <img 
-            src={profile.photos[0]} 
-            alt={profile.name} 
-            className="w-full h-full object-cover"
-            draggable={false}
-          />
+      {/* Full viewport profile card */}
+      <div className="relative w-full h-full overflow-hidden">
+        {/* Profile Image - Full viewport */}
+        <img 
+          src={profile.photos[0]} 
+          alt={profile.name} 
+          className="w-full h-full object-cover"
+          draggable={false}
+        />
+        
+        {/* Gradient Overlays for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
+        
+        {/* Profile Info - Bottom overlay */}
+        <div className="absolute bottom-20 left-0 right-0 text-white z-10 p-6">
+          <div className="flex items-center gap-2 mb-2">
+            <h2 className="text-3xl font-bold">{profile.name}, {profile.age}</h2>
+            {profile.verified && (
+              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+            )}
+          </div>
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+            <p className="text-white/90 text-base">{profile.distance}</p>
+          </div>
           
-          {/* Profile Info Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 text-white z-10 p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-2xl font-bold">{profile.name}, {profile.age}</h2>
-              {profile.verified && (
-                <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              <p className="text-white/90 text-sm">{profile.distance}</p>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Star className="w-3 h-3 text-yellow-400 fill-current" />
-              <p className="text-white/90 text-sm">{profile.occupation}</p>
-            </div>
+          <div className="flex items-center gap-2">
+            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+            <p className="text-white/90 text-base">{profile.occupation}</p>
           </div>
         </div>
 
-        {/* Action Buttons Section - Bottom 1/6 */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/6 bg-white z-20 p-4 flex items-center">
-          <div className="flex gap-3 w-full">
+        {/* Floating Action Buttons - Overlaid on the card */}
+        <div className="absolute bottom-6 left-0 right-0 z-20 px-6">
+          <div className="flex justify-center gap-4">
+            {/* Pass Button */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleLike}
-              className="flex-1 bg-pink-500 text-white py-3 rounded-full text-center font-medium shadow-lg flex items-center justify-center gap-2"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handlePass}
+              className="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full shadow-xl flex items-center justify-center"
             >
-              <Heart className="w-5 h-5" />
-              Like
+              <X className="w-6 h-6 text-gray-600" />
             </motion.button>
+
+            {/* Super Like Button */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={handleSuperLike}
-              className="flex-1 bg-blue-500 text-white py-3 rounded-full text-center font-medium shadow-lg flex items-center justify-center gap-2"
+              className="w-16 h-16 bg-blue-500 rounded-full shadow-xl flex items-center justify-center"
             >
-              <Star className="w-5 h-5 fill-current" />
-              Super Like
+              <Star className="w-7 h-7 text-white fill-current" />
+            </motion.button>
+
+            {/* Like Button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleLike}
+              className="w-14 h-14 bg-pink-500 rounded-full shadow-xl flex items-center justify-center"
+            >
+              <Heart className="w-6 h-6 text-white" />
             </motion.button>
           </div>
         </div>
