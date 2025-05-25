@@ -23,6 +23,8 @@ import Settings from "./pages/Settings";
 import Onboarding from "./pages/Onboarding";
 import Community from "./pages/Community";
 import MessagePurchase from "./pages/MessagePurchase";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 
 // Admin pages
@@ -66,6 +68,8 @@ const App = () => (
                 <Route path="/matches" element={<AuthGuard><Matches /></AuthGuard>} />
                 <Route path="/messages" element={<AuthGuard><Messages /></AuthGuard>} />
                 <Route path="/message-purchase" element={<AuthGuard><MessagePurchase /></AuthGuard>} />
+                <Route path="/cart" element={<AuthGuard><Cart /></AuthGuard>} />
+                <Route path="/checkout" element={<AuthGuard><Checkout /></AuthGuard>} />
                 <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
                 <Route path="/profile/:id" element={<AuthGuard><ProfileDetail /></AuthGuard>} />
                 <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />

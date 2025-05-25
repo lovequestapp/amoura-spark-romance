@@ -6,7 +6,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, ArrowLeft, Check, Zap, Star } from 'lucide-react';
+import { MessageCircle, ArrowLeft, Check, Zap, Star, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -49,6 +49,26 @@ const MessagePurchase = () => {
     }
   ];
 
+  const handleAddToCart = (pack: typeof messagePacks[0]) => {
+    if (!user) {
+      toast({
+        title: "Please log in",
+        description: "You need to be logged in to add items to cart.",
+        variant: "destructive"
+      });
+      navigate('/login');
+      return;
+    }
+
+    // Add to cart logic would go here
+    toast({
+      title: "Added to Cart!",
+      description: `${pack.name} has been added to your cart.`,
+    });
+    
+    navigate('/cart');
+  };
+
   const handlePurchase = async (pack: typeof messagePacks[0]) => {
     if (!user) {
       toast({
@@ -88,7 +108,7 @@ const MessagePurchase = () => {
     <AppLayout>
       <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 p-4">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
+          {/* Header - Fixed alignment */}
           <div className="flex items-center mb-8">
             <Button
               variant="ghost"
@@ -97,10 +117,13 @@ const MessagePurchase = () => {
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <div className="flex-1 text-center">
-              <h1 className="text-3xl font-bold text-gray-900">Premium Messages</h1>
-              <p className="text-gray-600 mt-1">Choose your message pack and start connecting</p>
+            <div className="flex-1">
+              <div className="text-center">
+                <h1 className="text-3xl font-bold text-gray-900">Premium Messages</h1>
+                <p className="text-gray-600 mt-1">Choose your message pack and start connecting</p>
+              </div>
             </div>
+            <div className="w-12"></div> {/* Spacer to balance the back button */}
           </div>
 
           {/* Info Card */}
@@ -172,23 +195,34 @@ const MessagePurchase = () => {
                       ))}
                     </ul>
 
-                    <Button
-                      onClick={() => handlePurchase(pack)}
-                      disabled={isLoading}
-                      className={`w-full ${pack.popular 
-                        ? 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90' 
-                        : 'bg-green-600 hover:bg-green-700'
-                      } text-white`}
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center">
-                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                          Processing...
-                        </div>
-                      ) : (
-                        `Purchase ${pack.messages} Messages`
-                      )}
-                    </Button>
+                    <div className="space-y-2">
+                      <Button
+                        onClick={() => handleAddToCart(pack)}
+                        variant="outline"
+                        className="w-full border-gray-300 hover:bg-gray-50"
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Add to Cart
+                      </Button>
+
+                      <Button
+                        onClick={() => handlePurchase(pack)}
+                        disabled={isLoading}
+                        className={`w-full ${pack.popular 
+                          ? 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90' 
+                          : 'bg-green-600 hover:bg-green-700'
+                        } text-white`}
+                      >
+                        {isLoading ? (
+                          <div className="flex items-center">
+                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                            Processing...
+                          </div>
+                        ) : (
+                          `Buy Now - ${pack.messages} Messages`
+                        )}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
