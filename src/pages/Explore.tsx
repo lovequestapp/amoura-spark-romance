@@ -8,77 +8,7 @@ import { Profile } from '@/components/home/SwipeableCard';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-
-// Mock profiles data to ensure we always have content
-const mockProfiles: Profile[] = [
-  {
-    id: 1,
-    name: "Isabella",
-    age: 25,
-    distance: "1 mile away",
-    occupation: "Graduate Student",
-    photos: [
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=600&fit=crop"
-    ],
-    bio: "Science nerd by day, bookworm by night. Currently working on my PhD in Marine Biology.",
-    prompts: [
-      {
-        question: "I nerd out on...",
-        answer: "Ocean conservation, discovering new species, and explaining why dolphins are actually terrifying."
-      }
-    ],
-    verified: true,
-    premium: false,
-    featured: false,
-    personalityMatch: 83,
-    matchScore: 85
-  },
-  {
-    id: 2,
-    name: "Sophia",
-    age: 28,
-    distance: "2 miles away",
-    occupation: "Software Engineer",
-    photos: [
-      "https://images.unsplash.com/photo-1494790108755-2616b612b77c?w=400&h=600&fit=crop"
-    ],
-    bio: "Building the future one line of code at a time. Love hiking, coffee, and good conversations.",
-    prompts: [
-      {
-        question: "My ideal Sunday...",
-        answer: "Coffee shop coding session followed by a hike with my dog."
-      }
-    ],
-    verified: true,
-    premium: true,
-    featured: false,
-    personalityMatch: 78,
-    matchScore: 82
-  },
-  {
-    id: 3,
-    name: "Emma",
-    age: 26,
-    distance: "3 miles away",
-    occupation: "Teacher",
-    photos: [
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=600&fit=crop"
-    ],
-    bio: "Passionate about education and making a difference. Love books, travel, and weekend adventures.",
-    prompts: [
-      {
-        question: "I get excited about...",
-        answer: "Seeing my students have those 'aha!' moments when they finally understand something."
-      }
-    ],
-    verified: false,
-    premium: false,
-    featured: true,
-    personalityMatch: 89,
-    matchScore: 91
-  }
-];
+import { enhancedProfiles } from '@/utils/placeholderData';
 
 const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (direction: string) => void }) => {
   const controls = useAnimation();
@@ -249,11 +179,23 @@ const Explore = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [profiles, setProfiles] = useState<Profile[]>(mockProfiles);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  console.log('Explore render - profiles:', profiles.length, 'currentIndex:', currentIndex);
+  // Load demo profiles on component mount
+  useEffect(() => {
+    console.log('Loading demo profiles...');
+    setLoading(true);
+    
+    // Simulate loading delay for realism
+    setTimeout(() => {
+      setProfiles(enhancedProfiles);
+      setCurrentIndex(0);
+      setLoading(false);
+      console.log('Demo profiles loaded:', enhancedProfiles.length);
+    }, 1000);
+  }, []);
 
   const handleSwipe = async (direction: string) => {
     const currentProfile = profiles[currentIndex];
@@ -268,7 +210,6 @@ const Explore = () => {
         description: `You liked ${currentProfile.name}!`,
       });
     } else if (direction === "message") {
-      // Navigate to messages or show message interface
       toast({
         title: "Message",
         description: `Opening conversation with ${currentProfile.name}`,
@@ -282,12 +223,12 @@ const Explore = () => {
   const currentProfile = profiles[currentIndex];
   const hasMoreProfiles = currentIndex < profiles.length;
 
-  console.log('Current profile:', currentProfile?.name, 'Has more:', hasMoreProfiles);
+  console.log('Explore render - profiles:', profiles.length, 'currentIndex:', currentIndex, 'hasMore:', hasMoreProfiles);
 
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading profiles...</p>
@@ -323,7 +264,7 @@ const Explore = () => {
               <Button
                 onClick={() => {
                   setCurrentIndex(0);
-                  setProfiles([...mockProfiles]);
+                  setProfiles([...enhancedProfiles]);
                 }}
                 className="bg-pink-500 hover:bg-pink-600"
               >
