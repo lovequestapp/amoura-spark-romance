@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -108,7 +107,7 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
         
         {/* Profile Info - Bottom overlay */}
-        <div className="absolute bottom-20 left-0 right-0 text-white z-10 p-6">
+        <div className="absolute bottom-32 left-0 right-0 text-white z-10 p-6">
           <div className="flex items-center gap-2 mb-2">
             <h2 className="text-3xl font-bold">{profile.name}, {profile.age}</h2>
             {profile.verified && (
@@ -131,8 +130,8 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
           </div>
         </div>
 
-        {/* Floating Action Buttons - Overlaid on the card */}
-        <div className="absolute bottom-6 left-0 right-0 z-20 px-6">
+        {/* Floating Action Buttons - Moved higher up */}
+        <div className="absolute bottom-8 left-0 right-0 z-20 px-6">
           <div className="flex justify-center gap-4">
             {/* Pass Button */}
             <motion.button
