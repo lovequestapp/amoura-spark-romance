@@ -12,9 +12,9 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchAutoHide: false,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: "#FF1493",
       showSpinner: true,
-      spinnerColor: "#FF6B81", // Using amoura-deep-pink color
+      spinnerColor: "#FFFFFF", // White spinner on pink background
       androidSpinnerStyle: "large"
     },
     Keyboard: {
@@ -22,16 +22,16 @@ const config: CapacitorConfig = {
       resizeOnFullScreen: true
     },
     StatusBar: {
-      style: "dark",
-      backgroundColor: "#FFFFFF",
+      style: "light",
+      backgroundColor: "#FF1493", // Using amoura-deep-pink color
       overlaysWebView: false
     }
   },
   android: {
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#FF1493"
   },
   ios: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FF1493",
     contentInset: "always",
     allowsLinkPreview: true,
     scrollEnabled: true,
