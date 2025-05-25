@@ -372,10 +372,10 @@ const Home = () => {
             >
               <Button
                 onClick={() => handleSwipeWithHistory("left")}
-                size="lg"
-                className="h-16 w-16 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 shadow-lg transform transition-all duration-200 hover:shadow-xl"
+                variant="ghost"
+                className="h-14 w-14 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 shadow-lg transform transition-all duration-200 hover:shadow-xl"
               >
-                <X size={24} className="text-gray-500" />
+                <X size={20} className="text-gray-500" />
               </Button>
             </motion.div>
             
@@ -386,10 +386,9 @@ const Home = () => {
             >
               <Button
                 onClick={() => handleSwipeWithHistory("right")}
-                size="lg"
-                className="h-16 w-16 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-lg transform transition-all duration-200 hover:shadow-xl"
+                className="h-14 w-14 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-lg transform transition-all duration-200 hover:shadow-xl"
               >
-                <Heart size={24} className="text-white" />
+                <Heart size={20} className="text-white" />
               </Button>
             </motion.div>
           </motion.div>
