@@ -88,62 +88,64 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
       style={{ touchAction: 'pan-x' }}
       onClick={handleCardClick}
     >
-      <div className="relative w-full h-full overflow-hidden bg-white">
-        {/* Profile Image */}
-        <img 
-          src={profile.photos[0]} 
-          alt={profile.name} 
-          className="w-full h-full object-cover"
-          draggable={false}
-        />
+      <div className="relative w-full h-full overflow-hidden bg-white rounded-2xl mx-4" style={{ height: 'calc(100vh - 180px)' }}>
+        {/* Profile Image - Takes most of the space */}
+        <div className="relative w-full" style={{ height: 'calc(100% - 140px)' }}>
+          <img 
+            src={profile.photos[0]} 
+            alt={profile.name} 
+            className="w-full h-full object-cover"
+            draggable={false}
+          />
+          
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        </div>
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-
-        {/* Profile Info */}
-        <div className="absolute bottom-20 left-6 right-6 text-white z-20">
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-4xl font-bold">{profile.name}, {profile.age}</h2>
+        {/* Profile Info - Compact bottom section */}
+        <div className="absolute bottom-0 left-0 right-0 text-white z-20 p-4" style={{ height: '140px' }}>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-2xl font-bold">{profile.name}, {profile.age}</h2>
             {profile.verified && (
-              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
             )}
           </div>
           
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            <p className="text-white/90 text-base">{profile.distance}</p>
+            <p className="text-white/90 text-sm">{profile.distance}</p>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <p className="text-white/90 text-base">{profile.occupation}</p>
+          <div className="flex items-center gap-2 mb-3">
+            <Star className="w-3 h-3 text-yellow-400 fill-current" />
+            <p className="text-white/90 text-sm">{profile.occupation}</p>
           </div>
-        </div>
 
-        {/* Action Buttons - Fixed at bottom */}
-        <div className="absolute bottom-4 left-4 right-4 flex gap-3 z-20">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleLike}
-            className="flex-1 bg-black/40 backdrop-blur-sm text-white py-3 rounded-full text-center font-medium border border-white/20 flex items-center justify-center gap-2"
-          >
-            <Heart className="w-4 h-4" />
-            Like
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleSuperLike}
-            className="flex-1 bg-blue-500 text-white py-3 rounded-full text-center font-medium shadow-lg flex items-center justify-center gap-2"
-          >
-            <Star className="w-4 h-4 fill-current" />
-            Super Like
-          </motion.button>
+          {/* Action Buttons - Always visible at bottom */}
+          <div className="flex gap-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLike}
+              className="flex-1 bg-black/40 backdrop-blur-sm text-white py-2.5 rounded-full text-center font-medium border border-white/20 flex items-center justify-center gap-2 text-sm"
+            >
+              <Heart className="w-4 h-4" />
+              Like
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSuperLike}
+              className="flex-1 bg-blue-500 text-white py-2.5 rounded-full text-center font-medium shadow-lg flex items-center justify-center gap-2 text-sm"
+            >
+              <Star className="w-4 h-4 fill-current" />
+              Super Like
+            </motion.button>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -216,7 +218,7 @@ const Explore = () => {
 
   return (
     <AppLayout>
-      <div className="fixed inset-0 bg-black overflow-hidden" style={{ height: '100vh', maxHeight: '100vh' }}>
+      <div className="fixed inset-0 bg-black overflow-hidden" style={{ height: '100vh' }}>
         {hasMoreProfiles && currentProfile ? (
           <div className="absolute inset-0">
             <ExploreCard
