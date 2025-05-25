@@ -117,6 +117,11 @@ function App() {
                       <Messages />
                     </ProtectedRoute>
                   } />
+                  <Route path="/messages/:id" element={
+                    <ProtectedRoute>
+                      <Messages />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/profile" element={
                     <ProtectedRoute>
                       <Profile />
