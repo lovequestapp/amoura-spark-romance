@@ -84,12 +84,12 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
         {/* Profile Info */}
-        <div className="absolute bottom-32 left-6 right-6 text-white z-20">
+        <div className="absolute bottom-20 left-6 right-6 text-white z-20">
           <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-5xl font-bold">{profile.name}, {profile.age}</h2>
+            <h2 className="text-4xl font-bold">{profile.name}, {profile.age}</h2>
             {profile.verified && (
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -98,34 +98,34 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
           
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            <p className="text-white/90 text-lg">{profile.distance}</p>
+            <p className="text-white/90 text-base">{profile.distance}</p>
           </div>
           
           <div className="flex items-center gap-2">
-            <Star className="w-5 h-5 text-yellow-400 fill-current" />
-            <p className="text-white/90 text-lg">{profile.occupation}</p>
+            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+            <p className="text-white/90 text-base">{profile.occupation}</p>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="absolute bottom-6 left-6 right-6 flex gap-4 z-20">
+        {/* Action Buttons - Fixed at bottom */}
+        <div className="absolute bottom-4 left-4 right-4 flex gap-3 z-20">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onSwipe("message")}
-            className="flex-1 bg-black/40 backdrop-blur-sm text-white py-4 rounded-full text-center font-medium border border-white/20 flex items-center justify-center gap-2"
+            onClick={() => onSwipe("like")}
+            className="flex-1 bg-black/40 backdrop-blur-sm text-white py-3 rounded-full text-center font-medium border border-white/20 flex items-center justify-center gap-2"
           >
-            <MessageCircle className="w-5 h-5" />
-            Message
+            <Heart className="w-4 h-4" />
+            Like
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onSwipe("right")}
-            className="flex-1 bg-pink-500 text-white py-4 rounded-full text-center font-medium shadow-lg flex items-center justify-center gap-2"
+            onClick={() => onSwipe("superLike")}
+            className="flex-1 bg-blue-500 text-white py-3 rounded-full text-center font-medium shadow-lg flex items-center justify-center gap-2"
           >
-            <span className="text-xl">❤️</span>
-            Like
+            <Star className="w-4 h-4 fill-current" />
+            Super Like
           </motion.button>
         </div>
       </div>
@@ -163,15 +163,15 @@ const Explore = () => {
     console.log('Explore: Swiping', direction, 'on profile:', currentProfile.name);
 
     // Handle different swipe actions
-    if (direction === "right") {
+    if (direction === "right" || direction === "like") {
       toast({
         title: "Liked!",
         description: `You liked ${currentProfile.name}!`,
       });
-    } else if (direction === "message") {
+    } else if (direction === "superLike") {
       toast({
-        title: "Message",
-        description: `Opening conversation with ${currentProfile.name}`,
+        title: "Super Like!",
+        description: `You super liked ${currentProfile.name}! ⭐`,
       });
     }
 
@@ -187,7 +187,7 @@ const Explore = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 h-screen">
+        <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading profiles...</p>
@@ -199,7 +199,7 @@ const Explore = () => {
 
   return (
     <AppLayout>
-      <div className="flex-1 relative bg-black h-screen overflow-hidden">
+      <div className="fixed inset-0 bg-black overflow-hidden" style={{ height: '100vh', height: '100dvh' }}>
         {hasMoreProfiles && currentProfile ? (
           <div className="absolute inset-0">
             <ExploreCard
@@ -209,15 +209,15 @@ const Explore = () => {
             />
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center p-8 h-screen">
+          <div className="fixed inset-0 flex items-center justify-center p-8">
             <div className="text-center">
               <div className="w-24 h-24 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Heart className="w-12 h-12 text-pink-500" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-2xl font-bold text-white mb-4">
                 No More Profiles
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-300 mb-6">
                 You've seen all available profiles. Check back later for new matches!
               </p>
               <Button
