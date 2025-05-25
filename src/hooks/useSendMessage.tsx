@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
@@ -86,6 +85,72 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
     }
   };
 
+  const sendImageMessage = async (imageFile: File) => {
+    if (!conversationId || !senderId) return null;
+    
+    setSending(true);
+    try {
+      const safeSenderId = getDemoUUID(senderId);
+      
+      // Generate a unique file name
+      const fileExtension = imageFile.name.split('.').pop() || 'jpg';
+      const fileName = `${uuidv4()}.${fileExtension}`;
+      const filePath = `${safeSenderId}/${fileName}`;
+
+      // Upload the image file to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from('message-images')
+        .upload(filePath, imageFile);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('message-images')
+        .getPublicUrl(filePath);
+
+      // Insert message record
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          id: uuidv4(),
+          conversation_id: conversationId,
+          sender_id: safeSenderId,
+          content: urlData.publicUrl,
+          message_type: 'image' as 'text' | 'voice' | 'image'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const formattedMessage: FormattedMessage = {
+        id: data.id,
+        text: data.content,
+        sender: 'user',
+        time: data.created_at,
+        seen: false,
+        message_type: 'image'
+      };
+      
+      if (onMessageSent) {
+        onMessageSent(formattedMessage);
+      }
+      
+      return formattedMessage;
+    } catch (error: any) {
+      console.error('Error sending image message:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to send image",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setSending(false);
+    }
+  };
+
   const sendVoiceMessage = async (audioBlob: Blob) => {
     if (!conversationId || !senderId) return null;
     
@@ -153,6 +218,7 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
 
   return {
     sendTextMessage,
+    sendImageMessage,
     sendVoiceMessage,
     sending
   };

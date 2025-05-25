@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Image, Send, Mic } from 'lucide-react';
+import { ArrowLeft, Send, Mic } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import AppLayout from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import IceBreaker from '@/components/messages/IceBreaker';
 import MessageBubble from '@/components/messages/MessageBubble';
 import EmojiPicker from '@/components/messages/EmojiPicker';
 import VoiceRecorder from '@/components/messages/VoiceRecorder';
+import ImageUpload from '@/components/messages/ImageUpload';
 import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
 import { useConversation } from '@/hooks/useConversation';
 import { useSendMessage } from '@/hooks/useSendMessage';
@@ -61,7 +62,7 @@ const Messages = () => {
     userId
   );
   
-  const { sendTextMessage, sendVoiceMessage, sending } = useSendMessage(
+  const { sendTextMessage, sendImageMessage, sendVoiceMessage, sending } = useSendMessage(
     conversation?.id || null,
     userId,
     addMessage
@@ -100,6 +101,15 @@ const Messages = () => {
       }
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  };
+  
+  const handleImageUpload = async (file: File) => {
+    if (sending || !conversation?.id) return;
+    
+    const result = await sendImageMessage(file);
+    if (result) {
+      console.log('Image sent successfully');
     }
   };
   
@@ -194,9 +204,10 @@ const Messages = () => {
           </div>
         ) : (
           <form onSubmit={handleSendMessage} className="p-3 border-t flex items-center gap-2 bg-white">
-            <button type="button" className="text-gray-500 p-2 hover:text-gray-700 transition-colors">
-              <Image size={20} />
-            </button>
+            <ImageUpload 
+              onImageSelect={handleImageUpload}
+              disabled={sending || !conversation?.id}
+            />
             
             <div className="flex-1 relative">
               <Input

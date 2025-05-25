@@ -28,6 +28,18 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       >
         {message.message_type === 'voice' && message.voice_url ? (
           <audio src={message.voice_url} controls className="max-w-full h-10" />
+        ) : message.message_type === 'image' && message.text ? (
+          <div className="space-y-2">
+            <img 
+              src={message.text} 
+              alt="Shared image" 
+              className="max-w-full h-auto rounded-lg max-h-64 object-cover"
+              onError={(e) => {
+                console.error('Failed to load image:', message.text);
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          </div>
         ) : (
           <p className="break-words">{message.text}</p>
         )}
