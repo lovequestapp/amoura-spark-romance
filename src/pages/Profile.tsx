@@ -68,6 +68,9 @@ const Profile = () => {
     );
   }
 
+  // Default interests if none are available
+  const userInterests = profile?.interests || ['Travel', 'Music', 'Fitness', 'Reading'];
+
   return (
     <AppLayout>
       <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 p-4">
@@ -214,7 +217,7 @@ const Profile = () => {
               </TabsContent>
 
               <TabsContent value="interests" className="mt-6">
-                <ProfileInterests />
+                <ProfileInterests interests={userInterests} />
               </TabsContent>
 
               <TabsContent value="stats" className="mt-6">

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, ShoppingCart, Star, Zap, Users, BarChart3, Heart, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/hooks/useCart';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Product {
@@ -27,6 +28,7 @@ const AddOns = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { addToCart, getCartCount } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -84,26 +86,18 @@ const AddOns = () => {
       return;
     }
 
-    // Add to cart logic - for now using localStorage
-    const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = existingCart.find((item: any) => item.id === product.id);
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: `$${(product.price_cents / 100).toFixed(2)}`,
+      priceValue: product.price_cents,
+      features: product.features,
+      quantity: 1,
+      category: product.category
+    };
 
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      existingCart.push({
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        price: `$${(product.price_cents / 100).toFixed(2)}`,
-        priceValue: product.price_cents,
-        features: product.features,
-        quantity: 1,
-        category: product.category
-      });
-    }
-
-    localStorage.setItem('cart', JSON.stringify(existingCart));
+    addToCart(cartItem);
 
     toast({
       title: "Added to Cart!",
@@ -147,10 +141,15 @@ const AddOns = () => {
             <Button
               variant="outline"
               onClick={() => navigate('/cart')}
-              className="ml-4"
+              className="ml-4 relative"
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               Cart
+              {getCartCount() > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-amoura-deep-pink text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                  {getCartCount()}
+                </Badge>
+              )}
             </Button>
           </div>
 
