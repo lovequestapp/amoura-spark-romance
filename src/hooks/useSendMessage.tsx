@@ -167,7 +167,10 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
   };
 
   const sendVoiceMessage = async (audioBlob: Blob) => {
-    if (!conversationId || !senderId) return null;
+    if (!conversationId || !senderId) {
+      console.error('Cannot send voice message - missing required data:', { conversationId, senderId });
+      return null;
+    }
     
     setSending(true);
     try {
@@ -178,15 +181,19 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
       const filePath = `voice-messages/${fileName}`;
 
       console.log('Attempting to upload voice message to bucket: messages, path:', filePath);
+      console.log('Audio blob size:', audioBlob.size, 'type:', audioBlob.type);
 
-      // Upload the audio file to Supabase storage (using 'messages' bucket for voice)
+      // Upload the audio file to Supabase storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('messages')
-        .upload(filePath, audioBlob);
+        .upload(filePath, audioBlob, {
+          contentType: 'audio/webm',
+          cacheControl: '3600'
+        });
 
       if (uploadError) {
         console.error('Voice upload error:', uploadError);
-        throw uploadError;
+        throw new Error(`Voice upload failed: ${uploadError.message}`);
       }
 
       console.log('Voice message uploaded successfully:', uploadData);
@@ -198,14 +205,16 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
 
       console.log('Generated voice URL:', urlData.publicUrl);
 
-      // Insert message record
+      // Insert message record with voice_url
+      const messageId = uuidv4();
       const { data, error } = await supabase
         .from('messages')
         .insert({
-          id: uuidv4(),
+          id: messageId,
           conversation_id: conversationId,
           sender_id: safeSenderId,
           voice_url: urlData.publicUrl,
+          content: null, // Voice messages don't have text content
           message_type: 'voice' as 'text' | 'voice' | 'image'
         })
         .select()
@@ -213,7 +222,7 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
 
       if (error) {
         console.error('Error inserting voice message:', error);
-        throw error;
+        throw new Error(`Database insert failed: ${error.message}`);
       }
 
       console.log('Voice message inserted successfully:', data);
@@ -235,8 +244,8 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
     } catch (error: any) {
       console.error('Error sending voice message:', error);
       toast({
-        title: "Error",
-        description: error?.message || "Failed to send voice message",
+        title: "Voice Message Error",
+        description: error?.message || "Failed to send voice message. Please try again.",
         variant: "destructive",
       });
       return null;

@@ -27,7 +27,23 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         }`}
       >
         {message.message_type === 'voice' && message.voice_url ? (
-          <audio src={message.voice_url} controls className="max-w-full h-10" />
+          <div className="space-y-2">
+            <audio 
+              src={message.voice_url} 
+              controls 
+              className="max-w-full h-10"
+              onError={(e) => {
+                console.error('Failed to load voice message:', message.voice_url);
+                console.error('Audio error event:', e);
+              }}
+              onLoadStart={() => {
+                console.log('Loading voice message:', message.voice_url);
+              }}
+              onCanPlayThrough={() => {
+                console.log('Voice message can play through:', message.voice_url);
+              }}
+            />
+          </div>
         ) : message.message_type === 'image' && message.text ? (
           <div className="space-y-2">
             <img 
