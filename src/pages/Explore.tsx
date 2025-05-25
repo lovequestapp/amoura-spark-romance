@@ -4,12 +4,81 @@ import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, ArrowLeft, Star } from "lucide-react";
-import { useCardSwiper } from '@/hooks/use-card-swiper';
 import { Profile } from '@/components/home/SwipeableCard';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { enhancedProfiles } from '@/utils/placeholderData';
+
+// Mock profiles data to ensure we always have content
+const mockProfiles: Profile[] = [
+  {
+    id: 1,
+    name: "Isabella",
+    age: 25,
+    distance: "1 mile away",
+    occupation: "Graduate Student",
+    photos: [
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=600&fit=crop"
+    ],
+    bio: "Science nerd by day, bookworm by night. Currently working on my PhD in Marine Biology.",
+    prompts: [
+      {
+        question: "I nerd out on...",
+        answer: "Ocean conservation, discovering new species, and explaining why dolphins are actually terrifying."
+      }
+    ],
+    verified: true,
+    premium: false,
+    featured: false,
+    personalityMatch: 83,
+    matchScore: 85
+  },
+  {
+    id: 2,
+    name: "Sophia",
+    age: 28,
+    distance: "2 miles away",
+    occupation: "Software Engineer",
+    photos: [
+      "https://images.unsplash.com/photo-1494790108755-2616b612b77c?w=400&h=600&fit=crop"
+    ],
+    bio: "Building the future one line of code at a time. Love hiking, coffee, and good conversations.",
+    prompts: [
+      {
+        question: "My ideal Sunday...",
+        answer: "Coffee shop coding session followed by a hike with my dog."
+      }
+    ],
+    verified: true,
+    premium: true,
+    featured: false,
+    personalityMatch: 78,
+    matchScore: 82
+  },
+  {
+    id: 3,
+    name: "Emma",
+    age: 26,
+    distance: "3 miles away",
+    occupation: "Teacher",
+    photos: [
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=600&fit=crop"
+    ],
+    bio: "Passionate about education and making a difference. Love books, travel, and weekend adventures.",
+    prompts: [
+      {
+        question: "I get excited about...",
+        answer: "Seeing my students have those 'aha!' moments when they finally understand something."
+      }
+    ],
+    verified: false,
+    premium: false,
+    featured: true,
+    personalityMatch: 89,
+    matchScore: 91
+  }
+];
 
 const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (direction: string) => void }) => {
   const controls = useAnimation();
@@ -130,11 +199,13 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         <div className="absolute bottom-32 left-6 right-6 text-white z-20">
           <div className="flex items-center gap-3 mb-2">
             <h2 className="text-5xl font-bold">{profile.name}, {profile.age}</h2>
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-            </div>
+            {profile.verified && (
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+            )}
           </div>
           
           <div className="flex items-center gap-2 mb-2">
@@ -178,39 +249,17 @@ const Explore = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>(mockProfiles);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  // Load profiles
-  useEffect(() => {
-    const loadProfiles = async () => {
-      setLoading(true);
-      try {
-        // Use enhanced profiles with realistic data
-        const exploreProfiles = enhancedProfiles.map(p => ({
-          ...p,
-          matchScore: Math.floor(Math.random() * 40) + 60,
-        }));
-        setProfiles(exploreProfiles);
-      } catch (error) {
-        console.error('Error loading profiles:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load profiles",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProfiles();
-  }, [toast]);
+  console.log('Explore render - profiles:', profiles.length, 'currentIndex:', currentIndex);
 
   const handleSwipe = async (direction: string) => {
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
+
+    console.log('Swiping', direction, 'on profile:', currentProfile.name);
 
     // Handle different swipe actions
     if (direction === "right") {
@@ -232,6 +281,8 @@ const Explore = () => {
 
   const currentProfile = profiles[currentIndex];
   const hasMoreProfiles = currentIndex < profiles.length;
+
+  console.log('Current profile:', currentProfile?.name, 'Has more:', hasMoreProfiles);
 
   if (loading) {
     return (
@@ -272,12 +323,7 @@ const Explore = () => {
               <Button
                 onClick={() => {
                   setCurrentIndex(0);
-                  // Reload profiles
-                  const refreshedProfiles = enhancedProfiles.map(p => ({
-                    ...p,
-                    matchScore: Math.floor(Math.random() * 40) + 60,
-                  }));
-                  setProfiles(refreshedProfiles);
+                  setProfiles([...mockProfiles]);
                 }}
                 className="bg-pink-500 hover:bg-pink-600"
               >
