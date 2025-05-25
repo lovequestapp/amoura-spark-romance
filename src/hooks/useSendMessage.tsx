@@ -177,17 +177,26 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
       const fileName = `${uuidv4()}.webm`;
       const filePath = `voice-messages/${fileName}`;
 
+      console.log('Attempting to upload voice message to bucket: messages, path:', filePath);
+
       // Upload the audio file to Supabase storage (using 'messages' bucket for voice)
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('messages')
         .upload(filePath, audioBlob);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Voice upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Voice message uploaded successfully:', uploadData);
 
       // Get public URL
       const { data: urlData } = supabase.storage
         .from('messages')
         .getPublicUrl(filePath);
+
+      console.log('Generated voice URL:', urlData.publicUrl);
 
       // Insert message record
       const { data, error } = await supabase
@@ -202,7 +211,12 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting voice message:', error);
+        throw error;
+      }
+
+      console.log('Voice message inserted successfully:', data);
 
       const formattedMessage: FormattedMessage = {
         id: data.id,
