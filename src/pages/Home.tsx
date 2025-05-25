@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -317,12 +316,6 @@ const Home = () => {
       <div className="flex-1 flex flex-col p-4 w-full max-w-full">
         <DateIdea />
         
-        <PremiumFeatures 
-          onRewind={handleRewind}
-          onSuperLike={handleSuperLike}
-          onBoost={handleBoost}
-        />
-        
         <MatchFilters onApplyFilters={handleApplyFilters} />
         
         <div className="flex-1 flex items-center justify-center relative w-full">
@@ -401,6 +394,12 @@ const Home = () => {
             </motion.div>
           </motion.div>
         )}
+        
+        <PremiumFeatures 
+          onRewind={handleRewind}
+          onSuperLike={handleSuperLike}
+          onBoost={handleBoost}
+        />
       </div>
     </AppLayout>
   );
