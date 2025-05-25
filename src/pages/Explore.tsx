@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -12,6 +11,7 @@ import { enhancedProfiles } from '@/utils/placeholderData';
 
 const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (direction: string) => void }) => {
   const controls = useAnimation();
+  const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
   
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -53,6 +53,22 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on buttons or if dragging
+    if ((e.target as HTMLElement).closest('button') || isDragging) return;
+    navigate(`/profile/${profile.id}`);
+  };
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSwipe("like");
+  };
+
+  const handleSuperLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSwipe("superLike");
+  };
+
   if (!profile) {
     console.log('ExploreCard: No profile provided');
     return null;
@@ -68,8 +84,9 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
       onDragStart={() => setIsDragging(true)}
       onDragEnd={handleDragEnd}
       animate={controls}
-      className="absolute inset-0 cursor-grab active:cursor-grabbing touch-none"
+      className="absolute inset-0 cursor-pointer touch-none"
       style={{ touchAction: 'pan-x' }}
+      onClick={handleCardClick}
     >
       <div className="relative w-full h-full overflow-hidden bg-white">
         {/* Profile Image */}
@@ -112,7 +129,7 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onSwipe("like")}
+            onClick={handleLike}
             className="flex-1 bg-black/40 backdrop-blur-sm text-white py-3 rounded-full text-center font-medium border border-white/20 flex items-center justify-center gap-2"
           >
             <Heart className="w-4 h-4" />
@@ -121,7 +138,7 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onSwipe("superLike")}
+            onClick={handleSuperLike}
             className="flex-1 bg-blue-500 text-white py-3 rounded-full text-center font-medium shadow-lg flex items-center justify-center gap-2"
           >
             <Star className="w-4 h-4 fill-current" />
