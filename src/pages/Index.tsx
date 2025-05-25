@@ -214,8 +214,8 @@ const Index = () => {
                   
                   {/* Profile image */}
                   <img 
-                    src="/lovable-uploads/7d408e6b-06c5-4527-8848-6cc3f50683ac.png" 
-                    alt="Isabella Profile" 
+                    src="/lovable-uploads/f572c971-a715-43c4-84b3-ce8d82790d45.png" 
+                    alt="Profile" 
                     className="w-full h-full object-cover"
                   />
                   
@@ -245,15 +245,15 @@ const Index = () => {
                     {/* Profile info */}
                     <div className="text-white">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-3xl font-bold">Isabella, 25</h3>
+                        <h3 className="text-3xl font-bold">Sofia, 24</h3>
                         <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                           <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </div>
                       </div>
-                      <p className="text-white/80 text-sm mb-1">📍 1 mile away</p>
-                      <p className="text-white/80 text-sm">Graduate Student</p>
+                      <p className="text-white/80 text-sm mb-1">📍 2 miles away</p>
+                      <p className="text-white/80 text-sm">Marketing Professional</p>
                     </div>
                     
                     {/* Action buttons */}
@@ -263,7 +263,7 @@ const Index = () => {
                         whileTap={{ scale: 0.95 }}
                         className="flex-1 bg-white/10 backdrop-blur-sm text-white py-3 rounded-full text-center font-medium border border-white/20"
                       >
-                        💰 Message
+                        💬 Message
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
@@ -411,7 +411,7 @@ const Index = () => {
             className="mt-8 text-gray-500 text-sm"
           >
             Join over 2 million singles already on Amoura
-          </p>
+          </motion.p>
         </motion.div>
       </section>
     </div>
