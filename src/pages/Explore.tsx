@@ -202,21 +202,22 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
       {/* Clean Action Buttons */}
       <div className="absolute bottom-24 left-0 right-0 z-20 px-6">
         <div className="flex items-center justify-center gap-4">
+          {/* Message Button with $ indicator for premium feature */}
+          <Button
+            onClick={handleMessage}
+            className="h-14 px-8 bg-black/60 backdrop-blur-md hover:bg-black/70 text-white rounded-full flex items-center gap-3 font-medium text-base transition-all duration-200 hover:scale-105 border border-white/20"
+          >
+            <MessageCircle className="w-5 h-5" />
+            $ Message
+          </Button>
+
           {/* Like Button - Primary action */}
           <Button
             onClick={handleLike}
-            className="h-14 w-14 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white flex items-center justify-center font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+            className="h-14 px-10 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full flex items-center gap-3 font-semibold text-base transition-all duration-200 hover:scale-105 shadow-lg"
           >
             <Heart className="w-5 h-5" />
-          </Button>
-
-          {/* Message Button */}
-          <Button
-            onClick={handleMessage}
-            className="h-14 px-6 bg-black/60 backdrop-blur-md hover:bg-black/70 text-white rounded-full flex items-center gap-2 font-medium transition-all duration-200 hover:scale-105 border border-white/20"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Message
+            Like
           </Button>
         </div>
         
@@ -226,7 +227,7 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
           <Button
             onClick={handlePass}
             variant="ghost"
-            className="h-12 w-12 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-500 flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg"
+            className="h-10 w-10 rounded-full bg-black/40 hover:bg-black/60 text-white border border-white/20 flex items-center justify-center transition-all duration-200 hover:scale-105"
           >
             <X className="w-5 h-5" />
           </Button>
@@ -234,9 +235,9 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
           {/* Super Like Button */}
           <Button
             onClick={handleSuperLike}
-            className="h-12 w-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg"
+            className="h-10 w-10 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg"
           >
-            <Star className="w-4 h-4 fill-current" />
+            <Star className="w-5 h-5 fill-current" />
           </Button>
         </div>
       </div>
