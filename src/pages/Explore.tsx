@@ -136,8 +136,8 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         </div>
       </div>
 
-      {/* Clean Action Buttons - Moved down by 50px from previous position */}
-      <div className="absolute bottom-16 left-0 right-0 z-20 px-6">
+      {/* Clean Action Buttons - Moved up by 25px from previous position */}
+      <div className="absolute bottom-20 left-0 right-0 z-20 px-6">
         <div className="flex items-center justify-center gap-4">
           {/* Message Button with $ indicator for premium feature */}
           <Button
