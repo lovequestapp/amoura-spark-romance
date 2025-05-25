@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
@@ -97,17 +98,26 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
       const fileName = `${uuidv4()}.${fileExtension}`;
       const filePath = `${safeSenderId}/${fileName}`;
 
+      console.log('Attempting to upload image to bucket: message-images, path:', filePath);
+
       // Upload the image file to Supabase storage
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('message-images')
         .upload(filePath, imageFile);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Image uploaded successfully:', uploadData);
 
       // Get public URL
       const { data: urlData } = supabase.storage
         .from('message-images')
         .getPublicUrl(filePath);
+
+      console.log('Generated public URL:', urlData.publicUrl);
 
       // Insert message record
       const { data, error } = await supabase
@@ -122,7 +132,12 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting image message:', error);
+        throw error;
+      }
+
+      console.log('Image message inserted successfully:', data);
 
       const formattedMessage: FormattedMessage = {
         id: data.id,
@@ -162,7 +177,7 @@ export const useSendMessage = (conversationId: string | null, senderId: string |
       const fileName = `${uuidv4()}.webm`;
       const filePath = `voice-messages/${fileName}`;
 
-      // Upload the audio file to Supabase storage
+      // Upload the audio file to Supabase storage (using 'messages' bucket for voice)
       const { error: uploadError } = await supabase.storage
         .from('messages')
         .upload(filePath, audioBlob);
