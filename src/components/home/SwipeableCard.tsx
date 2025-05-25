@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { motion, useAnimation, PanInfo } from 'framer-motion';
+import { motion, useAnimation, PanInfo, useMotionValue, useTransform } from 'framer-motion';
 import EnhancedProfileCard from './EnhancedProfileCard';
 import { useNavigate } from 'react-router-dom';
 
@@ -64,25 +64,64 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleProfileClick = () => {
+  // Motion values for smooth dragging animations
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  
+  // Transform values for dynamic animations during drag
+  const rotate = useTransform(x, [-300, 0, 300], [-30, 0, 30]);
+  const scale = useTransform(x, [-300, 0, 300], [0.8, 1, 0.8]);
+  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0, 0.5, 1, 0.5, 0]);
+  
+  // Like/Pass indicator opacity
+  const likeOpacity = useTransform(x, [0, 150], [0, 1]);
+  const passOpacity = useTransform(x, [-150, 0], [1, 0]);
+
+  const handleProfileClick = (e: React.MouseEvent) => {
+    // Prevent navigation if currently dragging
+    if (Math.abs(x.get()) > 5) return;
     navigate(`/profile/${profile.id}`);
   };
   
   const cardVariants = {
-    hidden: { opacity: 0, y: 50 },
+    hidden: { 
+      opacity: 0, 
+      y: 50,
+      scale: 0.9,
+      rotate: -5
+    },
     visible: { 
       opacity: 1, 
       y: 0,
+      scale: 1,
+      rotate: 0,
       transition: {
         type: "spring",
-        stiffness: 100,
-        damping: 20
+        stiffness: 200,
+        damping: 25,
+        mass: 1
       }
     },
     exit: {
-      x: window.innerWidth,
+      scale: 0.8,
       opacity: 0,
-      transition: { duration: 0.3 }
+      transition: { 
+        duration: 0.2,
+        ease: "easeInOut"
+      }
+    }
+  };
+
+  const indicatorVariants = {
+    hidden: { scale: 0, opacity: 0 },
+    visible: { 
+      scale: 1, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 20
+      }
     }
   };
   
@@ -95,13 +134,61 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
       drag
       dragConstraints={dragConstraints}
       dragElastic={0.8}
+      dragMomentum={false}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      style={{ originX: 0.5 }}
-      className="relative"
+      style={{ 
+        x, 
+        y, 
+        rotate, 
+        scale,
+        originX: 0.5,
+        originY: 0.5
+      }}
+      className="relative cursor-pointer touch-none"
       onClick={handleProfileClick}
+      whileHover={{ 
+        scale: 1.02,
+        transition: { duration: 0.2 }
+      }}
+      whileTap={{ 
+        scale: 0.98,
+        transition: { duration: 0.1 }
+      }}
     >
-      <EnhancedProfileCard profile={profile} onSwipe={() => {}} />
+      {/* Like Indicator */}
+      <motion.div
+        style={{ opacity: likeOpacity }}
+        variants={indicatorVariants}
+        className="absolute top-8 left-8 z-20 pointer-events-none"
+      >
+        <div className="bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg shadow-lg border-4 border-white transform rotate-12">
+          LIKE
+        </div>
+      </motion.div>
+
+      {/* Pass Indicator */}
+      <motion.div
+        style={{ opacity: passOpacity }}
+        variants={indicatorVariants}
+        className="absolute top-8 right-8 z-20 pointer-events-none"
+      >
+        <div className="bg-red-500 text-white px-6 py-3 rounded-full font-bold text-lg shadow-lg border-4 border-white transform -rotate-12">
+          PASS
+        </div>
+      </motion.div>
+
+      {/* Card with enhanced shadow and styling */}
+      <motion.div
+        style={{ opacity }}
+        className="relative bg-white rounded-3xl shadow-2xl overflow-hidden"
+        whileHover={{
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          transition: { duration: 0.3 }
+        }}
+      >
+        <EnhancedProfileCard profile={profile} onSwipe={() => {}} />
+      </motion.div>
     </motion.div>
   );
 };

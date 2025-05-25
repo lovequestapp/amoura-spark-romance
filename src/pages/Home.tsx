@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -331,11 +330,12 @@ const Home = () => {
           ) : (
             <div 
               ref={dragConstraints}
-              className="w-full max-w-sm"
+              className="w-full max-w-sm relative"
             >
               <AnimatePresence mode="wait">
                 {currentIndex >= 0 && filteredProfiles.length > 0 ? (
                   <SwipeableCard
+                    key={currentProfile?.id || 'current'}
                     profile={currentProfile}
                     controls={controls}
                     dragConstraints={dragConstraints}
@@ -362,23 +362,40 @@ const Home = () => {
         </div>
         
         {currentIndex >= 0 && !isLoading && filteredProfiles.length > 0 && (
-          <div className="flex justify-center gap-4 py-6">
-            <Button
-              onClick={() => handleSwipeWithHistory("left")}
-              size="lg"
-              className="h-16 w-16 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 shadow-sm transform transition-transform active:scale-95"
+          <motion.div 
+            className="flex justify-center gap-4 py-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <X size={24} className="text-gray-500" />
-            </Button>
+              <Button
+                onClick={() => handleSwipeWithHistory("left")}
+                size="lg"
+                className="h-16 w-16 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 shadow-lg transform transition-all duration-200 hover:shadow-xl"
+              >
+                <X size={24} className="text-gray-500" />
+              </Button>
+            </motion.div>
             
-            <Button
-              onClick={() => handleSwipeWithHistory("right")}
-              size="lg"
-              className="h-16 w-16 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-md transform transition-transform active:scale-95"
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <Heart size={24} className="text-white" />
-            </Button>
-          </div>
+              <Button
+                onClick={() => handleSwipeWithHistory("right")}
+                size="lg"
+                className="h-16 w-16 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-lg transform transition-all duration-200 hover:shadow-xl"
+              >
+                <Heart size={24} className="text-white" />
+              </Button>
+            </motion.div>
+          </motion.div>
         )}
       </div>
     </AppLayout>

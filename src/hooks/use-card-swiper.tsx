@@ -74,40 +74,75 @@ export const useCardSwiper = (
       
       setDragging(false);
       const { offset, velocity } = info;
-      const swipeThreshold = 100;
-      const swipeVelocityThreshold = 500;
+      
+      // Enhanced thresholds for more responsive swiping
+      const swipeThreshold = 80; // Reduced threshold for easier swiping
+      const swipeVelocityThreshold = 400; // Reduced velocity threshold
+      
+      // Calculate if swipe should trigger based on distance OR velocity
+      const shouldSwipeRight = offset.x > swipeThreshold || velocity.x > swipeVelocityThreshold;
+      const shouldSwipeLeft = offset.x < -swipeThreshold || velocity.x < -swipeVelocityThreshold;
 
-      if (
-        offset.x > swipeThreshold ||
-        velocity.x > swipeVelocityThreshold
-      ) {
-        // Swipe right - Like
+      if (shouldSwipeRight) {
+        // Swipe right - Like with enhanced animation
         controls.start({
-          x: window.innerWidth,
+          x: window.innerWidth + 100,
+          y: offset.y * 0.3, // Add slight vertical movement
+          rotate: 30,
+          scale: 0.8,
           opacity: 0,
-          transition: { duration: 0.3 },
+          transition: { 
+            duration: 0.4,
+            ease: [0.4, 0.0, 0.2, 1] // Custom easing for smooth exit
+          },
         });
         setTimeout(() => {
           handleSwipe("right");
-          controls.set({ x: 0, opacity: 1 });
-        }, 300);
-      } else if (
-        offset.x < -swipeThreshold ||
-        velocity.x < -swipeVelocityThreshold
-      ) {
-        // Swipe left - Pass
+          controls.set({ 
+            x: 0, 
+            y: 0, 
+            rotate: 0, 
+            scale: 1, 
+            opacity: 1 
+          });
+        }, 400);
+      } else if (shouldSwipeLeft) {
+        // Swipe left - Pass with enhanced animation
         controls.start({
-          x: -window.innerWidth,
+          x: -window.innerWidth - 100,
+          y: offset.y * 0.3, // Add slight vertical movement
+          rotate: -30,
+          scale: 0.8,
           opacity: 0,
-          transition: { duration: 0.3 },
+          transition: { 
+            duration: 0.4,
+            ease: [0.4, 0.0, 0.2, 1] // Custom easing for smooth exit
+          },
         });
         setTimeout(() => {
           handleSwipe("left");
-          controls.set({ x: 0, opacity: 1 });
-        }, 300);
+          controls.set({ 
+            x: 0, 
+            y: 0, 
+            rotate: 0, 
+            scale: 1, 
+            opacity: 1 
+          });
+        }, 400);
       } else {
-        // Snap back to center - changed rotation to rotate
-        controls.start({ x: 0, y: 0, rotate: 0 });
+        // Snap back to center with smooth spring animation
+        controls.start({ 
+          x: 0, 
+          y: 0, 
+          rotate: 0,
+          scale: 1,
+          transition: {
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+            mass: 1
+          }
+        });
       }
     },
     [currentProfile, controls, handleSwipe]
