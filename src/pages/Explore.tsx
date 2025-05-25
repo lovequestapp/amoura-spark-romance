@@ -53,6 +53,13 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
     }
   };
 
+  if (!profile) {
+    console.log('ExploreCard: No profile provided');
+    return null;
+  }
+
+  console.log('ExploreCard: Rendering profile:', profile.name);
+
   return (
     <motion.div
       drag
@@ -185,15 +192,16 @@ const Explore = () => {
 
   // Load demo profiles on component mount
   useEffect(() => {
-    console.log('Loading demo profiles...');
+    console.log('Explore: Loading demo profiles...');
     setLoading(true);
     
     // Simulate loading delay for realism
     setTimeout(() => {
+      console.log('Explore: Setting profiles:', enhancedProfiles.length, 'profiles');
       setProfiles(enhancedProfiles);
       setCurrentIndex(0);
       setLoading(false);
-      console.log('Demo profiles loaded:', enhancedProfiles.length);
+      console.log('Explore: Demo profiles loaded successfully');
     }, 1000);
   }, []);
 
@@ -201,7 +209,7 @@ const Explore = () => {
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
 
-    console.log('Swiping', direction, 'on profile:', currentProfile.name);
+    console.log('Explore: Swiping', direction, 'on profile:', currentProfile.name);
 
     // Handle different swipe actions
     if (direction === "right") {
@@ -223,7 +231,7 @@ const Explore = () => {
   const currentProfile = profiles[currentIndex];
   const hasMoreProfiles = currentIndex < profiles.length;
 
-  console.log('Explore render - profiles:', profiles.length, 'currentIndex:', currentIndex, 'hasMore:', hasMoreProfiles);
+  console.log('Explore: Render state - profiles:', profiles.length, 'currentIndex:', currentIndex, 'hasMore:', hasMoreProfiles, 'loading:', loading);
 
   if (loading) {
     return (
@@ -240,7 +248,7 @@ const Explore = () => {
 
   return (
     <AppLayout>
-      <div className="flex-1 relative bg-gradient-to-br from-pink-50 to-purple-50">
+      <div className="flex-1 relative bg-gradient-to-br from-pink-50 to-purple-50 min-h-screen">
         {hasMoreProfiles && currentProfile ? (
           <div className="absolute inset-4">
             <ExploreCard
