@@ -78,16 +78,33 @@ const Messages = () => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newMessage.trim() || sending) return;
+    console.log('Attempting to send message:', {
+      message: newMessage.trim(),
+      conversationId: conversation?.id,
+      userId,
+      sending
+    });
     
-    const result = await sendTextMessage(newMessage.trim());
-    if (result) {
-      setNewMessage('');
+    if (!newMessage.trim() || sending || !conversation?.id) {
+      console.log('Cannot send message - missing data or already sending');
+      return;
+    }
+    
+    try {
+      const result = await sendTextMessage(newMessage.trim());
+      console.log('Send message result:', result);
+      
+      if (result) {
+        setNewMessage('');
+        console.log('Message sent successfully, clearing input');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
   
   const handleSendVoice = async (audioBlob: Blob) => {
-    if (sending) return;
+    if (sending || !conversation?.id) return;
     
     const result = await sendVoiceMessage(audioBlob);
     if (result) {
@@ -187,27 +204,27 @@ const Messages = () => {
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type a message..."
                 className="rounded-full pr-10 border-gray-300 focus:border-amoura-deep-pink"
-                disabled={sending}
+                disabled={sending || !conversation?.id}
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2">
                 <EmojiPicker onEmojiSelect={handleEmojiSelect} />
               </div>
             </div>
             
-            {newMessage ? (
+            {newMessage.trim() ? (
               <button 
                 type="submit" 
-                className="text-amoura-deep-pink bg-transparent p-2 hover:bg-amoura-deep-pink/10 rounded-full transition-colors"
-                disabled={sending}
+                className="text-amoura-deep-pink bg-transparent p-2 hover:bg-amoura-deep-pink/10 rounded-full transition-colors disabled:opacity-50"
+                disabled={sending || !conversation?.id}
               >
-                <Send size={20} className={sending ? "opacity-50" : ""} />
+                <Send size={20} />
               </button>
             ) : (
               <button 
                 type="button" 
                 className="text-amoura-deep-pink bg-transparent p-2 hover:bg-amoura-deep-pink/10 rounded-full transition-colors"
                 onClick={() => setShowVoiceRecorder(true)}
-                disabled={sending}
+                disabled={sending || !conversation?.id}
               >
                 <Mic size={20} />
               </button>
