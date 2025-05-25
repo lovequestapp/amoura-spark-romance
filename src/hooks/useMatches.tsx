@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 
@@ -68,26 +67,11 @@ export const useMatches = () => {
       try {
         setLoading(true);
         
-        // For now, use demo data but in production this would fetch from Supabase
-        // const { data: matchesData, error: matchesError } = await supabase
-        //   .from('matches')
-        //   .select(`
-        //     *,
-        //     conversations!inner(
-        //       id,
-        //       last_message_at,
-        //       messages(content, created_at, sender_id)
-        //     )
-        //   `)
-        //   .eq('user1_id', user.id)
-        //   .or(`user2_id.eq.${user.id}`)
-        //   .eq('is_active', true)
-        //   .order('created_at', { ascending: false });
-
         // Simulate loading time
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Use demo matches for now
+        // Use demo matches for now - in production this would fetch from Supabase
+        // When the database types are updated, we can use real Supabase queries
         setMatches(demoMatches);
         console.log('Loaded demo matches:', demoMatches.length);
         
@@ -111,30 +95,26 @@ export const useMatches = () => {
     if (!user) return null;
 
     try {
-      const { data, error } = await supabase
-        .from('matches')
-        .insert({
-          user1_id: user.id,
-          user2_id: userId,
-          is_active: true
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      // Refresh matches
-      setMatches(prev => [...prev, {
-        id: data.id,
+      // For now, just add to local state
+      // In production, this would create a match in Supabase
+      const newMatch: Match = {
+        id: Date.now().toString(),
         user_id: userId,
         name: 'New Match',
         photo: '',
         match_time: 'Just now',
         online: false,
         unread_count: 0
-      }]);
+      };
       
-      return data;
+      setMatches(prev => [...prev, newMatch]);
+      
+      toast({
+        title: "New Match!",
+        description: "You have a new match!",
+      });
+      
+      return newMatch;
     } catch (error) {
       console.error('Error creating match:', error);
       toast({
