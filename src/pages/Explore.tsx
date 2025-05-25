@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -94,8 +93,8 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
       style={{ touchAction: 'pan-x' }}
       onClick={handleCardClick}
     >
-      {/* Profile card with height adjusted to leave room for buttons */}
-      <div className="relative w-full h-[calc(100vh-160px)] overflow-hidden">
+      {/* Profile card with significant space for buttons */}
+      <div className="relative w-full h-[calc(100vh-200px)] overflow-hidden">
         {/* Profile Image */}
         <img 
           src={profile.photos[0]} 
@@ -105,10 +104,10 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         />
         
         {/* Stronger gradient for better text visibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
         
-        {/* Profile Info - Moved higher up for better visibility */}
-        <div className="absolute bottom-4 left-0 right-0 text-white z-10 p-6">
+        {/* Profile Info - Positioned higher for better visibility */}
+        <div className="absolute bottom-6 left-0 right-0 text-white z-10 p-6">
           <div className="flex items-center gap-2 mb-3">
             <h2 className="text-3xl font-bold drop-shadow-lg">{profile.name}, {profile.age}</h2>
             {profile.verified && (
@@ -132,8 +131,8 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         </div>
       </div>
 
-      {/* Action Buttons - Positioned below the card with more space */}
-      <div className="absolute bottom-4 left-0 right-0 z-20 px-6">
+      {/* Action Buttons - Moved significantly higher */}
+      <div className="absolute bottom-16 left-0 right-0 z-20 px-6">
         <div className="flex justify-center gap-6">
           {/* Pass Button */}
           <motion.button
