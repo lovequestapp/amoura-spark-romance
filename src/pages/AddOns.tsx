@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +17,7 @@ const AddOns = () => {
   const { user } = useAuth();
   const { addToCart, getCartCount } = useCart();
 
-  // Hardcoded essential add-ons
+  // Updated add-ons with multiple message pack options
   const addOns = [
     {
       id: 'profile-boost',
@@ -34,18 +35,52 @@ const AddOns = () => {
       ]
     },
     {
-      id: 'message-pack',
-      name: 'Message Pack',
-      description: 'Send messages without matching first',
-      price: '$9.99',
-      priceValue: 999,
+      id: 'message-starter',
+      name: 'Starter Message Pack',
+      description: '10 premium messages for casual conversations',
+      price: '$4.99',
+      priceValue: 499,
       icon: MessageCircle,
       color: 'bg-blue-500',
       features: [
+        '10 premium messages',
+        'Message anyone without matching',
+        'Valid for 30 days',
+        'Higher response rate'
+      ]
+    },
+    {
+      id: 'message-popular',
+      name: 'Popular Message Pack',
+      description: '25 premium messages - best value for active daters',
+      price: '$9.99',
+      priceValue: 999,
+      icon: MessageCircle,
+      color: 'bg-blue-600',
+      popular: true,
+      features: [
         '25 premium messages',
         'Message anyone without matching',
-        'Higher response rate',
-        'Valid for 60 days'
+        'Valid for 60 days',
+        'Priority message delivery',
+        'Read receipts included'
+      ]
+    },
+    {
+      id: 'message-premium',
+      name: 'Premium Message Pack',
+      description: '50 premium messages for serious connections',
+      price: '$17.99',
+      priceValue: 1799,
+      icon: MessageCircle,
+      color: 'bg-blue-700',
+      features: [
+        '50 premium messages',
+        'Message anyone without matching',
+        'Valid for 90 days',
+        'Priority message delivery',
+        'Read receipts included',
+        'Message scheduling'
       ]
     },
     {
@@ -66,13 +101,13 @@ const AddOns = () => {
     {
       id: 'rewinds',
       name: 'Rewinds',
-      description: 'Undo your last 10 swipes',
+      description: 'Undo your last 5 swipes',
       price: '$1.99',
       priceValue: 199,
       icon: RotateCcw,
       color: 'bg-green-500',
       features: [
-        '10 rewinds included',
+        '5 rewinds included',
         'Undo accidental passes',
         'Get second chances',
         'Never miss a connection'
@@ -144,7 +179,7 @@ const AddOns = () => {
           </div>
 
           {/* Add-Ons Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {addOns.map((addOn, index) => {
               const Icon = addOn.icon;
               
@@ -155,7 +190,17 @@ const AddOns = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="h-full hover:shadow-lg transition-shadow bg-white/80 backdrop-blur-sm">
+                  <Card className={`h-full hover:shadow-lg transition-shadow bg-white/80 backdrop-blur-sm relative ${
+                    addOn.popular ? 'border-amoura-deep-pink shadow-lg scale-105' : ''
+                  }`}>
+                    {addOn.popular && (
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <Badge className="bg-amoura-deep-pink text-white px-4 py-1">
+                          Most Popular
+                        </Badge>
+                      </div>
+                    )}
+                    
                     <CardHeader className="pb-4">
                       <div className="flex items-center gap-3 mb-2">
                         <div className={`w-12 h-12 ${addOn.color} rounded-full flex items-center justify-center`}>
