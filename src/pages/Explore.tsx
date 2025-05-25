@@ -199,7 +199,7 @@ const Explore = () => {
 
   return (
     <AppLayout>
-      <div className="fixed inset-0 bg-black overflow-hidden" style={{ height: '100vh', height: '100dvh' }}>
+      <div className="fixed inset-0 bg-black overflow-hidden" style={{ height: '100vh', maxHeight: '100vh' }}>
         {hasMoreProfiles && currentProfile ? (
           <div className="absolute inset-0">
             <ExploreCard
