@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
-import { Heart, Star, X, MessageCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Heart, Star, X, MessageCircle, CheckCircle, AlertTriangle, Info } from "lucide-react";
 import { Profile } from '@/components/home/SwipeableCard';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { enhancedProfiles } from '@/utils/placeholderData';
+import PersonalityBadges from '@/components/home/PersonalityBadges';
 
 const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (direction: string) => void }) => {
   const controls = useAnimation();
@@ -86,6 +88,13 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
 
   console.log('ExploreCard: Rendering profile:', profile.name);
 
+  // Check for match score and enhanced features
+  const hasMatchScore = profile && 'matchScore' in profile && profile.matchScore !== null;
+  const matchScore = hasMatchScore ? (profile as any).matchScore : (profile?.personalityMatch || 0);
+  const hasDealbreakers = profile?.dealbreakers && profile.dealbreakers.length > 0;
+  const hasAttachmentScore = profile && (profile as any).attachmentScore !== undefined;
+  const attachmentScore = hasAttachmentScore ? (profile as any).attachmentScore : undefined;
+
   return (
     <motion.div
       drag="x"
@@ -111,32 +120,86 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         {/* Stronger gradient for better text visibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
         
-        {/* Profile Info - Positioned higher for better visibility */}
+        {/* Enhanced Profile Info */}
         <div className="absolute bottom-6 left-0 right-0 text-white z-10 p-6">
-          <div className="flex items-center gap-2 mb-3">
+          {/* Header with name, age, verification, and premium badges */}
+          <div className="flex items-center gap-2 mb-2">
             <h2 className="text-3xl font-bold drop-shadow-lg">{profile.name}, {profile.age}</h2>
             {profile.verified && (
-              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
+              <CheckCircle className="h-6 w-6 text-blue-500 fill-white" />
+            )}
+            {profile.premium && (
+              <Badge variant="premium" className="h-5 bg-gradient-to-r from-purple-500 to-pink-500 text-white">Premium</Badge>
+            )}
+            {profile.featured && (
+              <Badge className="bg-gradient-to-r from-amoura-gold to-amber-400 text-black h-5 flex items-center">
+                <Star className="h-3 w-3 mr-1 fill-black" /> Featured
+              </Badge>
             )}
           </div>
           
+          {/* Distance and occupation */}
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 bg-red-500 rounded-full"></div>
             <p className="text-white text-lg drop-shadow-lg">{profile.distance}</p>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-3">
             <Star className="w-4 h-4 text-yellow-400 fill-current" />
             <p className="text-white text-lg drop-shadow-lg">{profile.occupation}</p>
           </div>
+
+          {/* Enhanced Match Information and Badges */}
+          {hasMatchScore && (
+            <div className="mb-3 flex flex-wrap gap-2 items-center">
+              <Badge className={`bg-gradient-to-r ${matchScore > 80 
+                ? 'from-amoura-deep-pink to-pink-500 hover:from-amoura-deep-pink hover:to-pink-600' 
+                : matchScore > 65
+                  ? 'from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600'
+                  : 'from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600'
+                } text-white font-semibold`}>
+                {matchScore}% Match
+              </Badge>
+              
+              {hasDealbreakers && (
+                <Badge variant="outline" className="bg-red-50/90 text-red-500 border-red-200 flex items-center gap-1">
+                  <AlertTriangle size={12} />
+                  <span>Dealbreaker</span>
+                </Badge>
+              )}
+
+              {hasAttachmentScore && attachmentScore > 80 && (
+                <Badge variant="outline" className="bg-green-50/90 text-green-600 border-green-200 flex items-center gap-1">
+                  <Heart size={12} className="fill-green-600" />
+                  <span>Compatible Style</span>
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Personality Badges */}
+          {profile.relationshipIntention && profile.personalityBadges && (
+            <div className="mb-3">
+              <PersonalityBadges 
+                intention={profile.relationshipIntention} 
+                badges={profile.personalityBadges.slice(0, 2)} 
+              />
+            </div>
+          )}
+
+          {/* Personality Match Info with enhanced details */}
+          {(profile.personalityMatch || matchScore) && (
+            <div className="mb-2 flex items-center gap-2">
+              <Info className="w-4 h-4 text-pink-400" />
+              <p className="text-pink-200 text-sm drop-shadow-lg">
+                {matchScore}% match with your personality
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Clean Action Buttons - Moved up by 25px from previous position */}
+      {/* Clean Action Buttons */}
       <div className="absolute bottom-24 left-0 right-0 z-20 px-6">
         <div className="flex items-center justify-center gap-4">
           {/* Message Button with $ indicator for premium feature */}
