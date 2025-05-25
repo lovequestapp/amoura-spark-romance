@@ -78,7 +78,7 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
 
   const handleMessage = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/messages`);
+    navigate(`/message-purchase`);
   };
 
   if (!profile) {
@@ -202,10 +202,10 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
       {/* Clean Action Buttons */}
       <div className="absolute bottom-24 left-0 right-0 z-20 px-6">
         <div className="flex items-center justify-center gap-4">
-          {/* Message Button with $ indicator for premium feature */}
+          {/* Message Button with green background for paid feature */}
           <Button
             onClick={handleMessage}
-            className="h-14 px-8 bg-black/60 backdrop-blur-md hover:bg-black/70 text-white rounded-full flex items-center gap-3 font-medium text-base transition-all duration-200 hover:scale-105 border border-white/20"
+            className="h-14 px-8 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-3 font-medium text-base transition-all duration-200 hover:scale-105 shadow-lg"
           >
             <MessageCircle className="w-5 h-5" />
             $ Message

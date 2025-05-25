@@ -1,182 +1,94 @@
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Index from './pages/Index';
-import Home from './pages/Home';
-import { Toaster } from './components/ui/toaster';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Messages from './pages/Messages';
-import NotFound from './pages/NotFound';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Community from './pages/Community';
-import Onboarding from './pages/Onboarding';
-import Profile from './pages/Profile';
-import PasswordReset from './pages/auth/PasswordReset';
-import Help from './pages/help/Help';
-import Matches from './pages/Matches';
-import Settings from './pages/Settings';
-import Explore from './pages/Explore';
-import { SubscriptionProvider } from './contexts/SubscriptionContext';
-import Dashboard from './pages/admin/Dashboard';
-import Users from './pages/admin/Users';
-import Content from './pages/admin/Content';
-import AdminSettings from './pages/admin/Settings';
-import Analytics from './pages/admin/Analytics';
-import AdminLayout from './components/admin/AdminLayout';
-import ProfileDetail from './pages/ProfileDetail';
-import { ErrorProvider } from './contexts/ErrorContext';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import './App.css';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { SubscriptionProvider } from "./contexts/SubscriptionContext";
+import { ErrorProvider } from "./contexts/ErrorContext";
+import AuthGuard from "./components/auth/AuthGuard";
 
-// Loading component
-const LoadingScreen = () => (
-  <div className="w-full h-screen flex items-center justify-center bg-white">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amoura-deep-pink mx-auto mb-4"></div>
-      <p className="text-gray-600">Loading...</p>
-    </div>
-  </div>
-);
+// Import all pages
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Home from "./pages/Home";
+import Explore from "./pages/Explore";
+import Matches from "./pages/Matches";
+import Messages from "./pages/Messages";
+import Profile from "./pages/Profile";
+import ProfileDetail from "./pages/ProfileDetail";
+import Settings from "./pages/Settings";
+import Onboarding from "./pages/Onboarding";
+import Community from "./pages/Community";
+import MessagePurchase from "./pages/MessagePurchase";
+import NotFound from "./pages/NotFound";
 
-// Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
-  
-  console.log('ProtectedRoute - isLoading:', isLoading, 'user:', !!user);
-  
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-  
-  if (!user) {
-    console.log('No user, redirecting to login');
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-};
+// Admin pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminUsers from "./pages/admin/Users";
+import AdminContent from "./pages/admin/Content";
+import AdminAnalytics from "./pages/admin/Analytics";
+import AdminSettings from "./pages/admin/Settings";
 
-// Admin route component
-const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAdmin, isLoading, user } = useAuth();
-  
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-  
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-  
-  return <>{children}</>;
-};
+// Settings sub-pages
+import ContactSettings from "./pages/settings/ContactSettings";
 
-function App() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: 1,
-        refetchOnWindowFocus: false,
-        staleTime: 5 * 60 * 1000,
-      },
-    },
-  });
+// Auth pages
+import PasswordReset from "./pages/auth/PasswordReset";
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ErrorProvider>
-        <AuthProvider>
-          <SubscriptionProvider>
+// Help pages
+import Help from "./pages/help/Help";
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ErrorProvider>
+      <AuthProvider>
+        <SubscriptionProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
             <BrowserRouter>
-              <div className="w-full max-w-full min-h-screen bg-white">
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/auth" element={<Navigate to="/login" replace />} />
-                  <Route path="/auth/reset-password" element={<PasswordReset />} />
-                  <Route path="/help" element={<Help />} />
-                  
-                  {/* Protected routes */}
-                  <Route path="/home" element={
-                    <ProtectedRoute>
-                      <Home />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/explore" element={
-                    <ProtectedRoute>
-                      <Explore />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/matches" element={
-                    <ProtectedRoute>
-                      <Matches />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/messages" element={
-                    <ProtectedRoute>
-                      <Messages />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/messages/:id" element={
-                    <ProtectedRoute>
-                      <Messages />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/profile" element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/profile/:id" element={
-                    <ProtectedRoute>
-                      <ProfileDetail />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/community" element={
-                    <ProtectedRoute>
-                      <Community />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/settings" element={
-                    <ProtectedRoute>
-                      <Settings />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/onboarding" element={
-                    <ProtectedRoute>
-                      <Onboarding />
-                    </ProtectedRoute>
-                  } />
-                  
-                  {/* Admin routes */}
-                  <Route path="/admin" element={
-                    <AdminRoute>
-                      <AdminLayout />
-                    </AdminRoute>
-                  }>
-                    <Route index element={<Dashboard />} />
-                    <Route path="analytics" element={<Analytics />} />
-                    <Route path="users" element={<Users />} />
-                    <Route path="content" element={<Content />} />
-                    <Route path="settings" element={<AdminSettings />} />
-                  </Route>
-                  
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <Toaster />
-              </div>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/password-reset" element={<PasswordReset />} />
+                <Route path="/help" element={<Help />} />
+
+                {/* Protected routes */}
+                <Route path="/home" element={<AuthGuard><Home /></AuthGuard>} />
+                <Route path="/explore" element={<AuthGuard><Explore /></AuthGuard>} />
+                <Route path="/matches" element={<AuthGuard><Matches /></AuthGuard>} />
+                <Route path="/messages" element={<AuthGuard><Messages /></AuthGuard>} />
+                <Route path="/message-purchase" element={<AuthGuard><MessagePurchase /></AuthGuard>} />
+                <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
+                <Route path="/profile/:id" element={<AuthGuard><ProfileDetail /></AuthGuard>} />
+                <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
+                <Route path="/settings/contact" element={<AuthGuard><ContactSettings /></AuthGuard>} />
+                <Route path="/onboarding" element={<AuthGuard><Onboarding /></AuthGuard>} />
+                <Route path="/community" element={<AuthGuard><Community /></AuthGuard>} />
+
+                {/* Admin routes */}
+                <Route path="/admin" element={<AuthGuard><AdminDashboard /></AuthGuard>} />
+                <Route path="/admin/users" element={<AuthGuard><AdminUsers /></AuthGuard>} />
+                <Route path="/admin/content" element={<AuthGuard><AdminContent /></AuthGuard>} />
+                <Route path="/admin/analytics" element={<AuthGuard><AdminAnalytics /></AuthGuard>} />
+                <Route path="/admin/settings" element={<AuthGuard><AdminSettings /></AuthGuard>} />
+
+                {/* 404 route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </BrowserRouter>
-          </SubscriptionProvider>
-        </AuthProvider>
-      </ErrorProvider>
-    </QueryClientProvider>
-  );
-}
+          </TooltipProvider>
+        </SubscriptionProvider>
+      </AuthProvider>
+    </ErrorProvider>
+  </QueryClientProvider>
+);
 
 export default App;

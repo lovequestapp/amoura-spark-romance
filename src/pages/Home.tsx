@@ -280,7 +280,7 @@ const Home = () => {
   };
   
   const handleMessage = () => {
-    navigate('/messages');
+    navigate('/message-purchase');
   };
   
   // Enhanced swipe handlers that maintain swipe history and ML tracking
