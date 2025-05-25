@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, ArrowLeft, Star } from "lucide-react";
+import { Heart, MessageCircle, Star } from "lucide-react";
 import { Profile } from '@/components/home/SwipeableCard';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -62,75 +62,26 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
 
   return (
     <motion.div
-      drag
-      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.2}
       onDragStart={() => setIsDragging(true)}
       onDragEnd={handleDragEnd}
       animate={controls}
-      className="absolute inset-0 cursor-grab active:cursor-grabbing"
-      style={{ touchAction: 'none' }}
+      className="absolute inset-0 cursor-grab active:cursor-grabbing touch-none"
+      style={{ touchAction: 'pan-x' }}
     >
-      <div className="relative w-full h-full rounded-3xl overflow-hidden bg-white shadow-2xl">
-        {/* Status Bar */}
-        <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-r from-pink-500 to-pink-400 z-30 flex items-center justify-between px-6 text-white text-sm font-medium">
-          <span>12:56</span>
-          <div className="flex items-center gap-1">
-            <span className="text-xs">5G</span>
-            <div className="flex gap-1">
-              <div className="w-1 h-3 bg-white rounded-full"></div>
-              <div className="w-1 h-3 bg-white rounded-full"></div>
-              <div className="w-1 h-3 bg-white rounded-full"></div>
-              <div className="w-1 h-3 bg-white/60 rounded-full"></div>
-            </div>
-            <div className="w-6 h-3 bg-white rounded-sm text-xs flex items-center justify-center text-black font-bold">75</div>
-          </div>
-        </div>
-
-        {/* Heart Icon Top Right */}
-        <div className="absolute top-16 right-6 z-20">
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
-          >
-            <Heart className="w-6 h-6 text-pink-500" />
-          </motion.div>
-        </div>
-
+      <div className="relative w-full h-full overflow-hidden bg-white">
         {/* Profile Image */}
         <img 
           src={profile.photos[0]} 
           alt={profile.name} 
           className="w-full h-full object-cover"
+          draggable={false}
         />
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-
-        {/* Back Button */}
-        <div className="absolute top-16 left-6 z-20">
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </motion.div>
-        </div>
-
-        {/* Like Profile Button */}
-        <div className="absolute top-1/2 right-6 transform -translate-y-1/2 z-20">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onSwipe("right")}
-            className="bg-pink-500 text-white px-6 py-3 rounded-full font-medium shadow-lg flex items-center gap-2"
-          >
-            <Heart className="w-5 h-5" />
-            Like Profile
-          </motion.button>
-        </div>
 
         {/* Profile Info */}
         <div className="absolute bottom-32 left-6 right-6 text-white z-20">
@@ -236,7 +187,7 @@ const Explore = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50">
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading profiles...</p>
@@ -248,9 +199,9 @@ const Explore = () => {
 
   return (
     <AppLayout>
-      <div className="flex-1 relative bg-gradient-to-br from-pink-50 to-purple-50 min-h-screen">
+      <div className="flex-1 relative bg-black h-screen overflow-hidden">
         {hasMoreProfiles && currentProfile ? (
-          <div className="absolute inset-4">
+          <div className="absolute inset-0">
             <ExploreCard
               key={currentProfile.id}
               profile={currentProfile}
@@ -258,7 +209,7 @@ const Explore = () => {
             />
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center p-8">
+          <div className="flex-1 flex items-center justify-center p-8 h-screen">
             <div className="text-center">
               <div className="w-24 h-24 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Heart className="w-12 h-12 text-pink-500" />
