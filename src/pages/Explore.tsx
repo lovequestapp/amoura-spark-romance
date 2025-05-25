@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -93,9 +94,9 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
       style={{ touchAction: 'pan-x' }}
       onClick={handleCardClick}
     >
-      {/* Profile card with reduced height to fit buttons */}
-      <div className="relative w-full h-[calc(100vh-120px)] overflow-hidden">
-        {/* Profile Image - Reduced height */}
+      {/* Profile card with height adjusted to leave room for buttons */}
+      <div className="relative w-full h-[calc(100vh-160px)] overflow-hidden">
+        {/* Profile Image */}
         <img 
           src={profile.photos[0]} 
           alt={profile.name} 
@@ -103,13 +104,13 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
           draggable={false}
         />
         
-        {/* Gradient Overlays for readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+        {/* Stronger gradient for better text visibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
         
-        {/* Profile Info - Bottom overlay */}
-        <div className="absolute bottom-0 left-0 right-0 text-white z-10 p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <h2 className="text-3xl font-bold">{profile.name}, {profile.age}</h2>
+        {/* Profile Info - Moved higher up for better visibility */}
+        <div className="absolute bottom-4 left-0 right-0 text-white z-10 p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="text-3xl font-bold drop-shadow-lg">{profile.name}, {profile.age}</h2>
             {profile.verified && (
               <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                 <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -121,27 +122,27 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
           
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            <p className="text-white/90 text-base">{profile.distance}</p>
+            <p className="text-white text-lg drop-shadow-lg">{profile.distance}</p>
           </div>
           
           <div className="flex items-center gap-2">
             <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <p className="text-white/90 text-base">{profile.occupation}</p>
+            <p className="text-white text-lg drop-shadow-lg">{profile.occupation}</p>
           </div>
         </div>
       </div>
 
-      {/* Floating Action Buttons - Positioned below the card */}
-      <div className="absolute bottom-6 left-0 right-0 z-20 px-6">
-        <div className="flex justify-center gap-4">
+      {/* Action Buttons - Positioned below the card with more space */}
+      <div className="absolute bottom-4 left-0 right-0 z-20 px-6">
+        <div className="flex justify-center gap-6">
           {/* Pass Button */}
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handlePass}
-            className="w-14 h-14 bg-white/95 backdrop-blur-sm rounded-full shadow-xl flex items-center justify-center border border-gray-100"
+            className="w-16 h-16 bg-white rounded-full shadow-2xl flex items-center justify-center border-2 border-gray-100"
           >
-            <X className="w-6 h-6 text-gray-600" />
+            <X className="w-7 h-7 text-gray-600" />
           </motion.button>
 
           {/* Super Like Button */}
@@ -149,9 +150,9 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleSuperLike}
-            className="w-16 h-16 bg-blue-500 rounded-full shadow-xl flex items-center justify-center"
+            className="w-18 h-18 bg-blue-500 rounded-full shadow-2xl flex items-center justify-center"
           >
-            <Star className="w-7 h-7 text-white fill-current" />
+            <Star className="w-8 h-8 text-white fill-current" />
           </motion.button>
 
           {/* Like Button */}
@@ -159,9 +160,9 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleLike}
-            className="w-14 h-14 bg-pink-500 rounded-full shadow-xl flex items-center justify-center"
+            className="w-16 h-16 bg-pink-500 rounded-full shadow-2xl flex items-center justify-center"
           >
-            <Heart className="w-6 h-6 text-white" />
+            <Heart className="w-7 h-7 text-white" />
           </motion.button>
         </div>
       </div>
