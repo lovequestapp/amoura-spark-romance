@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import DateIdea from '@/components/profile/DateIdea';
 import { Button } from "@/components/ui/button";
-import { Heart, X } from "lucide-react";
+import { Heart, X, MessageCircle, Star } from "lucide-react";
 import { useCardSwiper } from '@/hooks/use-card-swiper';
 import SwipeableCard, { Profile } from '@/components/home/SwipeableCard';
 import NoMoreProfiles from '@/components/home/NoMoreProfiles';
@@ -279,6 +280,10 @@ const Home = () => {
     });
   };
   
+  const handleMessage = () => {
+    navigate('/messages');
+  };
+  
   // Enhanced swipe handlers that maintain swipe history and ML tracking
   const handleSwipeWithHistory = async (direction: string) => {
     if (currentProfile && user) {
@@ -360,37 +365,63 @@ const Home = () => {
         
         {currentIndex >= 0 && !isLoading && filteredProfiles.length > 0 && currentProfile && (
           <motion.div 
-            className="flex justify-center gap-4 py-6"
+            className="py-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
+            {/* Main Action Buttons - matching Explore page style */}
+            <div className="flex items-center justify-center gap-4 mb-4">
+              {/* Message Button with $ indicator for premium feature */}
               <Button
-                onClick={() => handleSwipeWithHistory("left")}
-                variant="ghost"
-                className="h-14 w-14 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 shadow-lg transform transition-all duration-200 hover:shadow-xl"
+                onClick={handleMessage}
+                className="h-14 px-8 bg-black/60 backdrop-blur-md hover:bg-black/70 text-white rounded-full flex items-center gap-3 font-medium text-base transition-all duration-200 hover:scale-105 border border-white/20"
               >
-                <X size={20} className="text-gray-500" />
+                <MessageCircle className="w-5 h-5" />
+                $ Message
               </Button>
-            </motion.div>
-            
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
+
+              {/* Like Button - Primary action */}
               <Button
                 onClick={() => handleSwipeWithHistory("right")}
-                className="h-14 w-14 rounded-full bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 shadow-lg transform transition-all duration-200 hover:shadow-xl"
+                className="h-14 px-10 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full flex items-center gap-3 font-semibold text-base transition-all duration-200 hover:scale-105 shadow-lg"
               >
-                <Heart size={20} className="text-white" />
+                <Heart className="w-5 h-5" />
+                Like
               </Button>
-            </motion.div>
+            </div>
+            
+            {/* Secondary Actions - Smaller and less prominent */}
+            <div className="flex justify-center gap-6">
+              {/* Pass Button */}
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  onClick={() => handleSwipeWithHistory("left")}
+                  variant="ghost"
+                  className="h-10 w-10 rounded-full bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-500 flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </motion.div>
+
+              {/* Super Like Button */}
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  onClick={handleSuperLike}
+                  className="h-10 w-10 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg"
+                >
+                  <Star className="w-5 h-5 fill-current" />
+                </Button>
+              </motion.div>
+            </div>
           </motion.div>
         )}
         
