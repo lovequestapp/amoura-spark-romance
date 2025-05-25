@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
@@ -370,12 +369,12 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            {/* Main Action Buttons - matching Explore page style */}
+            {/* Main Action Buttons */}
             <div className="flex items-center justify-center gap-4 mb-4">
-              {/* Message Button with $ indicator for premium feature */}
+              {/* Message Button with green background to represent money/paid */}
               <Button
                 onClick={handleMessage}
-                className="h-14 px-8 bg-black/60 backdrop-blur-md hover:bg-black/70 text-white rounded-full flex items-center gap-3 font-medium text-base transition-all duration-200 hover:scale-105 border border-white/20"
+                className="h-14 px-8 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-3 font-medium text-base transition-all duration-200 hover:scale-105 shadow-lg"
               >
                 <MessageCircle className="w-5 h-5" />
                 $ Message
