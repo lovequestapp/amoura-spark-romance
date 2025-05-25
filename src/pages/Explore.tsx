@@ -93,9 +93,9 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
       style={{ touchAction: 'pan-x' }}
       onClick={handleCardClick}
     >
-      {/* Full viewport profile card */}
-      <div className="relative w-full h-full overflow-hidden">
-        {/* Profile Image - Full viewport */}
+      {/* Profile card with reduced height to fit buttons */}
+      <div className="relative w-full h-[calc(100vh-120px)] overflow-hidden">
+        {/* Profile Image - Reduced height */}
         <img 
           src={profile.photos[0]} 
           alt={profile.name} 
@@ -104,10 +104,10 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
         />
         
         {/* Gradient Overlays for readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
         
         {/* Profile Info - Bottom overlay */}
-        <div className="absolute bottom-32 left-0 right-0 text-white z-10 p-6">
+        <div className="absolute bottom-0 left-0 right-0 text-white z-10 p-6">
           <div className="flex items-center gap-2 mb-2">
             <h2 className="text-3xl font-bold">{profile.name}, {profile.age}</h2>
             {profile.verified && (
@@ -129,40 +129,40 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
             <p className="text-white/90 text-base">{profile.occupation}</p>
           </div>
         </div>
+      </div>
 
-        {/* Floating Action Buttons - Moved higher up */}
-        <div className="absolute bottom-8 left-0 right-0 z-20 px-6">
-          <div className="flex justify-center gap-4">
-            {/* Pass Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handlePass}
-              className="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full shadow-xl flex items-center justify-center"
-            >
-              <X className="w-6 h-6 text-gray-600" />
-            </motion.button>
+      {/* Floating Action Buttons - Positioned below the card */}
+      <div className="absolute bottom-6 left-0 right-0 z-20 px-6">
+        <div className="flex justify-center gap-4">
+          {/* Pass Button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handlePass}
+            className="w-14 h-14 bg-white/95 backdrop-blur-sm rounded-full shadow-xl flex items-center justify-center border border-gray-100"
+          >
+            <X className="w-6 h-6 text-gray-600" />
+          </motion.button>
 
-            {/* Super Like Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleSuperLike}
-              className="w-16 h-16 bg-blue-500 rounded-full shadow-xl flex items-center justify-center"
-            >
-              <Star className="w-7 h-7 text-white fill-current" />
-            </motion.button>
+          {/* Super Like Button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleSuperLike}
+            className="w-16 h-16 bg-blue-500 rounded-full shadow-xl flex items-center justify-center"
+          >
+            <Star className="w-7 h-7 text-white fill-current" />
+          </motion.button>
 
-            {/* Like Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleLike}
-              className="w-14 h-14 bg-pink-500 rounded-full shadow-xl flex items-center justify-center"
-            >
-              <Heart className="w-6 h-6 text-white" />
-            </motion.button>
-          </div>
+          {/* Like Button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleLike}
+            className="w-14 h-14 bg-pink-500 rounded-full shadow-xl flex items-center justify-center"
+          >
+            <Heart className="w-6 h-6 text-white" />
+          </motion.button>
         </div>
       </div>
     </motion.div>
