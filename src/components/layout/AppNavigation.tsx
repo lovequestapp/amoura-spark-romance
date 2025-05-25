@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Heart, MessageCircle, Home, User, Users, Search } from 'lucide-react';
+import { Heart, Home, User, Users, Search } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -12,7 +11,6 @@ const AppNavigation = () => {
     { icon: Home, label: 'Home', path: '/home' },
     { icon: Search, label: 'Explore', path: '/explore' },
     { icon: Heart, label: 'Matches', path: '/matches' },
-    { icon: MessageCircle, label: 'Messages', path: '/messages' },
     { icon: Users, label: 'Community', path: '/community' },
     { icon: User, label: 'Profile', path: '/profile' },
   ];
