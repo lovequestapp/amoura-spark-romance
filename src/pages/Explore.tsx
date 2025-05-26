@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { enhancedProfiles } from '@/utils/placeholderData';
 import PersonalityBadges from '@/components/home/PersonalityBadges';
+import FloatingHeartsAnimation from '@/components/animations/FloatingHeartsAnimation';
 
 const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (direction: string) => void }) => {
   const controls = useAnimation();
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
+  const likeButtonRef = useRef<HTMLButtonElement>(null);
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false);
@@ -63,6 +66,7 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setShowHeartAnimation(true);
     onSwipe("like");
   };
 
@@ -96,152 +100,162 @@ const ExploreCard = ({ profile, onSwipe }: { profile: Profile; onSwipe: (directi
   const attachmentScore = hasAttachmentScore ? (profile as any).attachmentScore : undefined;
 
   return (
-    <motion.div
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.2}
-      onDragStart={() => setIsDragging(true)}
-      onDragEnd={handleDragEnd}
-      animate={controls}
-      className="absolute inset-0 cursor-pointer touch-none"
-      style={{ touchAction: 'pan-x' }}
-      onClick={handleCardClick}
-    >
-      {/* Profile card with significant space for buttons */}
-      <div className="relative w-full h-[calc(100vh-200px)] overflow-hidden">
-        {/* Profile Image */}
-        <img 
-          src={profile.photos[0]} 
-          alt={profile.name} 
-          className="w-full h-full object-cover"
-          draggable={false}
-        />
-        
-        {/* Stronger gradient for better text visibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
-        
-        {/* Enhanced Profile Info */}
-        <div className="absolute bottom-6 left-0 right-0 text-white z-10 p-6">
-          {/* Header with name, age, verification, and premium badges */}
-          <div className="flex items-center gap-2 mb-2">
-            <h2 className="text-3xl font-bold drop-shadow-lg">{profile.name}, {profile.age}</h2>
-            {profile.verified && (
-              <CheckCircle className="h-6 w-6 text-blue-500 fill-white" />
-            )}
-            {profile.premium && (
-              <Badge variant="premium" className="h-5 bg-gradient-to-r from-purple-500 to-pink-500 text-white">Premium</Badge>
-            )}
-            {profile.featured && (
-              <Badge className="bg-gradient-to-r from-amoura-gold to-amber-400 text-black h-5 flex items-center">
-                <Star className="h-3 w-3 mr-1 fill-black" /> Featured
-              </Badge>
-            )}
-          </div>
+    <>
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragStart={() => setIsDragging(true)}
+        onDragEnd={handleDragEnd}
+        animate={controls}
+        className="absolute inset-0 cursor-pointer touch-none"
+        style={{ touchAction: 'pan-x' }}
+        onClick={handleCardClick}
+      >
+        {/* Profile card with significant space for buttons */}
+        <div className="relative w-full h-[calc(100vh-200px)] overflow-hidden">
+          {/* Profile Image */}
+          <img 
+            src={profile.photos[0]} 
+            alt={profile.name} 
+            className="w-full h-full object-cover"
+            draggable={false}
+          />
           
-          {/* Distance and occupation */}
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            <p className="text-white text-lg drop-shadow-lg">{profile.distance}</p>
-          </div>
+          {/* Stronger gradient for better text visibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
           
-          <div className="flex items-center gap-2 mb-3">
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <p className="text-white text-lg drop-shadow-lg">{profile.occupation}</p>
-          </div>
-
-          {/* Enhanced Match Information and Badges */}
-          {hasMatchScore && (
-            <div className="mb-3 flex flex-wrap gap-2 items-center">
-              <Badge className={`bg-gradient-to-r ${matchScore > 80 
-                ? 'from-amoura-deep-pink to-pink-500 hover:from-amoura-deep-pink hover:to-pink-600' 
-                : matchScore > 65
-                  ? 'from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600'
-                  : 'from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600'
-                } text-white font-semibold`}>
-                {matchScore}% Match
-              </Badge>
-              
-              {hasDealbreakers && (
-                <Badge variant="outline" className="bg-red-50/90 text-red-500 border-red-200 flex items-center gap-1">
-                  <AlertTriangle size={12} />
-                  <span>Dealbreaker</span>
-                </Badge>
+          {/* Enhanced Profile Info */}
+          <div className="absolute bottom-6 left-0 right-0 text-white z-10 p-6">
+            {/* Header with name, age, verification, and premium badges */}
+            <div className="flex items-center gap-2 mb-2">
+              <h2 className="text-3xl font-bold drop-shadow-lg">{profile.name}, {profile.age}</h2>
+              {profile.verified && (
+                <CheckCircle className="h-6 w-6 text-blue-500 fill-white" />
               )}
-
-              {hasAttachmentScore && attachmentScore > 80 && (
-                <Badge variant="outline" className="bg-green-50/90 text-green-600 border-green-200 flex items-center gap-1">
-                  <Heart size={12} className="fill-green-600" />
-                  <span>Compatible Style</span>
+              {profile.premium && (
+                <Badge variant="premium" className="h-5 bg-gradient-to-r from-purple-500 to-pink-500 text-white">Premium</Badge>
+              )}
+              {profile.featured && (
+                <Badge className="bg-gradient-to-r from-amoura-gold to-amber-400 text-black h-5 flex items-center">
+                  <Star className="h-3 w-3 mr-1 fill-black" /> Featured
                 </Badge>
               )}
             </div>
-          )}
-
-          {/* Personality Badges */}
-          {profile.relationshipIntention && profile.personalityBadges && (
-            <div className="mb-3">
-              <PersonalityBadges 
-                intention={profile.relationshipIntention} 
-                badges={profile.personalityBadges.slice(0, 2)} 
-              />
+            
+            {/* Distance and occupation */}
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <p className="text-white text-lg drop-shadow-lg">{profile.distance}</p>
             </div>
-          )}
-
-          {/* Personality Match Info with enhanced details */}
-          {(profile.personalityMatch || matchScore) && (
-            <div className="mb-2 flex items-center gap-2">
-              <Info className="w-4 h-4 text-pink-400" />
-              <p className="text-pink-200 text-sm drop-shadow-lg">
-                {matchScore}% match with your personality
-              </p>
+            
+            <div className="flex items-center gap-2 mb-3">
+              <Star className="w-4 h-4 text-yellow-400 fill-current" />
+              <p className="text-white text-lg drop-shadow-lg">{profile.occupation}</p>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Clean Action Buttons */}
-      <div className="absolute bottom-24 left-0 right-0 z-20 px-6">
-        <div className="flex items-center justify-center gap-4">
-          {/* Message Button with green background for paid feature */}
-          <Button
-            onClick={handleMessage}
-            className="h-14 px-8 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-3 font-medium text-base transition-all duration-200 hover:scale-105 shadow-lg"
-          >
-            <MessageCircle className="w-5 h-5" />
-            $ Message
-          </Button>
+            {/* Enhanced Match Information and Badges */}
+            {hasMatchScore && (
+              <div className="mb-3 flex flex-wrap gap-2 items-center">
+                <Badge className={`bg-gradient-to-r ${matchScore > 80 
+                  ? 'from-amoura-deep-pink to-pink-500 hover:from-amoura-deep-pink hover:to-pink-600' 
+                  : matchScore > 65
+                    ? 'from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600'
+                    : 'from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600'
+                  } text-white font-semibold`}>
+                  {matchScore}% Match
+                </Badge>
+                
+                {hasDealbreakers && (
+                  <Badge variant="outline" className="bg-red-50/90 text-red-500 border-red-200 flex items-center gap-1">
+                    <AlertTriangle size={12} />
+                    <span>Dealbreaker</span>
+                  </Badge>
+                )}
 
-          {/* Like Button - Primary action */}
-          <Button
-            onClick={handleLike}
-            className="h-14 px-10 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full flex items-center gap-3 font-semibold text-base transition-all duration-200 hover:scale-105 shadow-lg"
-          >
-            <Heart className="w-5 h-5" />
-            Like
-          </Button>
-        </div>
-        
-        {/* Secondary Actions - Smaller and less prominent */}
-        <div className="flex justify-center gap-6 mt-4">
-          {/* Pass Button */}
-          <Button
-            onClick={handlePass}
-            variant="ghost"
-            className="h-10 w-10 rounded-full bg-black/40 hover:bg-black/60 text-white border border-white/20 flex items-center justify-center transition-all duration-200 hover:scale-105"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+                {hasAttachmentScore && attachmentScore > 80 && (
+                  <Badge variant="outline" className="bg-green-50/90 text-green-600 border-green-200 flex items-center gap-1">
+                    <Heart size={12} className="fill-green-600" />
+                    <span>Compatible Style</span>
+                  </Badge>
+                )}
+              </div>
+            )}
 
-          {/* Super Like Button */}
-          <Button
-            onClick={handleSuperLike}
-            className="h-10 w-10 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg"
-          >
-            <Star className="w-5 h-5 fill-current" />
-          </Button>
+            {/* Personality Badges */}
+            {profile.relationshipIntention && profile.personalityBadges && (
+              <div className="mb-3">
+                <PersonalityBadges 
+                  intention={profile.relationshipIntention} 
+                  badges={profile.personalityBadges.slice(0, 2)} 
+                />
+              </div>
+            )}
+
+            {/* Personality Match Info with enhanced details */}
+            {(profile.personalityMatch || matchScore) && (
+              <div className="mb-2 flex items-center gap-2">
+                <Info className="w-4 h-4 text-pink-400" />
+                <p className="text-pink-200 text-sm drop-shadow-lg">
+                  {matchScore}% match with your personality
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </motion.div>
+
+        {/* Clean Action Buttons */}
+        <div className="absolute bottom-24 left-0 right-0 z-20 px-6">
+          <div className="flex items-center justify-center gap-4">
+            {/* Message Button with green background for paid feature */}
+            <Button
+              onClick={handleMessage}
+              className="h-14 px-8 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-3 font-medium text-base transition-all duration-200 hover:scale-105 shadow-lg"
+            >
+              <MessageCircle className="w-5 h-5" />
+              $ Message
+            </Button>
+
+            {/* Like Button - Primary action with ref for animation */}
+            <Button
+              ref={likeButtonRef}
+              onClick={handleLike}
+              className="h-14 px-10 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full flex items-center gap-3 font-semibold text-base transition-all duration-200 hover:scale-105 shadow-lg"
+            >
+              <Heart className="w-5 h-5" />
+              Like
+            </Button>
+          </div>
+          
+          {/* Secondary Actions - Smaller and less prominent */}
+          <div className="flex justify-center gap-6 mt-4">
+            {/* Pass Button */}
+            <Button
+              onClick={handlePass}
+              variant="ghost"
+              className="h-10 w-10 rounded-full bg-black/40 hover:bg-black/60 text-white border border-white/20 flex items-center justify-center transition-all duration-200 hover:scale-105"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+
+            {/* Super Like Button */}
+            <Button
+              onClick={handleSuperLike}
+              className="h-10 w-10 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg"
+            >
+              <Star className="w-5 h-5 fill-current" />
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Floating Hearts Animation */}
+      <FloatingHeartsAnimation
+        trigger={showHeartAnimation}
+        onComplete={() => setShowHeartAnimation(false)}
+        buttonRef={likeButtonRef}
+      />
+    </>
   );
 };
 

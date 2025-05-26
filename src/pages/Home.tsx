@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from '@/components/layout/AppLayout';
 import DateIdea from '@/components/profile/DateIdea';
@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { getPersonalizedMatches, getFeaturedMatch, WeightedMatch } from '@/services/matching';
 import { useNavigate } from 'react-router-dom';
+import FloatingHeartsAnimation from '@/components/animations/FloatingHeartsAnimation';
 
 // Enhanced demo profiles for development/testing
 import { enhancedProfiles } from '@/utils/placeholderData';
@@ -24,6 +25,7 @@ const Home = () => {
   const { user } = useAuth();
   const { tier } = useSubscription();
   const navigate = useNavigate();
+  const likeButtonRef = useRef<HTMLButtonElement>(null);
 
   const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
   const [filters, setFilters] = useState<FilterOptions>({
@@ -34,6 +36,7 @@ const Home = () => {
     relationshipIntention: null,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   
   const {
     currentIndex,
@@ -288,6 +291,11 @@ const Home = () => {
     if (currentProfile && user) {
       setSwipedProfiles([...swipedProfiles, { profile: currentProfile, direction }]);
       
+      // Trigger heart animation for likes
+      if (direction === 'right' || direction === 'like') {
+        setShowHeartAnimation(true);
+      }
+      
       // Track swipe for ML learning (only in production)
       if (process.env.NODE_ENV === 'production') {
         try {
@@ -380,8 +388,9 @@ const Home = () => {
                 $ Message
               </Button>
 
-              {/* Like Button - Primary action */}
+              {/* Like Button - Primary action with ref for animation */}
               <Button
+                ref={likeButtonRef}
                 onClick={() => handleSwipeWithHistory("right")}
                 className="h-14 px-10 bg-amoura-deep-pink hover:bg-amoura-deep-pink/90 text-white rounded-full flex items-center gap-3 font-semibold text-base transition-all duration-200 hover:scale-105 shadow-lg"
               >
@@ -430,6 +439,13 @@ const Home = () => {
           onBoost={handleBoost}
         />
       </div>
+
+      {/* Floating Hearts Animation */}
+      <FloatingHeartsAnimation
+        trigger={showHeartAnimation}
+        onComplete={() => setShowHeartAnimation(false)}
+        buttonRef={likeButtonRef}
+      />
     </AppLayout>
   );
 };
