@@ -500,7 +500,7 @@ const Profile = () => {
             >
               <ActiveInventory />
             </motion.div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Keep existing dialogs */}
