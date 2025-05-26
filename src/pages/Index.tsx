@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -26,6 +25,29 @@ const pulseAnimation = {
     ease: "easeInOut"
   }
 };
+
+const FloatingHeart = ({ delay = 0, size = "small", position = { top: "20%", left: "10%" } }) => (
+  <motion.div
+    className={`absolute pointer-events-none ${
+      size === "small" ? "w-3 h-3" : size === "medium" ? "w-4 h-4" : "w-5 h-5"
+    } text-amoura-deep-pink/20`}
+    style={{ top: position.top, left: position.left }}
+    animate={{
+      y: [-10, -20, -10],
+      x: [-5, 5, -5],
+      rotate: [0, 10, -10, 0],
+      scale: [1, 1.1, 1],
+    }}
+    transition={{
+      duration: 6 + delay,
+      repeat: Infinity,
+      ease: "easeInOut",
+      delay: delay,
+    }}
+  >
+    <Heart className="w-full h-full fill-current" />
+  </motion.div>
+);
 
 const Testimonial = ({ quote, name, age, location, stars, delay = 0 }) => (
   <motion.div
@@ -70,6 +92,15 @@ const Index = () => {
     <div className="min-h-screen bg-white w-full">
       {/* Enhanced Hero Section */}
       <section className="pt-24 pb-16 px-6 bg-gradient-to-br from-white via-amoura-soft-pink to-white overflow-hidden relative w-full">
+        {/* Floating Hearts in Hero */}
+        <FloatingHeart delay={0} size="small" position={{ top: "15%", left: "5%" }} />
+        <FloatingHeart delay={1} size="medium" position={{ top: "25%", left: "85%" }} />
+        <FloatingHeart delay={2} size="small" position={{ top: "35%", left: "15%" }} />
+        <FloatingHeart delay={3} size="large" position={{ top: "45%", left: "90%" }} />
+        <FloatingHeart delay={1.5} size="small" position={{ top: "60%", left: "8%" }} />
+        <FloatingHeart delay={2.5} size="medium" position={{ top: "70%", left: "80%" }} />
+        <FloatingHeart delay={0.5} size="small" position={{ top: "80%", left: "20%" }} />
+
         {/* Animated background decorations */}
         <motion.div 
           animate={{
@@ -308,7 +339,13 @@ const Index = () => {
       <AlgorithmSection />
       
       {/* Testimonials Section */}
-      <section className="py-20 px-6 bg-gradient-to-b from-white to-amoura-soft-pink/30">
+      <section className="py-20 px-6 bg-gradient-to-b from-white to-amoura-soft-pink/30 relative overflow-hidden">
+        {/* Floating Hearts in Testimonials */}
+        <FloatingHeart delay={1} size="small" position={{ top: "10%", left: "10%" }} />
+        <FloatingHeart delay={2.5} size="medium" position={{ top: "20%", left: "85%" }} />
+        <FloatingHeart delay={0.5} size="small" position={{ top: "60%", left: "5%" }} />
+        <FloatingHeart delay={3} size="small" position={{ top: "80%", left: "90%" }} />
+
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
@@ -363,6 +400,12 @@ const Index = () => {
 
       {/* Final CTA Section */}
       <section className="py-24 px-6 bg-gradient-to-b from-amoura-soft-pink to-white relative overflow-hidden">
+        {/* Floating Hearts in CTA */}
+        <FloatingHeart delay={0} size="medium" position={{ top: "15%", left: "15%" }} />
+        <FloatingHeart delay={1.5} size="small" position={{ top: "25%", left: "80%" }} />
+        <FloatingHeart delay={2} size="large" position={{ top: "50%", left: "10%" }} />
+        <FloatingHeart delay={0.8} size="small" position={{ top: "70%", left: "85%" }} />
+
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-amoura-gold/10 blur-3xl"></div>
           <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-amoura-deep-pink/10 blur-3xl"></div>
