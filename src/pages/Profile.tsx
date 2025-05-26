@@ -309,11 +309,6 @@ const Profile = () => {
               </motion.div>
             </div>
 
-            {/* Enhanced Stats Section */}
-            <QuickStats />
-
-            <Separator className="my-8 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
             {/* Enhanced Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 mb-12">
               {/* Photos Section */}
