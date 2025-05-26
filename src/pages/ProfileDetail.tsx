@@ -13,6 +13,8 @@ import { Separator } from '@/components/ui/separator';
 import PremiumFeatures from '@/components/subscription/PremiumFeatures';
 import PaidMessageDialog from '@/components/messages/PaidMessageDialog';
 import { useInventory } from '@/hooks/useInventory';
+import { enhancedProfiles } from '@/utils/placeholderData';
+import DetailedProfileView from '@/components/profile/DetailedProfileView';
 
 const ProfileDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,18 +34,48 @@ const ProfileDetail = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      // Fetch profile data from Supabase based on the ID
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', id)
-        .single();
+      
+      // Check if this is a demo profile (numeric ID)
+      const isNumericId = /^\d+$/.test(id || '');
+      
+      if (isNumericId) {
+        // Handle demo profiles
+        const demoProfile = enhancedProfiles.find(p => p.id.toString() === id);
+        if (demoProfile) {
+          // Convert demo profile to expected format
+          setProfile({
+            id: demoProfile.id,
+            full_name: demoProfile.name,
+            bio: demoProfile.bio,
+            photos: demoProfile.photos,
+            location: demoProfile.distance,
+            age: demoProfile.age,
+            occupation: demoProfile.occupation,
+            verified: demoProfile.verified,
+            premium: demoProfile.premium,
+            traits: demoProfile.traits,
+            prompts: demoProfile.prompts,
+            relationshipIntention: demoProfile.relationshipIntention,
+            personalityBadges: demoProfile.personalityBadges,
+            interests: demoProfile.interests
+          });
+        } else {
+          setProfile(null);
+        }
+      } else {
+        // Handle real Supabase profiles (UUID format)
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', id)
+          .single();
 
-      if (error) throw error;
-
-      setProfile(data);
+        if (error) throw error;
+        setProfile(data);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
+      setProfile(null);
     } finally {
       setLoading(false);
     }
@@ -90,6 +122,12 @@ const ProfileDetail = () => {
             <CardContent className="p-8">
               <h2 className="text-2xl font-semibold mb-4">Profile Not Found</h2>
               <p>Sorry, the profile you are looking for could not be found.</p>
+              <Button 
+                onClick={() => navigate('/home')} 
+                className="mt-4"
+              >
+                Back to Home
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -97,6 +135,28 @@ const ProfileDetail = () => {
     );
   }
 
+  // Check if this is a demo profile with enhanced data
+  const isDemoProfile = /^\d+$/.test(id || '');
+  
+  if (isDemoProfile && profile.traits) {
+    // Use the enhanced DetailedProfileView for demo profiles
+    return (
+      <AppLayout>
+        <DetailedProfileView profile={profile} />
+        
+        {/* Add the PaidMessageDialog */}
+        <PaidMessageDialog
+          open={showPaidMessageDialog}
+          onClose={() => setShowPaidMessageDialog(false)}
+          recipientName={profile?.full_name || 'User'}
+          recipientPhoto={profile?.photos?.[0] || '/placeholder.svg'}
+          onSendMessage={handlePaidMessageSent}
+        />
+      </AppLayout>
+    );
+  }
+
+  // Fallback to simple profile view for real Supabase profiles
   return (
     <AppLayout>
       <div className="min-h-screen bg-gray-50 py-6">
