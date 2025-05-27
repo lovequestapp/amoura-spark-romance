@@ -9,7 +9,8 @@ import { useNavigate } from 'react-router-dom';
 interface DetailedProfileProps {
   profile: {
     id: number;
-    name: string;
+    name?: string;
+    full_name?: string;
     age: number;
     distance: string;
     occupation: string;
@@ -37,10 +38,13 @@ const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Get the display name - prioritize full_name over name
+  const displayName = profile.full_name || profile.name || 'User';
+
   const handleLike = () => {
     toast({
       title: "Profile Liked!",
-      description: `You've liked ${profile.name}'s profile. They'll be notified!`,
+      description: `You've liked ${displayName}'s profile. They'll be notified!`,
       variant: "default",
     });
   };
@@ -48,7 +52,7 @@ const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
   const handleSuperLike = () => {
     toast({
       title: "Super Like Sent!",
-      description: `You've super liked ${profile.name}! They'll be notified immediately!`,
+      description: `You've super liked ${displayName}! They'll be notified immediately!`,
       variant: "default",
     });
   };
@@ -105,13 +109,13 @@ const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
         <div className="relative w-full aspect-[4/5]">
           <img 
             src={profile.photos[0]} 
-            alt={`${profile.name}'s main photo`}
+            alt={`${displayName}'s main photo`}
             className="w-full h-full object-cover"
           />
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
             <div className="text-white">
               <h1 className="text-3xl font-bold flex items-center gap-2">
-                {profile.name}, {profile.age}
+                {displayName}, {profile.age}
                 {profile.verified && (
                   <Verified className="w-6 h-6 text-blue-400" />
                 )}
@@ -181,7 +185,7 @@ const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
             >
               <img 
                 src={photo} 
-                alt={`${profile.name}'s photo ${index + 2}`}
+                alt={`${displayName}'s photo ${index + 2}`}
                 className="w-full h-[500px] object-cover rounded-lg shadow-lg"
               />
             </motion.div>
