@@ -17,11 +17,6 @@ interface BasicInfoEditProps {
   onProfileUpdated: (updatedInfo: any) => void;
 }
 
-const zodiacSigns = [
-  'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
-];
-
 const relationshipTypes = [
   { value: 'long_term', label: 'Long-term relationship' },
   { value: 'short_term', label: 'Short-term relationship' },
@@ -37,7 +32,6 @@ const BasicInfoEdit = ({ open, onClose, profile, onProfileUpdated }: BasicInfoEd
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
     birth_date: profile?.birth_date || '',
-    zodiac_sign: profile?.zodiac_sign || '',
     education: profile?.education || '',
     relationship_type: profile?.relationship_type || ''
   });
@@ -106,25 +100,6 @@ const BasicInfoEdit = ({ open, onClose, profile, onProfileUpdated }: BasicInfoEd
               onChange={(e) => handleInputChange('birth_date', e.target.value)}
               className="mt-1"
             />
-          </div>
-
-          <div>
-            <Label htmlFor="zodiac_sign" className="text-sm font-medium text-gray-700">Zodiac Sign</Label>
-            <Select
-              value={formData.zodiac_sign}
-              onValueChange={(value) => handleInputChange('zodiac_sign', value)}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select your zodiac sign" />
-              </SelectTrigger>
-              <SelectContent>
-                {zodiacSigns.map((sign) => (
-                  <SelectItem key={sign} value={sign}>
-                    {sign}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <div>

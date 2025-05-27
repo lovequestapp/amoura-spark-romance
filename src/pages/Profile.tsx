@@ -443,7 +443,7 @@ const Profile = () => {
                         className="border-2 border-amoura-deep-pink text-amoura-deep-pink hover:bg-amoura-deep-pink hover:text-white font-medium"
                       >
                         <Edit className="w-4 h-4 mr-2" />
-                        Edit Prompts
+                        Edit
                       </Button>
                     </motion.div>
                   </div>
