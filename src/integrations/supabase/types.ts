@@ -191,6 +191,51 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          created_at: string
+          currency: string | null
+          id: string
+          item_type: string
+          price_cents: number
+          product_category: string
+          product_name: string
+          quantity: number
+          status: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          id?: string
+          item_type: string
+          price_cents: number
+          product_category: string
+          product_name: string
+          quantity: number
+          status?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          id?: string
+          item_type?: string
+          price_cents?: number
+          product_category?: string
+          product_name?: string
+          quantity?: number
+          status?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       personality_traits: {
         Row: {
           created_at: string | null
@@ -765,6 +810,18 @@ export type Database = {
       like_post: {
         Args: { post_id_param: string }
         Returns: Json
+      }
+      process_purchase: {
+        Args: {
+          user_id_param: string
+          product_name_param: string
+          product_category_param: string
+          item_type_param: string
+          quantity_param: number
+          price_cents_param: number
+          stripe_session_id_param?: string
+        }
+        Returns: string
       }
       unlike_post: {
         Args: { post_id_param: string }

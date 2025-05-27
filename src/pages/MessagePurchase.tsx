@@ -9,12 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { MessageCircle, ArrowLeft, Check, Zap, Star, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePurchaseProcessor } from '@/hooks/usePurchaseProcessor';
 
 const MessagePurchase = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const { processPurchase, isProcessing } = usePurchaseProcessor();
 
   const messagePacks = [
     {
@@ -99,9 +100,34 @@ const MessagePurchase = () => {
       return;
     }
 
-    // Add to cart and redirect to checkout
-    handleAddToCart(pack);
-    navigate('/checkout');
+    // Create purchase item
+    const purchaseItem = {
+      id: pack.id,
+      name: pack.name,
+      description: pack.description,
+      price: pack.price,
+      priceValue: pack.priceValue,
+      messages: pack.messages,
+      quantity: 1,
+      category: 'communication',
+      features: pack.features
+    };
+
+    // Process purchase directly
+    const success = await processPurchase([purchaseItem]);
+    
+    if (success) {
+      // Navigate back to profile or show success message
+      toast({
+        title: "Purchase Complete!",
+        description: `You now have ${pack.messages} premium messages in your inventory.`,
+      });
+      
+      // Navigate back to previous page after a short delay
+      setTimeout(() => {
+        navigate(-1);
+      }, 2000);
+    }
   };
 
   return (
@@ -207,6 +233,7 @@ const MessagePurchase = () => {
                         onClick={() => handleAddToCart(pack)}
                         variant="outline"
                         className="w-full border-gray-300 hover:bg-gray-50"
+                        disabled={isProcessing}
                       >
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         Add to Cart
@@ -214,13 +241,13 @@ const MessagePurchase = () => {
 
                       <Button
                         onClick={() => handlePurchase(pack)}
-                        disabled={isLoading}
+                        disabled={isProcessing}
                         className={`w-full ${pack.popular 
                           ? 'bg-amoura-deep-pink hover:bg-amoura-deep-pink/90' 
                           : 'bg-green-600 hover:bg-green-700'
                         } text-white`}
                       >
-                        Buy Now - {pack.messages} Messages
+                        {isProcessing ? 'Processing...' : `Buy Now - ${pack.messages} Messages`}
                       </Button>
                     </div>
                   </CardContent>

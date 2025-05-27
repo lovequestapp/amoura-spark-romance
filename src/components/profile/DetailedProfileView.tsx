@@ -5,6 +5,7 @@ import { ArrowLeft, Heart, MessageCircle, DollarSign, MapPin, Verified, Star } f
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useInventory } from '@/hooks/useInventory';
 
 interface DetailedProfileProps {
   profile: {
@@ -37,6 +38,7 @@ interface DetailedProfileProps {
 const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { hasItem } = useInventory();
 
   // Get the display name - prioritize full_name over name
   const displayName = profile.full_name || profile.name || 'User';
@@ -57,19 +59,18 @@ const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
     });
   };
 
-  const handlePaidMessage = () => {
-    toast({
-      title: "Premium Feature",
-      description: "Send a message before matching for $4.99",
-      action: (
-        <Button 
-          onClick={() => toast({ title: "Coming soon!", description: "This feature will be available soon." })}
-          className="bg-amoura-deep-pink hover:bg-amoura-deep-pink/90"
-        >
-          Send ($4.99)
-        </Button>
-      ),
-    });
+  const handleMessage = () => {
+    // Check if user has messages in inventory
+    if (hasItem('messages', 1)) {
+      // Navigate to conversation/chat (implement this route as needed)
+      toast({
+        title: "Opening Chat",
+        description: `Starting conversation with ${displayName}`,
+      });
+    } else {
+      // Redirect to message purchase page
+      navigate('/message-purchase');
+    }
   };
 
   return (
@@ -135,11 +136,11 @@ const DetailedProfileView: React.FC<DetailedProfileProps> = ({ profile }) => {
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="outline"
-                onClick={handlePaidMessage}
+                onClick={handleMessage}
                 className="border-gray-200 hover:bg-gray-50 py-3 flex-1"
               >
                 <DollarSign className="w-4 h-4 mr-2 text-amoura-deep-pink" />
-                <span>Message</span>
+                <span>{hasItem('messages', 1) ? 'Message' : 'Buy Messages'}</span>
               </Button>
               <Button
                 onClick={handleLike}
