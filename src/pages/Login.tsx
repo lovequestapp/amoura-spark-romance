@@ -33,6 +33,9 @@ const Login = () => {
     try {
       console.log('Attempting login with:', email);
       
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -41,6 +44,19 @@ const Login = () => {
       if (error) throw error;
       
       console.log("Login successful", data);
+      
+      // Update user online status
+      if (data.user) {
+        try {
+          await supabase.rpc('update_user_online_status', {
+            user_id_param: data.user.id,
+            is_online_param: true
+          });
+        } catch (statusError) {
+          console.error('Error updating online status:', statusError);
+        }
+      }
+      
       toast({
         title: "Login successful",
         description: "Welcome back!",
@@ -50,12 +66,12 @@ const Login = () => {
       navigate('/home', { replace: true });
       
     } catch (error: any) {
-      console.error("Login error:", error.message);
+      console.error("Login error:", error);
       
       // More user-friendly error messages
-      let errorMessage = error.message;
+      let errorMessage = error.message || 'Login failed. Please try again.';
       
-      if (error.message?.includes('credentials')) {
+      if (error.message?.includes('credentials') || error.message?.includes('Invalid')) {
         errorMessage = 'Invalid email or password. Please try again.';
       } else if (error.message?.includes('rate limited')) {
         errorMessage = 'Too many login attempts. Please try again later.';

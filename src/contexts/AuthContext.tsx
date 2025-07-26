@@ -72,6 +72,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Handle sign out with proper cleanup
   const signOut = useCallback(async () => {
     try {
+      // Update user online status before signing out
+      if (user) {
+        try {
+          await supabase.rpc('update_user_online_status', {
+            user_id_param: user.id,
+            is_online_param: false
+          });
+        } catch (error) {
+          console.error('Error updating online status:', error);
+        }
+      }
+
       cleanupAuthState();
       await supabase.auth.signOut({ scope: 'global' });
       
@@ -92,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       cleanupAuthState();
       window.location.href = '/';
     }
-  }, [toast]);
+  }, [toast, user]);
 
   useEffect(() => {
     let mounted = true;

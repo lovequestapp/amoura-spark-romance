@@ -155,6 +155,57 @@ export type Database = {
         }
         Relationships: []
       }
+      match_scores: {
+        Row: {
+          created_at: string | null
+          id: string
+          intention_score: number | null
+          interests_score: number | null
+          lifestyle_score: number | null
+          location_score: number | null
+          ml_confidence: number | null
+          ml_enhanced: boolean | null
+          overall_score: number
+          personality_score: number | null
+          success_probability: number | null
+          target_user_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          intention_score?: number | null
+          interests_score?: number | null
+          lifestyle_score?: number | null
+          location_score?: number | null
+          ml_confidence?: number | null
+          ml_enhanced?: boolean | null
+          overall_score?: number
+          personality_score?: number | null
+          success_probability?: number | null
+          target_user_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          intention_score?: number | null
+          interests_score?: number | null
+          lifestyle_score?: number | null
+          location_score?: number | null
+          ml_confidence?: number | null
+          ml_enhanced?: boolean | null
+          overall_score?: number
+          personality_score?: number | null
+          success_probability?: number | null
+          target_user_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string | null
@@ -616,6 +667,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_interests: {
         Row: {
           created_at: string
@@ -667,6 +742,27 @@ export type Database = {
           id?: string
           item_type?: string
           quantity?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_online_status: {
+        Row: {
+          is_online: boolean | null
+          last_seen: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          is_online?: boolean | null
+          last_seen?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          is_online?: boolean | null
+          last_seen?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -760,6 +856,10 @@ export type Database = {
         Args: { user_id_param: string }
         Returns: undefined
       }
+      calculate_match_score: {
+        Args: { user_id_param: string; target_user_id_param: string }
+        Returns: number
+      }
       check_is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -828,6 +928,14 @@ export type Database = {
         }
         Returns: string
       }
+      track_user_activity: {
+        Args: {
+          user_id_param: string
+          activity_type_param: string
+          metadata_param?: Json
+        }
+        Returns: undefined
+      }
       unlike_post: {
         Args: { post_id_param: string }
         Returns: Json
@@ -842,6 +950,10 @@ export type Database = {
       }
       update_remaining_super_likes: {
         Args: { user_id_param: string; new_value: number }
+        Returns: undefined
+      }
+      update_user_online_status: {
+        Args: { user_id_param: string; is_online_param?: boolean }
         Returns: undefined
       }
       use_inventory_item: {
